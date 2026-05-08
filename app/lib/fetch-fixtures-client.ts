@@ -6,6 +6,7 @@
  */
 import { createSupabaseClient } from "./supabase-client";
 import type { Fixture } from "./fixtures";
+import { utcToIST } from "./timezone";
 
 export type SportId = "all" | "football" | "f1";
 
@@ -20,6 +21,7 @@ function mapFootballRow(row: Record<string, any>): Fixture {
   const dateStr = typeof row.date === "string"
     ? row.date.split("T")[0]
     : (row.date as Date).toISOString().split("T")[0];
+  const ist = utcToIST(dateStr, row.kickoff);
   return {
     id: String(row.id),
     sport: "football",
@@ -27,8 +29,8 @@ function mapFootballRow(row: Record<string, any>): Fixture {
     awayTeam: row.away_team,
     competition: row.competition,
     competitionShort: row.competition_short,
-    kickoff: row.kickoff,
-    date: dateStr,
+    kickoff: ist.kickoff,
+    date: ist.date,
     venue: row.venue ?? undefined,
     status: row.status as Fixture["status"],
     homeScore: row.home_score ?? undefined,
@@ -41,6 +43,7 @@ function mapF1Row(row: Record<string, any>): Fixture {
   const dateStr = typeof row.date === "string"
     ? row.date.split("T")[0]
     : (row.date as Date).toISOString().split("T")[0];
+  const ist = utcToIST(dateStr, "14:00");
   return {
     id: String(row.id),
     sport: "f1",
@@ -48,8 +51,8 @@ function mapF1Row(row: Record<string, any>): Fixture {
     awayTeam: row.country,
     competition: `Round ${row.round}`,
     competitionShort: "F1",
-    kickoff: "14:00",
-    date: dateStr,
+    kickoff: ist.kickoff,
+    date: ist.date,
     venue: row.country,
     status: mapF1Status(row.status),
   };
