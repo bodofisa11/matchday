@@ -2,6 +2,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { getPostgresPool } from "./postgres-client";
 import { footballFixtures, f1Fixtures } from "./db-schema";
 import type { Fixture } from "./fixtures";
+import { utcToIST } from "./timezone";
 
 export type SportId = "all" | "football" | "f1";
 
@@ -16,6 +17,7 @@ function mapRowToFixture(row: typeof footballFixtures.$inferSelect): Fixture {
     typeof row.date === "string"
       ? row.date.split("T")[0]
       : (row.date as Date).toISOString().split("T")[0];
+  const ist = utcToIST(dateStr, row.kickoff);
   return {
     id: String(row.id),
     sport: "football" as const,
@@ -23,8 +25,8 @@ function mapRowToFixture(row: typeof footballFixtures.$inferSelect): Fixture {
     awayTeam: row.awayTeam,
     competition: row.competition,
     competitionShort: row.competitionShort,
-    kickoff: row.kickoff,
-    date: dateStr,
+    kickoff: ist.kickoff,
+    date: ist.date,
     venue: row.venue ?? undefined,
     status: row.status as Fixture["status"],
     homeScore: row.homeScore ?? undefined,
@@ -37,6 +39,7 @@ function mapF1RowToFixture(row: typeof f1Fixtures.$inferSelect): Fixture {
     typeof row.date === "string"
       ? row.date.split("T")[0]
       : (row.date as Date).toISOString().split("T")[0];
+  const ist = utcToIST(dateStr, "14:00");
   return {
     id: String(row.id),
     sport: "f1" as const,
@@ -44,8 +47,8 @@ function mapF1RowToFixture(row: typeof f1Fixtures.$inferSelect): Fixture {
     awayTeam: row.country,
     competition: `Round ${row.round}`,
     competitionShort: "F1",
-    kickoff: "14:00",
-    date: dateStr,
+    kickoff: ist.kickoff,
+    date: ist.date,
     venue: row.country,
     status: mapF1Status(row.status),
   };
