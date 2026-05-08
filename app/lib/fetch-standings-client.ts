@@ -1,4 +1,5 @@
 import { createSupabaseClient } from "./supabase-client";
+import { utcToIST } from "./timezone";
 
 export interface FootballStandingRow {
   position: number;
@@ -128,6 +129,14 @@ export async function fetchFootballFixtures(
   const supabase = createSupabaseClient();
   if (!supabase) return [];
   const cols = "id,home_team,away_team,competition,competition_short,kickoff,date,venue,status,home_score,away_score";
+  function applyIST(rows: FootballFixtureRow[]): FootballFixtureRow[] {
+    return rows.map((r) => {
+      const dateStr = typeof r.date === "string" ? r.date.split("T")[0] : r.date;
+      const ist = utcToIST(dateStr, r.kickoff);
+      return { ...r, date: ist.date, kickoff: ist.kickoff };
+    });
+  }
+
   if (status === "scheduled") {
     const { data } = await supabase
       .from("football_fixtures")
@@ -138,7 +147,7 @@ export async function fetchFootballFixtures(
       .order("date")
       .order("kickoff")
       .limit(limit);
-    return (data as FootballFixtureRow[]) ?? [];
+    return applyIST((data as FootballFixtureRow[]) ?? []);
   }
   if (status === "finished") {
     const { data } = await supabase
@@ -148,7 +157,7 @@ export async function fetchFootballFixtures(
       .eq("status", "finished")
       .order("date", { ascending: false })
       .limit(limit);
-    return (data as FootballFixtureRow[]) ?? [];
+    return applyIST((data as FootballFixtureRow[]) ?? []);
   }
   const { data } = await supabase
     .from("football_fixtures")
@@ -158,7 +167,7 @@ export async function fetchFootballFixtures(
     .order("date")
     .order("kickoff")
     .limit(limit);
-  return (data as FootballFixtureRow[]) ?? [];
+  return applyIST((data as FootballFixtureRow[]) ?? []);
 }
 
 export async function fetchF1DriverStandings(): Promise<F1DriverRow[]> {
@@ -305,7 +314,11 @@ export async function fetchWcFixturesByStage(
     .limit(limit);
   if (stage) query = query.eq("stage", stage);
   const { data } = await query;
-  return (data as FootballFixtureRow[]) ?? [];
+  return ((data as FootballFixtureRow[]) ?? []).map((r) => {
+    const dateStr = typeof r.date === "string" ? r.date.split("T")[0] : r.date;
+    const ist = utcToIST(dateStr, r.kickoff);
+    return { ...r, date: ist.date, kickoff: ist.kickoff };
+  });
 }
 
 export async function fetchIPLStandings(): Promise<IPLStandingRow[]> {
