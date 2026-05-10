@@ -6,7 +6,7 @@
  */
 import { createSupabaseClient } from "./supabase-client";
 import type { Fixture } from "./fixtures";
-import { utcToIST } from "./timezone";
+import { utcToIST, istDateRangeToUTCDateRange } from "./timezone";
 
 export type SportId = "all" | "football" | "f1";
 
@@ -58,26 +58,30 @@ function mapF1Row(row: Record<string, any>): Fixture {
   };
 }
 
-async function fetchFromSupabase(sportId: SportId): Promise<Fixture[]> {
+async function fetchFromSupabase(
+  sportId: SportId,
+  utcRange?: { utcStart: string; utcEnd: string },
+): Promise<Fixture[]> {
   const supabase = createSupabaseClient();
   if (!supabase) return [];
 
   const allFixtures: Fixture[] = [];
 
   if (sportId === "f1" || sportId === "all") {
-    const { data } = await supabase
-      .from("f1_fixtures")
-      .select("*")
-      .order("date", { ascending: true });
+    let q = supabase.from("f1_fixtures").select("*").order("date", { ascending: true });
+    if (utcRange) q = q.gte("date", utcRange.utcStart).lte("date", utcRange.utcEnd);
+    const { data } = await q;
     if (data) allFixtures.push(...data.map(mapF1Row));
   }
 
   if (sportId === "football" || sportId === "all") {
-    const { data } = await supabase
+    let q = supabase
       .from("football_fixtures")
       .select("*")
       .order("date", { ascending: true })
       .order("kickoff", { ascending: true });
+    if (utcRange) q = q.gte("date", utcRange.utcStart).lte("date", utcRange.utcEnd);
+    const { data } = await q;
     if (data) allFixtures.push(...data.map(mapFootballRow));
   }
 
@@ -87,6 +91,35 @@ async function fetchFromSupabase(sportId: SportId): Promise<Fixture[]> {
   });
 
   return allFixtures;
+}
+
+/**
+ * Fetch fixtures whose IST date falls in [istStart, istEnd] inclusive.
+ * Converts the IST window into the UTC range the database needs to scan,
+ * then filters mapped (already-IST) results back down to the requested window.
+ */
+export async function fetchFixturesByISTDateRange(
+  sportId: SportId,
+  istStart: string,
+  istEnd: string,
+): Promise<{ fixtures: Fixture[]; updatedAt: string }> {
+  const updatedAt = new Date().toISOString();
+  const utcRange = istDateRangeToUTCDateRange(istStart, istEnd);
+
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    const all = await fetchFromSupabase(sportId, utcRange);
+    const fixtures = all.filter((f) => f.date >= istStart && f.date <= istEnd);
+    return { fixtures, updatedAt };
+  }
+
+  // Local dev fallback: fetch all from API route then filter client-side.
+  const res = await fetch(`/api/fixtures/${sportId}`);
+  if (!res.ok) return { fixtures: [], updatedAt };
+  const json = (await res.json()) as { fixtures: Fixture[]; updatedAt: string };
+  return {
+    fixtures: json.fixtures.filter((f) => f.date >= istStart && f.date <= istEnd),
+    updatedAt: json.updatedAt ?? updatedAt,
+  };
 }
 
 /**

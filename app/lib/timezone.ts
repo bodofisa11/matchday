@@ -26,3 +26,39 @@ export function utcToIST(
   const M = String(ist.getUTCMinutes()).padStart(2, "0");
   return { date: `${y}-${m}-${d}`, kickoff: `${H}:${M}` };
 }
+
+function pad2(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+/** Current calendar date in IST, formatted YYYY-MM-DD. */
+export function istTodayStr(): string {
+  const ist = new Date(Date.now() + IST_OFFSET_MIN * 60 * 1000);
+  return `${ist.getUTCFullYear()}-${pad2(ist.getUTCMonth() + 1)}-${pad2(ist.getUTCDate())}`;
+}
+
+/** Add `days` (may be negative) to a YYYY-MM-DD date string. */
+export function addDaysToDateStr(dateStr: string, days: number): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d + days));
+  return `${dt.getUTCFullYear()}-${pad2(dt.getUTCMonth() + 1)}-${pad2(dt.getUTCDate())}`;
+}
+
+/**
+ * Given a contiguous IST date window [istStart, istEnd] (inclusive), return the
+ * UTC date bounds that must be queried to cover every fixture whose IST date
+ * falls in that window.
+ *
+ * Because IST = UTC + 5:30, the IST day starts at 18:30 UTC of the previous
+ * calendar day. So the UTC range expands by one day on the lower bound; the
+ * upper bound stays the same (IST 23:59 = UTC 18:29 same day).
+ */
+export function istDateRangeToUTCDateRange(
+  istStart: string,
+  istEnd: string,
+): { utcStart: string; utcEnd: string } {
+  return {
+    utcStart: addDaysToDateStr(istStart, -1),
+    utcEnd: istEnd,
+  };
+}
