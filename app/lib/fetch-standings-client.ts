@@ -170,6 +170,52 @@ export async function fetchFootballFixtures(
   return applyIST((data as FootballFixtureRow[]) ?? []);
 }
 
+export async function fetchFootballFixturesPaged(
+  competitionShort: string,
+  status: "scheduled" | "finished",
+  page: number,
+  pageSize = 10,
+  fromDate?: string,
+  toDate?: string,
+): Promise<{ rows: FootballFixtureRow[]; hasMore: boolean }> {
+  const supabase = createSupabaseClient();
+  if (!supabase) return { rows: [], hasMore: false };
+
+  const cols = "id,home_team,away_team,competition,competition_short,kickoff,date,venue,status,home_score,away_score";
+  const from = page * pageSize;
+  const to = from + pageSize; // fetch one extra to detect hasMore
+
+  function applyIST(rows: FootballFixtureRow[]): FootballFixtureRow[] {
+    return rows.map((r) => {
+      const dateStr = typeof r.date === "string" ? r.date.split("T")[0] : r.date;
+      const ist = utcToIST(dateStr, r.kickoff);
+      return { ...r, date: ist.date, kickoff: ist.kickoff };
+    });
+  }
+
+  let query = supabase
+    .from("football_fixtures")
+    .select(cols)
+    .eq("competition_short", competitionShort)
+    .eq("status", status);
+
+  if (fromDate) query = query.gte("date", fromDate);
+  if (toDate) query = query.lte("date", toDate);
+
+  if (status === "finished") {
+    query = query.order("date", { ascending: false }).order("kickoff", { ascending: false });
+  } else {
+    query = query.order("date").order("kickoff");
+  }
+
+  query = query.range(from, to);
+
+  const { data } = await query;
+  const raw = (data as FootballFixtureRow[]) ?? [];
+  const hasMore = raw.length > pageSize;
+  return { rows: applyIST(raw.slice(0, pageSize)), hasMore };
+}
+
 export async function fetchF1DriverStandings(): Promise<F1DriverRow[]> {
   const supabase = createSupabaseClient();
   if (!supabase) return [];

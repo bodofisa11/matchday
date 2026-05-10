@@ -1,14 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { TeamLogo } from "../TeamLogo";
+import { useState } from "react";
 import { competitionLogoUrl } from "../../lib/image-utils";
-import {
-  fetchFootballFixtures,
-  type FootballFixtureRow,
-} from "../../lib/fetch-standings-client";
-import { teamCode, teamColor, formatFixtureDate, todayStr } from "../../lib/team-meta";
 import { NewsTab } from "../NewsTab";
+import { FixturesTabPanel } from "../FixturesTabPanel";
 
 type Tab = "news" | "fixtures" | "stats" | "teams";
 
@@ -56,51 +51,9 @@ function Placeholder({ label }: { label: string }) {
   );
 }
 
-function Loading() {
-  return <div style={{ color: "var(--text-muted)", padding: "1rem 0", fontSize: "0.85rem" }}>Loading…</div>;
-}
-
-function FixtureItem({ f, league }: { f: FootballFixtureRow; league: string }) {
-  const hCode = teamCode(f.home_team);
-  const aCode = teamCode(f.away_team);
-  return (
-    <div className="fixture-item">
-      <div className="fixture-teams">
-        <div className="fixture-team">
-          <TeamLogo code={hCode} sport="football" leagueCode={league} color={teamColor(hCode)} />
-          {f.home_team}
-        </div>
-        <div className="fixture-team">
-          <TeamLogo code={aCode} sport="football" leagueCode={league} color={teamColor(aCode)} />
-          {f.away_team}
-        </div>
-      </div>
-      <div className="fixture-meta">
-        <div className="fixture-date">{formatFixtureDate(f.date)}</div>
-        <div className="fixture-time">{f.kickoff}</div>
-        {f.venue && <div className="fixture-venue">{f.venue}</div>}
-      </div>
-    </div>
-  );
-}
 
 export function UCLSection() {
   const [activeTab, setActiveTab] = useState<Tab>("fixtures");
-  const [upcoming, setUpcoming] = useState<FootballFixtureRow[]>([]);
-  const [results, setResults] = useState<FootballFixtureRow[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const today = todayStr();
-    Promise.all([
-      fetchFootballFixtures("UCL", "scheduled", 8, today),
-      fetchFootballFixtures("UCL", "finished", 8),
-    ]).then(([u, r]) => {
-      setUpcoming(u);
-      setResults(r);
-      setLoading(false);
-    });
-  }, []);
 
   return (
     <>
@@ -121,49 +74,7 @@ export function UCLSection() {
       {activeTab === "news" && <NewsTab competition="UEFA Champions League" accent={ACCENT} />}
 
       {activeTab === "fixtures" && (
-        <div className="grid-12 fade-in fd2">
-          <div className="card span-6">
-            <div className="card-header">
-              <div className="card-title">Upcoming Fixtures</div>
-            </div>
-            {loading ? <Loading /> : upcoming.length === 0 ? (
-              <div style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>No upcoming fixtures.</div>
-            ) : upcoming.map((f) => <FixtureItem key={f.id} f={f} league="ucl" />)}
-          </div>
-
-          <div className="card span-6">
-            <div className="card-header">
-              <div className="card-title">Recent Results</div>
-            </div>
-            {loading ? <Loading /> : results.length === 0 ? (
-              <div style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>No results yet.</div>
-            ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.7rem" }}>
-                {results.map((r) => {
-                  const hCode = teamCode(r.home_team);
-                  const aCode = teamCode(r.away_team);
-                  return (
-                    <div className="result-card" key={r.id}>
-                      <div className="result-label">{formatFixtureDate(r.date)}</div>
-                      <div className="result-row">
-                        <div className="fixture-team">
-                          <TeamLogo code={hCode} sport="football" leagueCode="ucl" color={teamColor(hCode)} />
-                          {r.home_team}
-                        </div>
-                        <div className="fixture-score">{r.home_score} — {r.away_score}</div>
-                        <div className="fixture-team">
-                          <TeamLogo code={aCode} sport="football" leagueCode="ucl" color={teamColor(aCode)} />
-                          {r.away_team}
-                        </div>
-                      </div>
-                      <div className="result-ft">FT</div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
+        <FixturesTabPanel competitionShort="UCL" leagueCode="ucl" accent={ACCENT} />
       )}
 
       {activeTab === "stats" && <Placeholder label="Stats" />}
