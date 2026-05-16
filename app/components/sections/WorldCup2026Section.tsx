@@ -380,9 +380,15 @@ export function WorldCup2026Section() {
                   <div className="card-header">
                     <div className="card-title">Group {name}</div>
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", paddingTop: "0.5rem" }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                      gap: "0.5rem",
+                      paddingTop: "0.5rem",
+                    }}
+                  >
                     {rows.map((r) => {
-                      const code = teamCode(r.team);
                       const team = teamMap.get(normalizeName(r.team));
                       const clickable = !!team;
                       return (
@@ -392,20 +398,44 @@ export function WorldCup2026Section() {
                           disabled={!clickable}
                           style={{
                             display: "flex",
+                            flexDirection: "column",
                             alignItems: "center",
-                            gap: "0.6rem",
-                            fontSize: "0.85rem",
-                            background: "transparent",
-                            border: "none",
-                            padding: "0.25rem 0",
+                            gap: "0.4rem",
+                            padding: "0.75rem 0.5rem",
+                            background: "var(--bg-elevated, rgba(255,255,255,0.02))",
+                            border: "1px solid var(--border-subtle)",
+                            borderRadius: 8,
                             color: "var(--text-primary)",
                             cursor: clickable ? "pointer" : "default",
-                            textAlign: "left",
-                            opacity: clickable ? 1 : 0.7,
+                            opacity: clickable ? 1 : 0.6,
+                            transition: "all 0.15s",
+                            textAlign: "center",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (clickable) {
+                              e.currentTarget.style.borderColor = ACCENT;
+                              e.currentTarget.style.transform = "translateY(-1px)";
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = "var(--border-subtle)";
+                            e.currentTarget.style.transform = "translateY(0)";
                           }}
                         >
-                          <TeamLogo code={code} sport="football" leagueCode={LEAGUE} color={teamColor(code)} size={22} />
-                          {r.team}
+                          {team?.crest ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={team.crest} alt={r.team} style={{ width: 40, height: 40, objectFit: "contain" }} />
+                          ) : (
+                            <div style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <TeamLogo code={teamCode(r.team)} sport="football" leagueCode={LEAGUE} color={teamColor(teamCode(r.team))} size={36} />
+                            </div>
+                          )}
+                          <div style={{ fontSize: "0.72rem", fontWeight: 600, lineHeight: 1.15 }}>
+                            {team?.short_name ?? r.team}
+                          </div>
+                          {team?.tla && (
+                            <div style={{ fontSize: "0.6rem", color: "var(--text-muted)", letterSpacing: "0.05em" }}>{team.tla}</div>
+                          )}
                         </button>
                       );
                     })}
