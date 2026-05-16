@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTeamCodes } from "./lib/use-team-codes";
 import { Navbar, type SportGroup } from "./components/Navbar";
 import { CompBar, type CompId } from "./components/CompBar";
 import { TodaySection } from "./components/sections/TodaySection";
@@ -25,6 +26,10 @@ const GROUP_DEFAULT: Partial<Record<SportGroup, CompId>> = {
 export default function Home() {
   const [activeGroup, setActiveGroup] = useState<SportGroup>("today");
   const [activeComp, setActiveComp] = useState<CompId>("pl");
+
+  // Preload DB-backed team code cache once for the whole app.
+  // Triggers a re-render when ready so descendants pick up TLA values.
+  useTeamCodes();
 
   function handleGroupChange(group: SportGroup) {
     setActiveGroup(group);
