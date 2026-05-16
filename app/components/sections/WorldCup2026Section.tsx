@@ -10,12 +10,10 @@ import {
   type WcGroupStandingRow,
 } from "../../lib/fetch-standings-client";
 import { teamCode, teamColor, formatFixtureDate, formatGD } from "../../lib/team-meta";
-import { NewsTab } from "../NewsTab";
 
-type Tab = "news" | "fixtures" | "groups" | "bracket" | "teams";
+type Tab = "fixtures" | "groups" | "bracket" | "teams";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "news", label: "News" },
   { id: "fixtures", label: "Fixtures" },
   { id: "groups", label: "Groups" },
   { id: "bracket", label: "Bracket" },
@@ -281,8 +279,6 @@ export function WorldCup2026Section() {
       </div>
 
       <TabBar active={activeTab} onChange={setActiveTab} />
-
-      {activeTab === "news" && <NewsTab competition="FIFA World Cup 2026" accent={ACCENT} />}
 
       {activeTab === "fixtures" && (
         <div className="grid-12 fade-in fd2">

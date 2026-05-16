@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import { competitionLogoUrl } from "../../lib/image-utils";
-import { NewsTab } from "../NewsTab";
 import { FixturesTabPanel } from "../FixturesTabPanel";
 
-type Tab = "news" | "fixtures" | "stats" | "teams";
+type Tab = "fixtures" | "stats" | "teams";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "news", label: "News" },
   { id: "fixtures", label: "Fixtures" },
   { id: "stats", label: "Stats" },
   { id: "teams", label: "Teams" },
@@ -70,8 +68,6 @@ export function UCLSection() {
       </div>
 
       <TabBar active={activeTab} onChange={setActiveTab} />
-
-      {activeTab === "news" && <NewsTab competition="UEFA Champions League" accent={ACCENT} />}
 
       {activeTab === "fixtures" && (
         <FixturesTabPanel competitionShort="UCL" leagueCode="ucl" accent={ACCENT} />

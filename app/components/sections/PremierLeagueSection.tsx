@@ -8,13 +8,11 @@ import {
   type FootballStandingRow,
 } from "../../lib/fetch-standings-client";
 import { teamCode, teamColor, formatGD } from "../../lib/team-meta";
-import { NewsTab } from "../NewsTab";
 import { FixturesTabPanel } from "../FixturesTabPanel";
 
-type Tab = "news" | "fixtures" | "standings" | "stats" | "teams";
+type Tab = "fixtures" | "standings" | "stats" | "teams";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "news", label: "News" },
   { id: "fixtures", label: "Fixtures" },
   { id: "standings", label: "Standings" },
   { id: "stats", label: "Stats" },
@@ -94,8 +92,6 @@ export function PremierLeagueSection() {
       </div>
 
       <TabBar active={activeTab} onChange={setActiveTab} />
-
-      {activeTab === "news" && <NewsTab competition="Premier League" accent={ACCENT} />}
 
       {activeTab === "fixtures" && (
         <FixturesTabPanel competitionShort="EPL" leagueCode={LEAGUE} accent={ACCENT} />
