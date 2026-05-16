@@ -6,23 +6,17 @@ import {
   type FootballSquadPlayerRow,
   type FootballTeamDetailRow,
 } from "../lib/fetch-standings-client";
+import {
+  POSITION_GROUP_ORDER,
+  countryDisplay,
+  positionGroup,
+  shortPosition,
+} from "../lib/football-terms";
 
 interface Props {
   team: FootballTeamDetailRow;
   accent: string;
   onClose: () => void;
-}
-
-const POSITION_ORDER = ["Goalkeeper", "Defence", "Midfield", "Offence"];
-
-function positionGroup(pos: string | null): string {
-  if (!pos) return "Other";
-  const p = pos.toLowerCase();
-  if (p.includes("keeper")) return "Goalkeeper";
-  if (p.includes("back") || p.includes("defence") || p.includes("defender")) return "Defence";
-  if (p.includes("midfield")) return "Midfield";
-  if (p.includes("forward") || p.includes("offence") || p.includes("wing") || p.includes("striker") || p.includes("attack")) return "Offence";
-  return "Other";
 }
 
 export function TeamDetailModal({ team, accent, onClose }: Props) {
@@ -60,7 +54,7 @@ export function TeamDetailModal({ team, accent, onClose }: Props) {
     if (!grouped[g]) grouped[g] = [];
     grouped[g].push(p);
   }
-  const groupKeys = [...POSITION_ORDER, "Other"].filter((k) => grouped[k]?.length);
+  const groupKeys = [...POSITION_GROUP_ORDER, "Other"].filter((k) => grouped[k]?.length);
 
   return (
     <div
@@ -127,7 +121,7 @@ export function TeamDetailModal({ team, accent, onClose }: Props) {
               <div>
                 <span style={{ color: "var(--text-muted)" }}>Coach: </span>
                 {team.coach_name}
-                {team.coach_nationality && <span style={{ color: "var(--text-muted)" }}> ({team.coach_nationality})</span>}
+                {team.coach_nationality && <span style={{ color: "var(--text-muted)" }}> ({countryDisplay(team.coach_nationality)})</span>}
               </div>
             )}
             {team.club_colors && (
@@ -154,8 +148,8 @@ export function TeamDetailModal({ team, accent, onClose }: Props) {
                   <tr>
                     <th style={{ width: 40 }}>#</th>
                     <th>Name</th>
-                    <th>Position</th>
-                    <th>Nationality</th>
+                    <th>Pos</th>
+                    <th>Nat</th>
                     <th>DOB</th>
                   </tr>
                 </thead>
@@ -164,8 +158,8 @@ export function TeamDetailModal({ team, accent, onClose }: Props) {
                     <tr key={p.player_api_id}>
                       <td><span className="pos-num">{p.shirt_number ?? "—"}</span></td>
                       <td>{p.name}</td>
-                      <td>{p.position ?? "—"}</td>
-                      <td>{p.nationality ?? "—"}</td>
+                      <td>{shortPosition(p.position) ?? p.position ?? "—"}</td>
+                      <td>{countryDisplay(p.nationality)}</td>
                       <td>{p.dob ?? "—"}</td>
                     </tr>
                   ))}
