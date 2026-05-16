@@ -22,10 +22,15 @@ interface Props {
 export function TeamDetailModal({ team, accent, onClose }: Props) {
   const [players, setPlayers] = useState<FootballSquadPlayerRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [prevId, setPrevId] = useState(team.team_api_id);
+  if (prevId !== team.team_api_id) {
+    setPrevId(team.team_api_id);
+    setPlayers([]);
+    setLoading(true);
+  }
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     fetchSquadByTeamApiId(team.team_api_id).then((data) => {
       if (cancelled) return;
       setPlayers(data);
@@ -85,7 +90,7 @@ export function TeamDetailModal({ team, accent, onClose }: Props) {
       >
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
           {team.crest && (
-            // eslint-disable-next-line @next/next/no-img-element
+             
             <img src={team.crest} alt={team.name} style={{ width: 64, height: 64, objectFit: "contain" }} />
           )}
           <div style={{ flex: 1 }}>

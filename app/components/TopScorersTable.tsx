@@ -16,10 +16,16 @@ interface Props {
 export function TopScorersTable({ competitionShort, accent, limit = 20 }: Props) {
   const [rows, setRows] = useState<FootballScorerRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const propKey = `${competitionShort}|${limit}`;
+  const [prevKey, setPrevKey] = useState(propKey);
+  if (prevKey !== propKey) {
+    setPrevKey(propKey);
+    setRows([]);
+    setLoading(true);
+  }
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     fetchFootballScorers(competitionShort, limit).then((data) => {
       if (cancelled) return;
       setRows(data);

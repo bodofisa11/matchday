@@ -16,10 +16,15 @@ export function TeamsTabPanel({ competitionShort, accent }: Props) {
   const [teams, setTeams] = useState<FootballTeamDetailRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<FootballTeamDetailRow | null>(null);
+  const [prevKey, setPrevKey] = useState(competitionShort);
+  if (prevKey !== competitionShort) {
+    setPrevKey(competitionShort);
+    setTeams([]);
+    setLoading(true);
+  }
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     fetchTeamsForCompetition(competitionShort).then((data) => {
       if (cancelled) return;
       setTeams(data);
@@ -81,7 +86,7 @@ export function TeamsTabPanel({ competitionShort, accent }: Props) {
                 }}
               >
                 {t.crest ? (
-                  // eslint-disable-next-line @next/next/no-img-element
+                   
                   <img src={t.crest} alt={t.name} style={{ width: 56, height: 56, objectFit: "contain" }} />
                 ) : (
                   <div style={{ width: 56, height: 56, borderRadius: "50%", background: accent + "20", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: accent }}>
