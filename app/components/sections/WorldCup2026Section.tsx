@@ -423,7 +423,7 @@ export function WorldCup2026Section() {
                           }}
                         >
                           {team?.crest ? (
-                            // eslint-disable-next-line @next/next/no-img-element
+                             
                             <img src={team.crest} alt={r.team} style={{ width: 40, height: 40, objectFit: "contain" }} />
                           ) : (
                             <div style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}>

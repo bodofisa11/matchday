@@ -42,15 +42,6 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
   );
 }
 
-function Placeholder({ label }: { label: string }) {
-  return (
-    <div className="card fade-in" style={{ textAlign: "center", padding: "3rem 1.5rem", color: "var(--text-muted)" }}>
-      <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🚧</div>
-      <div style={{ fontWeight: 600 }}>{label} — Coming soon</div>
-    </div>
-  );
-}
-
 
 export function UCLSection() {
   const [activeTab, setActiveTab] = useState<Tab>("fixtures");
