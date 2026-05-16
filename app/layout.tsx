@@ -21,7 +21,7 @@ const bebasNeue = Bebas_Neue({
 });
 
 export const metadata: Metadata = {
-  title: "MatchDay — Live Scores, Standings & Fixtures",
+  title: "MatchDay",
   description: "Live scores, standings and fixtures for Football, F1 and Cricket",
   icons: {
     icon: "assets/whistle.png",
