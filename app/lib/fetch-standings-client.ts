@@ -71,6 +71,33 @@ export interface F1RaceRow {
   name?: string | null;
 }
 
+export interface FootballScorerRow {
+  position: number;
+  player_name: string;
+  player_nationality: string | null;
+  player_position: string | null;
+  team_name: string;
+  played_matches: number;
+  goals: number;
+  assists: number | null;
+  penalties: number | null;
+}
+
+export async function fetchFootballScorers(
+  competitionShort: string,
+  limit = 20,
+): Promise<FootballScorerRow[]> {
+  const supabase = createSupabaseClient();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("football_scorers")
+    .select("position,player_name,player_nationality,player_position,team_name,played_matches,goals,assists,penalties")
+    .eq("competition_short", competitionShort)
+    .order("position")
+    .limit(limit);
+  return (data as FootballScorerRow[]) ?? [];
+}
+
 export interface IPLStandingRow {
   position: number;
   team: string;

@@ -10,6 +10,7 @@ import {
 import { teamCode, teamColor, formatGD } from "../../lib/team-meta";
 import { NewsTab } from "../NewsTab";
 import { FixturesTabPanel } from "../FixturesTabPanel";
+import { TopScorersTable } from "../TopScorersTable";
 
 type Tab = "news" | "fixtures" | "standings" | "stats" | "teams";
 
@@ -139,7 +140,7 @@ export function Ligue1Section() {
         </div>
       )}
 
-      {activeTab === "stats" && <Placeholder label="Stats" />}
+      {activeTab === "stats" && <TopScorersTable competitionShort="LIG" accent={ACCENT} />}
       {activeTab === "teams" && <Placeholder label="Teams" />}
     </>
   );
