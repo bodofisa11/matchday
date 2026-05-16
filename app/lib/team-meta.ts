@@ -1,7 +1,11 @@
+import { getTeamCodeFromDB } from "./team-codes-cache";
+
 /**
- * Maps DB team name → 3-letter display code for TeamLogo.
- * Source of truth: my-public-database/config/constants.py.
- * Legacy: FCB for Barcelona, BAY for Bayern Munich.
+ * Static fallback map: team name → 3-letter code.
+ * Preferred source of truth is `football_team_details.tla` in the DB,
+ * loaded via `loadTeamCodes()` and queried through `getTeamCodeFromDB()`.
+ * This map is only consulted when the DB cache misses (cache not yet
+ * loaded, team missing, or non-football competitions like IPL).
  */
 export const TEAM_CODE_MAP: Record<string, string> = {
   // EPL
@@ -202,8 +206,12 @@ export function teamLeague(code: string): string | undefined {
   return TEAM_LEAGUE[code];
 }
 
-export function teamCode(name: string): string {
-  return TEAM_CODE_MAP[name] ?? name.substring(0, 3).toUpperCase();
+export function teamCode(name: string, competitionShort?: string): string {
+  return (
+    getTeamCodeFromDB(name, competitionShort) ??
+    TEAM_CODE_MAP[name] ??
+    name.substring(0, 3).toUpperCase()
+  );
 }
 
 export function teamColor(code: string): string {
