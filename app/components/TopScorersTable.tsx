@@ -5,6 +5,7 @@ import {
   fetchFootballScorers,
   type FootballScorerRow,
 } from "../lib/fetch-standings-client";
+import { countryDisplay } from "../lib/football-terms";
 
 interface Props {
   competitionShort: string;
@@ -60,7 +61,7 @@ export function TopScorersTable({ competitionShort, accent, limit = 20 }: Props)
                       {r.player_name}
                       {r.player_nationality && (
                         <span style={{ marginLeft: "0.4rem", color: "var(--text-muted)", fontSize: "0.75rem" }}>
-                          {r.player_nationality}
+                          {countryDisplay(r.player_nationality)}
                         </span>
                       )}
                     </div>
