@@ -52,7 +52,7 @@ export default function Home() {
         {activeComp === "ipl" && activeGroup === "cricket" && <IPLSection />}
       </main>
       <footer className="sp-footer">
-        <span>SportPulse © 2026</span>
+        <span>MatchDay © 2026</span>
         <span>Data updated daily</span>
       </footer>
     </div>

@@ -49,16 +49,16 @@ export function FootballCard({ fixture }: { fixture: Fixture }) {
         {fixture.competition}
       </p>
 
-      <div className="flex items-center justify-between gap-3 mt-3">
-        <p className="font-semibold flex-1 text-right leading-tight">
+      <div className="flex items-center justify-between gap-2 sm:gap-3 mt-3">
+        <p className="font-semibold flex-1 min-w-0 text-right leading-tight text-sm sm:text-base break-words">
           {fixture.homeTeam}
         </p>
 
-        <div className="shrink-0 text-center min-w-[64px]">
+        <div className="shrink-0 text-center min-w-[48px] sm:min-w-[64px]">
           {fixture.status === "scheduled" ? (
-            <span className="text-sm font-medium">{fixture.kickoff}</span>
+            <span className="text-xs sm:text-sm font-medium">{fixture.kickoff}</span>
           ) : (
-            <span className="text-xl font-bold tabular-nums">
+            <span className="text-lg sm:text-xl font-bold tabular-nums">
               {fixture.homeScore} – {fixture.awayScore}
             </span>
           )}
@@ -72,7 +72,7 @@ export function FootballCard({ fixture }: { fixture: Fixture }) {
           )}
         </div>
 
-        <p className="font-semibold flex-1 text-left leading-tight">
+        <p className="font-semibold flex-1 min-w-0 text-left leading-tight text-sm sm:text-base break-words">
           {fixture.awayTeam}
         </p>
       </div>
