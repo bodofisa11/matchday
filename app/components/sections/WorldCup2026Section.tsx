@@ -6,10 +6,17 @@ import { competitionLogoUrl } from "../../lib/image-utils";
 import {
   fetchWcGroupStandings,
   fetchWcFixturesByStage,
+  fetchTeamsForCompetition,
   type FootballFixtureRow,
+  type FootballTeamDetailRow,
   type WcGroupStandingRow,
 } from "../../lib/fetch-standings-client";
 import { teamCode, teamColor, formatFixtureDate, formatGD } from "../../lib/team-meta";
+import { TeamDetailModal } from "../TeamDetailModal";
+
+function normalizeName(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
 
 type Tab = "fixtures" | "groups" | "bracket" | "teams";
 
@@ -220,8 +227,19 @@ export function WorldCup2026Section() {
   const [groups, setGroups] = useState<Record<string, WcGroupStandingRow[]>>({});
   const [allFixtures, setAllFixtures] = useState<FootballFixtureRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [teamMap, setTeamMap] = useState<Map<string, FootballTeamDetailRow>>(new Map());
+  const [selectedTeam, setSelectedTeam] = useState<FootballTeamDetailRow | null>(null);
 
   useEffect(() => {
+    fetchTeamsForCompetition("WC2026").then((teams) => {
+      const m = new Map<string, FootballTeamDetailRow>();
+      for (const t of teams) {
+        m.set(normalizeName(t.name), t);
+        if (t.short_name) m.set(normalizeName(t.short_name), t);
+        if (t.tla) m.set(normalizeName(t.tla), t);
+      }
+      setTeamMap(m);
+    });
     Promise.all([
       fetchWcFixturesByStage(null, 250),
       fetchWcGroupStandings(),
@@ -365,11 +383,30 @@ export function WorldCup2026Section() {
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", paddingTop: "0.5rem" }}>
                     {rows.map((r) => {
                       const code = teamCode(r.team);
+                      const team = teamMap.get(normalizeName(r.team));
+                      const clickable = !!team;
                       return (
-                        <div key={r.team} style={{ display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "0.85rem" }}>
+                        <button
+                          key={r.team}
+                          onClick={() => team && setSelectedTeam(team)}
+                          disabled={!clickable}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.6rem",
+                            fontSize: "0.85rem",
+                            background: "transparent",
+                            border: "none",
+                            padding: "0.25rem 0",
+                            color: "var(--text-primary)",
+                            cursor: clickable ? "pointer" : "default",
+                            textAlign: "left",
+                            opacity: clickable ? 1 : 0.7,
+                          }}
+                        >
                           <TeamLogo code={code} sport="football" leagueCode={LEAGUE} color={teamColor(code)} size={22} />
                           {r.team}
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
@@ -378,6 +415,10 @@ export function WorldCup2026Section() {
             </div>
           )}
         </div>
+      )}
+
+      {selectedTeam && (
+        <TeamDetailModal team={selectedTeam} accent={ACCENT} onClose={() => setSelectedTeam(null)} />
       )}
     </>
   );

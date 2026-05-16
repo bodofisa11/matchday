@@ -9,6 +9,7 @@ import {
 } from "../../lib/fetch-standings-client";
 import { teamCode, teamColor, formatGD } from "../../lib/team-meta";
 import { FixturesTabPanel } from "../FixturesTabPanel";
+import { TeamsTabPanel } from "../TeamsTabPanel";
 
 type Tab = "fixtures" | "standings" | "stats" | "teams";
 
@@ -132,7 +133,7 @@ export function EuropaLeagueSection() {
       )}
 
       {activeTab === "stats" && <Placeholder label="Stats" />}
-      {activeTab === "teams" && <Placeholder label="Teams" />}
+      {activeTab === "teams" && <TeamsTabPanel competitionShort="UEL" accent={ACCENT} />}
     </>
   );
 }
