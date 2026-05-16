@@ -10,6 +10,7 @@ import {
 import { teamCode, teamColor, formatGD } from "../../lib/team-meta";
 import { FixturesTabPanel } from "../FixturesTabPanel";
 import { TopScorersTable } from "../TopScorersTable";
+import { TeamsTabPanel } from "../TeamsTabPanel";
 
 type Tab = "fixtures" | "standings" | "stats" | "teams";
 
@@ -137,7 +138,7 @@ export function BundesligaSection() {
       )}
 
       {activeTab === "stats" && <TopScorersTable competitionShort="BUN" accent={ACCENT} />}
-      {activeTab === "teams" && <Placeholder label="Teams" />}
+      {activeTab === "teams" && <TeamsTabPanel competitionShort="BUN" accent={ACCENT} />}
     </>
   );
 }

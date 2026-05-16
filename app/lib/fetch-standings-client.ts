@@ -83,6 +83,66 @@ export interface FootballScorerRow {
   penalties: number | null;
 }
 
+export interface FootballTeamDetailRow {
+  team_api_id: number;
+  name: string;
+  short_name: string | null;
+  tla: string | null;
+  crest: string | null;
+  founded: number | null;
+  venue: string | null;
+  club_colors: string | null;
+  website: string | null;
+  address: string | null;
+  coach_name: string | null;
+  coach_nationality: string | null;
+  coach_dob: string | null;
+  coach_contract_start: string | null;
+  coach_contract_until: string | null;
+}
+
+export interface FootballSquadPlayerRow {
+  player_api_id: number;
+  name: string;
+  position: string | null;
+  dob: string | null;
+  nationality: string | null;
+  shirt_number: number | null;
+}
+
+export async function fetchTeamsForCompetition(
+  competitionShort: string,
+): Promise<FootballTeamDetailRow[]> {
+  const supabase = createSupabaseClient();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("football_team_details")
+    .select("team_api_id,name,short_name,tla,crest,founded,venue,club_colors,website,address,coach_name,coach_nationality,coach_dob,coach_contract_start,coach_contract_until")
+    .eq("competition_short", competitionShort)
+    .order("name");
+  return (data as FootballTeamDetailRow[]) ?? [];
+}
+
+export async function fetchSquadByTeamApiId(
+  teamApiId: number,
+): Promise<FootballSquadPlayerRow[]> {
+  const supabase = createSupabaseClient();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("football_squad_players")
+    .select("player_api_id,name,position,dob,nationality,shirt_number")
+    .eq("team_api_id", teamApiId)
+    .order("shirt_number", { ascending: true, nullsFirst: false });
+  const rows = (data as FootballSquadPlayerRow[]) ?? [];
+  // Dedup by player_api_id (player may appear in multiple competitions)
+  const seen = new Set<number>();
+  return rows.filter((r) => {
+    if (seen.has(r.player_api_id)) return false;
+    seen.add(r.player_api_id);
+    return true;
+  });
+}
+
 export async function fetchFootballScorers(
   competitionShort: string,
   limit = 20,
