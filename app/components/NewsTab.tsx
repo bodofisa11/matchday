@@ -110,7 +110,7 @@ function NewsCard({ article, accent }: { article: NewsArticleRow; accent: string
           }}
         >
           <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontWeight: 600 }}>
-            {article.source ?? "SportPulse"}
+            {article.source ?? "MatchDay"}
           </span>
           <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>
             {timeAgo(article.published_at)}
