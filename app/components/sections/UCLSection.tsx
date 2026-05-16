@@ -4,6 +4,7 @@ import { useState } from "react";
 import { competitionLogoUrl } from "../../lib/image-utils";
 import { FixturesTabPanel } from "../FixturesTabPanel";
 import { TopScorersTable } from "../TopScorersTable";
+import { TeamsTabPanel } from "../TeamsTabPanel";
 
 type Tab = "fixtures" | "stats" | "teams";
 
@@ -75,7 +76,7 @@ export function UCLSection() {
       )}
 
       {activeTab === "stats" && <TopScorersTable competitionShort="UCL" accent={ACCENT} />}
-      {activeTab === "teams" && <Placeholder label="Teams" />}
+      {activeTab === "teams" && <TeamsTabPanel competitionShort="UCL" accent={ACCENT} />}
     </>
   );
 }
