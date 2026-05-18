@@ -12,7 +12,7 @@ import {
   type WcGroupStandingRow,
 } from "../../lib/fetch-standings-client";
 import { teamCode, teamColor, formatFixtureDate, formatGD } from "../../lib/team-meta";
-import { TeamDetailModal } from "../TeamDetailModal";
+import { TeamDetailPanel } from "../TeamDetailPanel";
 
 function normalizeName(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -296,9 +296,13 @@ export function WorldCup2026Section() {
         )}
       </div>
 
-      <TabBar active={activeTab} onChange={setActiveTab} />
+      {!selectedTeam && <TabBar active={activeTab} onChange={setActiveTab} />}
 
-      {activeTab === "fixtures" && (
+      {selectedTeam && (
+        <TeamDetailPanel team={selectedTeam} accent={ACCENT} onBack={() => setSelectedTeam(null)} />
+      )}
+
+      {!selectedTeam && activeTab === "fixtures" && (
         <div className="grid-12 fade-in fd2">
           <div className="card span-6">
             <div className="card-header">
@@ -320,7 +324,7 @@ export function WorldCup2026Section() {
         </div>
       )}
 
-      {activeTab === "groups" && (
+      {!selectedTeam && activeTab === "groups" && (
         <div className="fade-in fd2">
           {loading ? (
             <Loading />
@@ -342,7 +346,7 @@ export function WorldCup2026Section() {
         </div>
       )}
 
-      {activeTab === "bracket" && (
+      {!selectedTeam && activeTab === "bracket" && (
         <div className="fade-in fd2">
           {loading ? (
             <Loading />
@@ -361,7 +365,7 @@ export function WorldCup2026Section() {
         </div>
       )}
 
-      {activeTab === "teams" && (
+      {!selectedTeam && activeTab === "teams" && (
         <div className="fade-in fd2">
           {loading ? (
             <Loading />
@@ -447,9 +451,6 @@ export function WorldCup2026Section() {
         </div>
       )}
 
-      {selectedTeam && (
-        <TeamDetailModal team={selectedTeam} accent={ACCENT} onClose={() => setSelectedTeam(null)} />
-      )}
     </>
   );
 }
