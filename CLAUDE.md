@@ -2,6 +2,19 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Release process
+
+**Strict rule:** every PR targeting `main` MUST add a bullet under the `## Upcoming` section of `RELEASE.md` describing the change in user-facing terms. The `release-notes-check` workflow enforces this — PRs without a `RELEASE.md` change fail CI. The only bypass is applying the `no-release-note` label (reserved for pure tooling/docs/CI PRs with no user impact).
+
+Deploys are tag-driven, not push-driven. Pushes to `main` do not deploy. To deploy:
+
+- Prod: `git tag vX.Y.Z && git push origin vX.Y.Z` (e.g. `v1.1.0`).
+- Test: `git tag vX.Y.Z-rc.N && git push origin vX.Y.Z-rc.N` from a feature branch (overwrites the Pages URL until next prod tag).
+
+On deploy, rename `## Upcoming` in `RELEASE.md` to `## vX.Y.Z — YYYY-MM-DD` and add a fresh empty `## Upcoming` header at the top. The tag name is embedded into the app at build time via `NEXT_PUBLIC_APP_VERSION` (see [`app/lib/version.ts`](app/lib/version.ts)) and displayed in the Navbar chip and footer.
+
+See `RELEASE.md` for the full versioning scheme (semver + pre-release naming).
+
 ## Commands
 
 ```bash
