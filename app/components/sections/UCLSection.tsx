@@ -6,10 +6,11 @@ import { FixturesTabPanel } from "../FixturesTabPanel";
 import { TopScorersTable } from "../TopScorersTable";
 import { TeamsTabPanel } from "../TeamsTabPanel";
 
-type Tab = "fixtures" | "stats" | "teams";
+type Tab = "upcoming" | "results" | "stats" | "teams";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "fixtures", label: "Fixtures" },
+  { id: "upcoming", label: "Upcoming" },
+  { id: "results", label: "Results" },
   { id: "stats", label: "Stats" },
   { id: "teams", label: "Teams" },
 ];
@@ -44,7 +45,7 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
 
 
 export function UCLSection() {
-  const [activeTab, setActiveTab] = useState<Tab>("fixtures");
+  const [activeTab, setActiveTab] = useState<Tab>("upcoming");
 
   return (
     <>
@@ -62,8 +63,12 @@ export function UCLSection() {
 
       <TabBar active={activeTab} onChange={setActiveTab} />
 
-      {activeTab === "fixtures" && (
-        <FixturesTabPanel competitionShort="UCL" leagueCode="ucl" accent={ACCENT} />
+      {activeTab === "upcoming" && (
+        <FixturesTabPanel competitionShort="UCL" leagueCode="ucl" accent={ACCENT} mode="upcoming" />
+      )}
+
+      {activeTab === "results" && (
+        <FixturesTabPanel competitionShort="UCL" leagueCode="ucl" accent={ACCENT} mode="results" />
       )}
 
       {activeTab === "stats" && <TopScorersTable competitionShort="UCL" accent={ACCENT} />}

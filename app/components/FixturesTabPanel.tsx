@@ -8,13 +8,14 @@ import {
 } from "../lib/fetch-standings-client";
 import { teamCode, teamColor, teamLeague, formatFixtureDate, todayStr } from "../lib/team-meta";
 
+type Mode = "upcoming" | "results";
+
 interface Props {
   competitionShort: string;
   leagueCode: string;
   accent: string;
+  mode: Mode;
 }
-
-type SubTab = "upcoming" | "results";
 
 function getTomorrow(today: string): string {
   const d = new Date(today + "T00:00:00");
@@ -190,17 +191,9 @@ function SectionHeader({ title, count, suffix, accent, note }: { title: string; 
 
 const PANEL_HEIGHT = "clamp(400px, calc(100vh - 380px), 680px)";
 
-export function FixturesTabPanel({ competitionShort, leagueCode, accent }: Props) {
+function UpcomingPanel({ competitionShort, leagueCode, accent }: { competitionShort: string; leagueCode: string; accent: string }) {
   const today = todayStr();
   const tomorrow = getTomorrow(today);
-
-  const [subTab, setSubTab] = useState<SubTab>("upcoming");
-
-  const [results, setResults] = useState<FootballFixtureRow[]>([]);
-  const [resultsPage, setResultsPage] = useState(0);
-  const [hasMoreResults, setHasMoreResults] = useState(false);
-  const [loadingResults, setLoadingResults] = useState(true);
-  const [loadingMoreResults, setLoadingMoreResults] = useState(false);
 
   const [todayFixtures, setTodayFixtures] = useState<FootballFixtureRow[]>([]);
   const [loadingToday, setLoadingToday] = useState(true);
@@ -213,32 +206,16 @@ export function FixturesTabPanel({ competitionShort, leagueCode, accent }: Props
 
   useEffect(() => {
     Promise.all([
-      fetchFootballFixturesPaged(competitionShort, "finished", 0, 10),
       fetchFootballFixturesPaged(competitionShort, "scheduled", 0, 50, today, today),
       fetchFootballFixturesPaged(competitionShort, "scheduled", 0, 15, tomorrow),
-    ]).then(([r, t, u]) => {
-      setResults(r.rows);
-      setHasMoreResults(r.hasMore);
-      setLoadingResults(false);
-
+    ]).then(([t, u]) => {
       setTodayFixtures(t.rows);
       setLoadingToday(false);
-
       setUpcoming(u.rows);
       setHasMoreUpcoming(u.hasMore);
       setLoadingUpcoming(false);
     });
   }, [competitionShort, today, tomorrow]);
-
-  const loadMoreResults = useCallback(async () => {
-    setLoadingMoreResults(true);
-    const next = resultsPage + 1;
-    const { rows, hasMore } = await fetchFootballFixturesPaged(competitionShort, "finished", next, 10);
-    setResults((prev) => [...prev, ...rows]);
-    setResultsPage(next);
-    setHasMoreResults(hasMore);
-    setLoadingMoreResults(false);
-  }, [competitionShort, resultsPage]);
 
   const loadMoreUpcoming = useCallback(async () => {
     setLoadingMoreUpcoming(true);
@@ -250,107 +227,98 @@ export function FixturesTabPanel({ competitionShort, leagueCode, accent }: Props
     setLoadingMoreUpcoming(false);
   }, [competitionShort, upcomingPage, tomorrow]);
 
-  const renderSubTab = (id: SubTab, label: string, count: number) => {
-    const active = subTab === id;
-    return (
-      <button
-        key={id}
-        onClick={() => setSubTab(id)}
-        style={{
-          padding: "0.4rem 1rem",
-          borderRadius: "999px",
-          border: active ? "none" : "1px solid var(--border-subtle)",
-          background: active ? accent : "transparent",
-          color: active ? "#000" : "var(--text-secondary)",
-          fontWeight: active ? 700 : 500,
-          fontSize: "0.78rem",
-          cursor: "pointer",
-          transition: "all 0.15s",
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "0.4rem",
-        }}
-      >
-        {label}
-        {count > 0 && (
-          <span style={{
-            fontSize: "0.6rem",
-            fontWeight: 700,
-            background: active ? "rgba(0,0,0,0.18)" : accent + "22",
-            color: active ? "#000" : accent,
-            padding: "0.05rem 0.4rem",
-            borderRadius: "20px",
-          }}>
-            {count}
-          </span>
-        )}
-      </button>
-    );
-  };
+  return (
+    <div className="fade-in fd2">
+      <div className="card" style={{ display: "flex", flexDirection: "column", padding: 0, overflow: "hidden" }}>
+        <SectionHeader title="Upcoming" count={todayFixtures.length + upcoming.length} suffix={hasMoreUpcoming ? "+" : ""} accent={accent} note="Today first" />
+        <div style={{ flex: 1, height: PANEL_HEIGHT, overflowY: "auto", padding: "0 1.4rem" }}>
+          {loadingUpcoming || loadingToday ? (
+            <SkeletonRows n={6} />
+          ) : todayFixtures.length === 0 && upcoming.length === 0 ? (
+            <div style={{ color: "var(--text-muted)", fontSize: "0.82rem", padding: "2rem 0", textAlign: "center" }}>
+              No upcoming fixtures.
+            </div>
+          ) : (
+            <>
+              {todayFixtures.length > 0 && (
+                <div style={{ paddingTop: "0.5rem" }}>
+                  <div style={{ fontSize: "0.62rem", fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "0.5px", padding: "0.4rem 0" }}>
+                    Today
+                  </div>
+                  {todayFixtures.map((f) => <FixtureRow key={f.id} f={f} league={leagueCode} />)}
+                </div>
+              )}
+              {upcoming.length > 0 && (
+                <div style={{ paddingTop: todayFixtures.length > 0 ? "0.6rem" : "0.5rem" }}>
+                  {todayFixtures.length > 0 && (
+                    <div style={{ fontSize: "0.62rem", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", padding: "0.4rem 0" }}>
+                      Later
+                    </div>
+                  )}
+                  {upcoming.map((f) => <FixtureRow key={f.id} f={f} league={leagueCode} />)}
+                </div>
+              )}
+              {hasMoreUpcoming && <LoadMoreBtn onClick={loadMoreUpcoming} loading={loadingMoreUpcoming} />}
+              <div style={{ height: "0.5rem" }} />
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ResultsPanel({ competitionShort, leagueCode, accent }: { competitionShort: string; leagueCode: string; accent: string }) {
+  const [results, setResults] = useState<FootballFixtureRow[]>([]);
+  const [resultsPage, setResultsPage] = useState(0);
+  const [hasMoreResults, setHasMoreResults] = useState(false);
+  const [loadingResults, setLoadingResults] = useState(true);
+  const [loadingMoreResults, setLoadingMoreResults] = useState(false);
+
+  useEffect(() => {
+    fetchFootballFixturesPaged(competitionShort, "finished", 0, 10).then((r) => {
+      setResults(r.rows);
+      setHasMoreResults(r.hasMore);
+      setLoadingResults(false);
+    });
+  }, [competitionShort]);
+
+  const loadMoreResults = useCallback(async () => {
+    setLoadingMoreResults(true);
+    const next = resultsPage + 1;
+    const { rows, hasMore } = await fetchFootballFixturesPaged(competitionShort, "finished", next, 10);
+    setResults((prev) => [...prev, ...rows]);
+    setResultsPage(next);
+    setHasMoreResults(hasMore);
+    setLoadingMoreResults(false);
+  }, [competitionShort, resultsPage]);
 
   return (
     <div className="fade-in fd2">
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", flexWrap: "wrap" }}>
-        {renderSubTab("upcoming", "Upcoming", todayFixtures.length + upcoming.length)}
-        {renderSubTab("results", "Results", results.length)}
+      <div className="card" style={{ display: "flex", flexDirection: "column", padding: 0, overflow: "hidden" }}>
+        <SectionHeader title="Results" count={results.length} suffix={hasMoreResults ? "+" : ""} accent={accent} note="Newest first" />
+        <div style={{ flex: 1, height: PANEL_HEIGHT, overflowY: "auto", padding: "0 1.4rem" }}>
+          {loadingResults ? (
+            <SkeletonRows n={6} />
+          ) : results.length === 0 ? (
+            <div style={{ color: "var(--text-muted)", fontSize: "0.82rem", padding: "2rem 0", textAlign: "center" }}>
+              No results yet this season.
+            </div>
+          ) : (
+            <>
+              {results.map((r) => <ResultRow key={r.id} r={r} league={leagueCode} />)}
+              {hasMoreResults && <LoadMoreBtn onClick={loadMoreResults} loading={loadingMoreResults} />}
+              <div style={{ height: "0.5rem" }} />
+            </>
+          )}
+        </div>
       </div>
-
-      {subTab === "upcoming" ? (
-        <div className="card" style={{ display: "flex", flexDirection: "column", padding: 0, overflow: "hidden" }}>
-          <SectionHeader title="Upcoming" count={todayFixtures.length + upcoming.length} suffix={hasMoreUpcoming ? "+" : ""} accent={accent} note="Today first" />
-          <div style={{ flex: 1, height: PANEL_HEIGHT, overflowY: "auto", padding: "0 1.4rem" }}>
-            {loadingUpcoming || loadingToday ? (
-              <SkeletonRows n={6} />
-            ) : todayFixtures.length === 0 && upcoming.length === 0 ? (
-              <div style={{ color: "var(--text-muted)", fontSize: "0.82rem", padding: "2rem 0", textAlign: "center" }}>
-                No upcoming fixtures.
-              </div>
-            ) : (
-              <>
-                {todayFixtures.length > 0 && (
-                  <div style={{ paddingTop: "0.5rem" }}>
-                    <div style={{ fontSize: "0.62rem", fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "0.5px", padding: "0.4rem 0" }}>
-                      Today
-                    </div>
-                    {todayFixtures.map((f) => <FixtureRow key={f.id} f={f} league={leagueCode} />)}
-                  </div>
-                )}
-                {upcoming.length > 0 && (
-                  <div style={{ paddingTop: todayFixtures.length > 0 ? "0.6rem" : "0.5rem" }}>
-                    {todayFixtures.length > 0 && (
-                      <div style={{ fontSize: "0.62rem", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", padding: "0.4rem 0" }}>
-                        Later
-                      </div>
-                    )}
-                    {upcoming.map((f) => <FixtureRow key={f.id} f={f} league={leagueCode} />)}
-                  </div>
-                )}
-                {hasMoreUpcoming && <LoadMoreBtn onClick={loadMoreUpcoming} loading={loadingMoreUpcoming} />}
-                <div style={{ height: "0.5rem" }} />
-              </>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="card" style={{ display: "flex", flexDirection: "column", padding: 0, overflow: "hidden" }}>
-          <SectionHeader title="Results" count={results.length} suffix={hasMoreResults ? "+" : ""} accent={accent} note="Newest first" />
-          <div style={{ flex: 1, height: PANEL_HEIGHT, overflowY: "auto", padding: "0 1.4rem" }}>
-            {loadingResults ? (
-              <SkeletonRows n={6} />
-            ) : results.length === 0 ? (
-              <div style={{ color: "var(--text-muted)", fontSize: "0.82rem", padding: "2rem 0", textAlign: "center" }}>
-                No results yet this season.
-              </div>
-            ) : (
-              <>
-                {results.map((r) => <ResultRow key={r.id} r={r} league={leagueCode} />)}
-                {hasMoreResults && <LoadMoreBtn onClick={loadMoreResults} loading={loadingMoreResults} />}
-                <div style={{ height: "0.5rem" }} />
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
+}
+
+export function FixturesTabPanel({ competitionShort, leagueCode, accent, mode }: Props) {
+  return mode === "upcoming"
+    ? <UpcomingPanel competitionShort={competitionShort} leagueCode={leagueCode} accent={accent} />
+    : <ResultsPanel competitionShort={competitionShort} leagueCode={leagueCode} accent={accent} />;
 }
