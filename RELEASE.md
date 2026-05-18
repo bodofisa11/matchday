@@ -57,9 +57,30 @@ and publishes to GitHub Pages. Tag also acts as the permanent git marker.
 <!-- Add bullets here for every PR merged to main. Promote this block to a
      versioned heading on deploy. -->
 
-- _(none yet — next deploy will become v1.0.1 / v1.1.0)_
-- Mobile-friendly standings: keep GD + Pts visible on phones, hide only W/D/L.
-- New compact-tables toggle in the Navbar collapses team names to codes (TLA), tightens padding, and applies to standings, top scorers, and team grids. Preference persists in localStorage and applies pre-paint to avoid flicker.
+- _(none yet — next deploy will become v1.2.1 / v1.3.0)_
+
+---
+
+## v1.2.0 — 2026-05-18
+
+First tag-driven production deploy bundling the release-tooling rollout and
+the mobile standings overhaul.
+
+**Release tooling**
+
+- Tag-driven deploys. `main` no longer auto-deploys; deploys trigger only on `v*` tag push (or manual `workflow_dispatch`).
+- Semver tag conventions: prod `vX.Y.Z`; test builds from feature branches `vX.Y.Z-rc.N` / `-beta.N` / `-alpha.N` (overwrite the same Pages URL).
+- Version badge in the Navbar (chip) and footer, embedded at build time via `NEXT_PUBLIC_APP_VERSION`.
+- `RELEASE.md` as the single source of truth, with an `## Upcoming` rolling block.
+- `release-notes-check` workflow fails PRs that don't update `RELEASE.md` (bypass with the `no-release-note` label).
+- PR template + CLAUDE.md rules so the process is enforced going forward.
+- Removed legacy `CHANGELOG.md` and `docs/RELEASES.md`.
+
+**Mobile UX**
+
+- Standings on small phones keep `#`, Team, `P`, `GD`, `Pts` visible — only W/D/L are hidden ≤480px (previously P/W/D/L/GD/Pts were all dropped).
+- New compact-tables toggle in the Navbar (`···` / `ABC`) globally collapses team full names to team codes (TLA), tightens row padding, drops W/D/L at all widths, and switches the Teams tab into a denser TLA tile grid. Persists in localStorage and applies pre-paint to avoid flicker.
+- Shared `<TeamName />` component used across all league standings and the Top Scorers Team column.
 
 ---
 
