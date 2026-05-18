@@ -58,6 +58,7 @@ and publishes to GitHub Pages. Tag also acts as the permanent git marker.
      versioned heading on deploy. -->
 
 - _(none yet — next deploy will become v1.2.1 / v1.3.0)_
+- CD workflow now creates (or updates) a GitHub Release for every tag push, pulling notes from the matching `## vX.Y.Z` section of `RELEASE.md`. Pre-release tags (`-rc.N`, `-beta.N`, `-alpha.N`) are flagged as prereleases. A prod tag only claims the **Latest** badge when the tagged commit is reachable from `origin/main` — tags pushed from feature branches are still deployed and released but never overwrite the Latest pointer. This populates the repo's right-hand Releases sidebar correctly.
 
 ---
 

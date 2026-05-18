@@ -25,7 +25,7 @@ on:
         default: "dev"
 
 permissions:
-  contents: read
+  contents: write   # needed to create GitHub Releases on tag push
   pages: write
   id-token: write
 
@@ -95,3 +95,91 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # Publish a GitHub Release for every tag push, so the repo's right-hand
+  # "Releases" sidebar always shows the latest deployed version. Notes are
+  # extracted from RELEASE.md (the section matching the tag). Pre-release
+  # tags (-rc, -beta, -alpha) are marked accordingly so they don't claim
+  # the "Latest" badge.
+  release:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Need full history to test whether the tagged commit is reachable
+          # from main (decides the "Latest" flag).
+          fetch-depth: 0
+
+      - name: Extract release notes from RELEASE.md
+        id: notes
+        run: |
+          TAG="${{ github.ref_name }}"
+          # Pull the lines between "## <tag> — ..." and the next "## " (or EOF).
+          awk -v tag="$TAG" '
+            $0 ~ "^## " tag " " { capture=1; next }
+            capture && /^## / { exit }
+            capture { print }
+          ' RELEASE.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "Release notes not found in RELEASE.md for tag $TAG — using a stub." >&2
+            echo "Deployment of \`$TAG\`. See [RELEASE.md](RELEASE.md) for details." > release-notes.md
+          fi
+
+      - name: Determine release flags
+        id: flags
+        run: |
+          TAG="${{ github.ref_name }}"
+
+          # Pre-release tags (-rc/-beta/-alpha) never claim "Latest" regardless of branch.
+          case "$TAG" in
+            *-rc.*|*-beta.*|*-alpha.*)
+              echo "prerelease=true"  >> $GITHUB_OUTPUT
+              echo "latest=false"     >> $GITHUB_OUTPUT
+              echo "Pre-release tag $TAG — not latest."
+              exit 0
+              ;;
+            *)
+              echo "prerelease=false" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+          # Only mark a prod tag as "Latest" if the tagged commit is reachable
+          # from origin/main. Tags pushed from feature branches are still
+          # deployed + released, but don't take the Latest badge.
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          if git merge-base --is-ancestor "${{ github.sha }}" origin/main; then
+            echo "latest=true"  >> $GITHUB_OUTPUT
+            echo "Tag $TAG is on main — marking Latest."
+          else
+            echo "latest=false" >> $GITHUB_OUTPUT
+            echo "Tag $TAG is NOT on main — skipping Latest."
+          fi
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.ref_name }}"
+          PRERELEASE_FLAG=""
+          if [ "${{ steps.flags.outputs.prerelease }}" = "true" ]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+          if [ "${{ steps.flags.outputs.latest }}" = "true" ]; then
+            LATEST_FLAG="--latest"
+          else
+            LATEST_FLAG="--latest=false"
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" \
+              --title "$TAG" \
+              --notes-file release-notes.md \
+              $PRERELEASE_FLAG $LATEST_FLAG
+          else
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --notes-file release-notes.md \
+              $PRERELEASE_FLAG $LATEST_FLAG
+          fi
