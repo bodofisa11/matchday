@@ -626,9 +626,10 @@ table { table-layout: auto; width: 100%; }
   .fixture-score { font-size: 1.1rem; min-width: 38px; letter-spacing: 1px; }
   .section-hero { padding: 0.85rem 1rem; }
   .hero-icon { width: 2rem; height: 2rem; font-size: 1.4rem; }
-  .standings-table th, .standings-table td { padding: 0.4rem 0.2rem; }
+  .standings-table th, .standings-table td { padding: 0.4rem 0.15rem; }
   .standings-table td { font-size: 0.72rem; }
   .standings-table td:not(:first-child):not(:nth-child(2)) { font-size: 0.68rem; }
+  .team-cell { gap: 0.3rem; }
 }
 
 /* Large phone ≤640px */
@@ -661,8 +662,14 @@ table { table-layout: auto; width: 100%; }
   .stat-row { grid-template-columns: repeat(2, 1fr); }
   .driver-bar-name { width: clamp(50px, 22vw, 70px); }
   .driver-bar-pts { width: 28px; font-size: 0.72rem; }
-  .standings-table th:nth-child(n+4):nth-child(-n+8),
-  .standings-table td:nth-child(n+4):nth-child(-n+8) { display: none; }
+  /* League standings on phones: hide W/D/L (cols 4-6) — keep #, Team, P, GD, Pts. */
+  .league-table th:nth-child(n+4):nth-child(-n+6),
+  .league-table td:nth-child(n+4):nth-child(-n+6) { display: none; }
+  .league-table th, .league-table td { padding: 0.4rem 0.1rem; font-size: 0.7rem; }
+  .league-table .team-cell { gap: 0.25rem; font-size: 0.72rem; }
+  /* Top scorers on phones: hide Team col (3) — keep #, Player, MP, A, G. */
+  .scorers-table th:nth-child(3),
+  .scorers-table td:nth-child(3) { display: none; }
   .sp-footer { justify-content: center; text-align: center; }
 }
 
@@ -672,6 +679,19 @@ table { table-layout: auto; width: 100%; }
   .logo-icon { width: 22px; height: 22px; }
   .stat-value { font-size: 1.3rem; }
 }
+
+/* COMPACT TABLES MODE — toggled by .compact-tables on <html>. Frees room
+   on narrow viewports by collapsing team full names down to codes (TLA),
+   tightening padding, and dropping the W/D/L breakdown so P / GD / Pts
+   are always visible. */
+.compact-tables .standings-table th,
+.compact-tables .standings-table td { padding: 0.35rem 0.15rem; }
+.compact-tables .standings-table td { font-size: 0.72rem; }
+.compact-tables .standings-table .team-cell { gap: 0.3rem; font-weight: 700; font-family: var(--font-jetbrains-mono, monospace); }
+.compact-tables .league-table th:nth-child(n+4):nth-child(-n+6),
+.compact-tables .league-table td:nth-child(n+4):nth-child(-n+6) { display: none; }
+.compact-tables .scorers-table th:nth-child(3),
+.compact-tables .scorers-table td:nth-child(3) { display: table-cell; font-family: var(--font-jetbrains-mono, monospace); font-weight: 700; }
 
 /* FOOTER */
 .sp-footer {

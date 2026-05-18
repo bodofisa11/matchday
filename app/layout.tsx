@@ -38,7 +38,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('sp-theme');if(t==='light'){document.documentElement.classList.add('light')}}catch(e){}})()`,
+            __html: `(function(){try{var t=localStorage.getItem('sp-theme');if(t==='light'){document.documentElement.classList.add('light')}var c=localStorage.getItem('compact-tables');if(c==='1'){document.documentElement.classList.add('compact-tables')}}catch(e){}})()`,
           }}
         />
       </head>

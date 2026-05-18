@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { TeamLogo } from "../TeamLogo";
+import { TeamName } from "../TeamName";
 import { competitionLogoUrl } from "../../lib/image-utils";
 import {
   fetchFootballStandings,
@@ -104,7 +105,7 @@ export function Ligue1Section() {
             {loading ? <Loading /> : standings.length === 0 ? (
               <div style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>No standings data yet.</div>
             ) : (
-              <table className="standings-table">
+              <table className="standings-table league-table">
                 <thead>
                   <tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>
                 </thead>
@@ -117,7 +118,7 @@ export function Ligue1Section() {
                         <td>
                           <div className="team-cell">
                             <TeamLogo code={code} sport="football" leagueCode={LEAGUE} color={teamColor(code)} />
-                            {row.team}
+                            <TeamName code={code} name={row.team} />
                           </div>
                         </td>
                         <td>{row.played}</td><td>{row.won}</td><td>{row.drawn}</td><td>{row.lost}</td>

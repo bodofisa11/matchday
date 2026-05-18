@@ -58,6 +58,8 @@ and publishes to GitHub Pages. Tag also acts as the permanent git marker.
      versioned heading on deploy. -->
 
 - _(none yet — next deploy will become v1.0.1 / v1.1.0)_
+- Mobile-friendly standings: keep GD + Pts visible on phones, hide only W/D/L.
+- New compact-tables toggle in the Navbar collapses team names to codes (TLA), tightens padding, and applies to standings, top scorers, and team grids. Preference persists in localStorage and applies pre-paint to avoid flicker.
 
 ---
 
