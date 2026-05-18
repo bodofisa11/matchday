@@ -1,14 +1,20 @@
 name: Deploy to GitHub Pages
 
-# Manual / tag-driven deploys only. We do NOT auto-deploy on every push to main.
-# Workflow:
-#   1. Bundle multiple features into main via normal PR flow.
-#   2. When ready to release, push a semver tag:
-#        - Production:  v1.2.0
-#        - Test build:  v1.2.0-rc.1   (also: -rc.N, -beta.N, -alpha.N)
-#      Both deploy to the same GitHub Pages URL (prerelease overwrites until the
-#      next prod tag re-deploys).
-#   3. Or trigger from the Actions tab with a custom version label.
+# Tag-driven deploys only. Pushes to `main` do NOT deploy. Two entry points:
+#
+#   A) Tag push (`v*.*.*` and pre-release variants) — the canonical deploy
+#      trigger. Builds the Next.js site with the tag embedded as
+#      NEXT_PUBLIC_APP_VERSION, publishes to GitHub Pages, and creates a
+#      GitHub Release with notes pulled from RELEASE.md.
+#
+#   B) Manual `workflow_dispatch` from the Actions tab — pick a bump type
+#      (major / minor / patch) and an optional pre-release channel
+#      (none / rc / beta / alpha). The workflow computes the next version
+#      from the latest existing tag, creates the tag, and pushes it. The
+#      tag push then triggers entry point (A).
+#
+# Prerelease tags (-rc/-beta/-alpha) deploy to the same Pages URL and
+# overwrite prod until the next prod tag re-deploys.
 
 on:
   push:
@@ -19,13 +25,28 @@ on:
       - "v*.*.*-alpha.*"
   workflow_dispatch:
     inputs:
-      version:
-        description: "Version label to embed in the build (e.g. v1.2.0 or dev)."
+      bump:
+        description: "Semver bump applied to the latest tag."
         required: true
-        default: "dev"
+        type: choice
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
+      prerelease:
+        description: "Pre-release channel (none = production tag)."
+        required: true
+        type: choice
+        default: none
+        options:
+          - none
+          - rc
+          - beta
+          - alpha
 
 permissions:
-  contents: write   # needed to create GitHub Releases on tag push
+  contents: write   # needed to create tags + GitHub Releases on tag push
   pages: write
   id-token: write
 
@@ -34,7 +55,91 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # -----------------------------------------------------------------------
+  # Manual dispatch path: compute next version from latest tag, then create
+  # and push the tag. The tag push re-enters this workflow via the
+  # `push: tags` trigger and the build/deploy/release jobs do the actual
+  # publish.
+  # -----------------------------------------------------------------------
+  bump-and-tag:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute next version
+        id: ver
+        env:
+          BUMP: ${{ github.event.inputs.bump }}
+          PRE: ${{ github.event.inputs.prerelease }}
+        run: |
+          set -euo pipefail
+
+          # Latest production tag (ignore pre-release tags when picking a base).
+          LATEST=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' \
+            | grep -Ev -- '-(rc|beta|alpha)\.' \
+            | sort -V | tail -n1 || true)
+          if [ -z "$LATEST" ]; then
+            LATEST="v0.0.0"
+            echo "No prior prod tag found — starting from v0.0.0."
+          fi
+          echo "Latest prod tag: $LATEST"
+
+          # Parse MAJOR.MINOR.PATCH out of vX.Y.Z.
+          VER=${LATEST#v}
+          MAJOR=${VER%%.*}
+          REST=${VER#*.}
+          MINOR=${REST%%.*}
+          PATCH=${REST#*.}
+
+          case "$BUMP" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+            *) echo "Unknown bump: $BUMP" >&2; exit 1 ;;
+          esac
+
+          NEXT="v${MAJOR}.${MINOR}.${PATCH}"
+
+          # Optional pre-release suffix. For -rc/-beta/-alpha we pick the
+          # next sequential N by scanning existing tags for that channel.
+          if [ "$PRE" != "none" ]; then
+            EXISTING=$(git tag --list "${NEXT}-${PRE}.*" | sort -V | tail -n1 || true)
+            if [ -z "$EXISTING" ]; then
+              N=1
+            else
+              N=${EXISTING##*.}
+              N=$((N + 1))
+            fi
+            NEXT="${NEXT}-${PRE}.${N}"
+          fi
+
+          echo "Next version: $NEXT"
+          echo "version=$NEXT" >> "$GITHUB_OUTPUT"
+
+      - name: Create and push tag
+        env:
+          NEXT: ${{ steps.ver.outputs.version }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git rev-parse -q --verify "refs/tags/$NEXT" >/dev/null; then
+            echo "Tag $NEXT already exists — aborting to avoid clobber." >&2
+            exit 1
+          fi
+          git tag -a "$NEXT" -m "Release $NEXT"
+          git push origin "$NEXT"
+          echo "Pushed $NEXT — tag push will trigger build/deploy/release."
+
+  # -----------------------------------------------------------------------
+  # Tag-push path: build, deploy to Pages, publish GitHub Release.
+  # -----------------------------------------------------------------------
   build:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -42,12 +147,7 @@ jobs:
 
       - name: Resolve version label
         id: ver
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-          else
-            echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          fi
+        run: echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -86,6 +186,7 @@ jobs:
           path: ./out
 
   deploy:
+    if: github.event_name == 'push'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
