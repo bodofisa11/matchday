@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
+import { APP_VERSION, isPrerelease } from "../lib/version";
 
 export type SportGroup = "today" | "football" | "f1" | "cricket" | "ufc";
 
@@ -68,6 +69,23 @@ export function Navbar({ activeGroup, onGroupChange }: NavbarProps) {
         </div>
 
         <div className="nav-right">
+          <span
+            className="version-chip"
+            title={isPrerelease() ? "Pre-release / test build" : "Production release"}
+            style={{
+              fontSize: "0.62rem",
+              fontWeight: 700,
+              letterSpacing: "0.05em",
+              padding: "0.18rem 0.5rem",
+              borderRadius: "6px",
+              border: "1px solid var(--border-subtle)",
+              color: isPrerelease() ? "#f59e0b" : "var(--text-muted)",
+              background: "transparent",
+              fontFamily: "var(--font-jetbrains-mono)",
+            }}
+          >
+            {APP_VERSION}
+          </span>
           <div className="nav-live">
             <span className="live-dot" />
             LIVE
