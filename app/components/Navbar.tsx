@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
+import { CompactTablesToggle } from "./CompactTablesToggle";
 import { APP_VERSION, isPrerelease } from "../lib/version";
 
 export type SportGroup = "today" | "football" | "f1" | "cricket" | "ufc";
@@ -90,6 +91,7 @@ export function Navbar({ activeGroup, onGroupChange }: NavbarProps) {
             <span className="live-dot" />
             LIVE
           </div>
+          <CompactTablesToggle />
           <ThemeToggle />
           <div className="nav-menu-wrap" ref={menuRef}>
             <button

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { TeamLogo } from "../TeamLogo";
+import { TeamName } from "../TeamName";
 import { fetchIPLStandings, type IPLStandingRow } from "../../lib/fetch-standings-client";
 import { teamCode, teamColor } from "../../lib/team-meta";
 import { NewsTab } from "../NewsTab";
@@ -103,7 +104,7 @@ export function IPLSection() {
                 </div>
               </div>
             ) : (
-              <table className="standings-table">
+              <table className="standings-table league-table">
                 <thead>
                   <tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>NRR</th><th>Pts</th></tr>
                 </thead>
@@ -116,7 +117,7 @@ export function IPLSection() {
                         <td>
                           <div className="team-cell">
                             <TeamLogo code={code} sport="cricket" leagueCode="ipl" color={teamColor(code)} />
-                            {row.team}
+                            <TeamName code={code} name={row.team} />
                           </div>
                         </td>
                         <td>{row.played}</td>

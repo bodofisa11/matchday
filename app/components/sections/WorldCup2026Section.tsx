@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { TeamLogo } from "../TeamLogo";
+import { TeamName } from "../TeamName";
 import { competitionLogoUrl } from "../../lib/image-utils";
 import {
   fetchWcGroupStandings,
@@ -143,7 +144,7 @@ function GroupCard({ name, rows }: { name: string; rows: WcGroupStandingRow[] })
       <div className="card-header">
         <div className="card-title">Group {name}</div>
       </div>
-      <table className="standings-table">
+      <table className="standings-table league-table">
         <thead>
           <tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>
         </thead>
@@ -164,7 +165,7 @@ function GroupCard({ name, rows }: { name: string; rows: WcGroupStandingRow[] })
                 <td>
                   <div className="team-cell">
                     <TeamLogo code={code} sport="football" leagueCode={LEAGUE} color={teamColor(code)} />
-                    {row.team}
+                    <TeamName code={code} name={row.team} />
                   </div>
                 </td>
                 <td>{row.played}</td><td>{row.won}</td><td>{row.drawn}</td><td>{row.lost}</td>

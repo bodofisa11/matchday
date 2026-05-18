@@ -6,6 +6,7 @@ import {
   type FootballTeamDetailRow,
 } from "../lib/fetch-standings-client";
 import { TeamDetailPanel } from "./TeamDetailPanel";
+import { useCompactTables } from "../lib/use-compact-tables";
 
 interface Props {
   competitionShort: string;
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function TeamsTabPanel({ competitionShort, accent }: Props) {
+  const compact = useCompactTables();
   const [teams, setTeams] = useState<FootballTeamDetailRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<FootballTeamDetailRow | null>(null);
@@ -57,8 +59,10 @@ export function TeamsTabPanel({ competitionShort, accent }: Props) {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-              gap: "0.75rem",
+              gridTemplateColumns: compact
+                ? "repeat(auto-fill, minmax(110px, 1fr))"
+                : "repeat(auto-fill, minmax(180px, 1fr))",
+              gap: compact ? "0.5rem" : "0.75rem",
               marginTop: "0.5rem",
             }}
           >
@@ -97,10 +101,10 @@ export function TeamsTabPanel({ competitionShort, accent }: Props) {
                     {t.tla ?? t.name.slice(0, 3).toUpperCase()}
                   </div>
                 )}
-                <div style={{ fontSize: "0.8rem", fontWeight: 600, lineHeight: 1.2 }}>
-                  {t.short_name ?? t.name}
+                <div style={{ fontSize: compact ? "0.7rem" : "0.8rem", fontWeight: 700, lineHeight: 1.2, fontFamily: compact ? "var(--font-jetbrains-mono)" : undefined, letterSpacing: compact ? "0.05em" : undefined }}>
+                  {compact ? (t.tla ?? t.short_name ?? t.name) : (t.short_name ?? t.name)}
                 </div>
-                {t.tla && (
+                {!compact && t.tla && (
                   <div style={{ fontSize: "0.65rem", color: "var(--text-muted)", letterSpacing: "0.05em" }}>{t.tla}</div>
                 )}
               </button>

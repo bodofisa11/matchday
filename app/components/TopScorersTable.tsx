@@ -6,6 +6,8 @@ import {
   type FootballScorerRow,
 } from "../lib/fetch-standings-client";
 import { countryDisplay } from "../lib/football-terms";
+import { teamCode } from "../lib/team-meta";
+import { TeamName } from "./TeamName";
 
 interface Props {
   competitionShort: string;
@@ -47,7 +49,7 @@ export function TopScorersTable({ competitionShort, accent, limit = 20 }: Props)
         ) : rows.length === 0 ? (
           <div style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>No scorer data yet.</div>
         ) : (
-          <table className="standings-table">
+          <table className="standings-table scorers-table">
             <thead>
               <tr>
                 <th>#</th>
@@ -72,7 +74,7 @@ export function TopScorersTable({ competitionShort, accent, limit = 20 }: Props)
                       )}
                     </div>
                   </td>
-                  <td>{r.team_name}</td>
+                  <td><TeamName code={teamCode(r.team_name)} name={r.team_name} /></td>
                   <td>{r.played_matches}</td>
                   <td>{r.assists ?? "—"}</td>
                   <td className="points-cell">{r.goals}</td>
