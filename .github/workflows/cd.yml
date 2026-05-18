@@ -25,7 +25,7 @@ on:
         default: "dev"
 
 permissions:
-  contents: read
+  contents: write   # needed to create GitHub Releases on tag push
   pages: write
   id-token: write
 
@@ -95,3 +95,69 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # Publish a GitHub Release for every tag push, so the repo's right-hand
+  # "Releases" sidebar always shows the latest deployed version. Notes are
+  # extracted from RELEASE.md (the section matching the tag). Pre-release
+  # tags (-rc, -beta, -alpha) are marked accordingly so they don't claim
+  # the "Latest" badge.
+  release:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract release notes from RELEASE.md
+        id: notes
+        run: |
+          TAG="${{ github.ref_name }}"
+          # Pull the lines between "## <tag> — ..." and the next "## " (or EOF).
+          awk -v tag="$TAG" '
+            $0 ~ "^## " tag " " { capture=1; next }
+            capture && /^## / { exit }
+            capture { print }
+          ' RELEASE.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "Release notes not found in RELEASE.md for tag $TAG — using a stub." >&2
+            echo "Deployment of \`$TAG\`. See [RELEASE.md](RELEASE.md) for details." > release-notes.md
+          fi
+
+      - name: Determine release flags
+        id: flags
+        run: |
+          TAG="${{ github.ref_name }}"
+          case "$TAG" in
+            *-rc.*|*-beta.*|*-alpha.*)
+              echo "prerelease=true"  >> $GITHUB_OUTPUT
+              echo "latest=false"     >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "prerelease=false" >> $GITHUB_OUTPUT
+              echo "latest=true"      >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ github.ref_name }}"
+          PRERELEASE_FLAG=""
+          LATEST_FLAG="--latest"
+          if [ "${{ steps.flags.outputs.prerelease }}" = "true" ]; then
+            PRERELEASE_FLAG="--prerelease"
+            LATEST_FLAG="--latest=false"
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" \
+              --title "$TAG" \
+              --notes-file release-notes.md \
+              $PRERELEASE_FLAG $LATEST_FLAG
+          else
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --notes-file release-notes.md \
+              $PRERELEASE_FLAG $LATEST_FLAG
+          fi
