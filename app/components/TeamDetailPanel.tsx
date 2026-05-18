@@ -16,10 +16,10 @@ import {
 interface Props {
   team: FootballTeamDetailRow;
   accent: string;
-  onClose: () => void;
+  onBack: () => void;
 }
 
-export function TeamDetailModal({ team, accent, onClose }: Props) {
+export function TeamDetailPanel({ team, accent, onBack }: Props) {
   const [players, setPlayers] = useState<FootballSquadPlayerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [prevId, setPrevId] = useState(team.team_api_id);
@@ -41,18 +41,6 @@ export function TeamDetailModal({ team, accent, onClose }: Props) {
     };
   }, [team.team_api_id]);
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [onClose]);
-
   const grouped: Record<string, FootballSquadPlayerRow[]> = {};
   for (const p of players) {
     const g = positionGroup(p.position);
@@ -62,35 +50,38 @@ export function TeamDetailModal({ team, accent, onClose }: Props) {
   const groupKeys = [...POSITION_GROUP_ORDER, "Other"].filter((k) => grouped[k]?.length);
 
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.6)",
-        zIndex: 1000,
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "center",
-        padding: "2rem 1rem",
-        overflowY: "auto",
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background: "var(--bg-card)",
-          borderRadius: "12px",
-          maxWidth: "880px",
-          width: "100%",
-          padding: "1.5rem",
-          border: "1px solid var(--border-subtle)",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
-        }}
-      >
+    <div className="grid-12 fade-in fd2">
+      <div className="card span-12">
+        <button
+          onClick={onBack}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.4rem",
+            background: "transparent",
+            border: "1px solid var(--border-subtle)",
+            color: "var(--text-secondary)",
+            borderRadius: 8,
+            padding: "0.35rem 0.7rem",
+            cursor: "pointer",
+            fontSize: "0.8rem",
+            marginBottom: "1rem",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = accent;
+            e.currentTarget.style.color = accent;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = "var(--border-subtle)";
+            e.currentTarget.style.color = "var(--text-secondary)";
+          }}
+        >
+          ← Back
+        </button>
+
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
           {team.crest && (
-             
+
             <img src={team.crest} alt={team.name} style={{ width: 64, height: 64, objectFit: "contain" }} />
           )}
           <div style={{ flex: 1 }}>
@@ -101,23 +92,6 @@ export function TeamDetailModal({ team, accent, onClose }: Props) {
               {team.venue && <span> · {team.venue}</span>}
             </div>
           </div>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            style={{
-              background: "transparent",
-              border: "1px solid var(--border-subtle)",
-              color: "var(--text-secondary)",
-              borderRadius: 8,
-              width: 32,
-              height: 32,
-              cursor: "pointer",
-              fontSize: "1.1rem",
-              lineHeight: 1,
-            }}
-          >
-            ×
-          </button>
         </div>
 
         {(team.coach_name || team.club_colors) && (

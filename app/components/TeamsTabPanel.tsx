@@ -5,7 +5,7 @@ import {
   fetchTeamsForCompetition,
   type FootballTeamDetailRow,
 } from "../lib/fetch-standings-client";
-import { TeamDetailModal } from "./TeamDetailModal";
+import { TeamDetailPanel } from "./TeamDetailPanel";
 
 interface Props {
   competitionShort: string;
@@ -34,6 +34,10 @@ export function TeamsTabPanel({ competitionShort, accent }: Props) {
       cancelled = true;
     };
   }, [competitionShort]);
+
+  if (selected) {
+    return <TeamDetailPanel team={selected} accent={accent} onBack={() => setSelected(null)} />;
+  }
 
   return (
     <div className="grid-12 fade-in fd2">
@@ -105,9 +109,6 @@ export function TeamsTabPanel({ competitionShort, accent }: Props) {
         )}
       </div>
 
-      {selected && (
-        <TeamDetailModal team={selected} accent={accent} onClose={() => setSelected(null)} />
-      )}
     </div>
   );
 }
