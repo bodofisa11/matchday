@@ -62,6 +62,7 @@ and publishes to GitHub Pages. Tag also acts as the permanent git marker.
 - Cricket (IPL): standings now include T (tied) and NR (no-result) columns alongside P/W/L/NRR/Pts.
 - F1 Constructors: added Code (3-letter FIA short) and Wins columns, with team color stripe and compact mode collapsing the name down to the code. New `app/lib/f1-codes.ts` maps drivers and constructors to standard FIA abbreviations (VER, HAM, RBR, MER…).
 - F1 Drivers: bar shows total wins next to points; compact mode shows the 3-letter driver code instead of last name.
+- CD workflow now creates (or updates) a GitHub Release for every tag push, pulling notes from the matching `## vX.Y.Z` section of `RELEASE.md`. Pre-release tags (`-rc.N`, `-beta.N`, `-alpha.N`) are flagged as prereleases. A prod tag only claims the **Latest** badge when the tagged commit is reachable from `origin/main` — tags pushed from feature branches are still deployed and released but never overwrite the Latest pointer. This populates the repo's right-hand Releases sidebar correctly.
 
 ---
 
