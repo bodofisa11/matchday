@@ -58,6 +58,7 @@ and publishes to GitHub Pages. Tag also acts as the permanent git marker.
      versioned heading on deploy. -->
 
 - _(none yet — next deploy will become v1.2.1 / v1.3.0)_
+- Auto-assign workflow (`.github/workflows/auto-assign.yml`): every opened/reopened PR is auto-assigned to `bodofisa11` (repo owner) so it surfaces in the assigned list. Reviewer-self-request is blocked by GitHub when author equals reviewer, so assignee is used instead.
 
 ---
 
