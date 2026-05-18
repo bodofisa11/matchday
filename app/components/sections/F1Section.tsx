@@ -14,7 +14,9 @@ import {
   type F1SprintResultRow,
 } from "../../lib/fetch-standings-client";
 import { F1_TEAM_COLORS, todayStr } from "../../lib/team-meta";
+import { driverCode, constructorCode } from "../../lib/f1-codes";
 import { NewsTab } from "../NewsTab";
+import { useCompactTables } from "../../lib/use-compact-tables";
 
 type Tab = "news" | "schedule" | "teams" | "drivers";
 type ResultTab = "race" | "sprint";
@@ -74,6 +76,14 @@ const COUNTRY_FLAGS: Record<string, string> = {
 function driverLastName(fullName: string): string {
   const parts = fullName.trim().split(" ");
   return parts[parts.length - 1];
+}
+
+function driverWinsByTeam(drivers: F1DriverRow[]): Record<string, number> {
+  const m: Record<string, number> = {};
+  for (const d of drivers) {
+    m[d.team] = (m[d.team] ?? 0) + Number(d.wins ?? 0);
+  }
+  return m;
 }
 
 function raceDisplayStatus(
@@ -204,6 +214,7 @@ function ResultsTable({
 }
 
 export function F1Section() {
+  const compact = useCompactTables();
   const [activeTab, setActiveTab] = useState<Tab>("drivers");
   const [drivers, setDrivers] = useState<F1DriverRow[]>([]);
   const [constructors, setConstructors] = useState<F1ConstructorRow[]>([]);
@@ -301,13 +312,19 @@ export function F1Section() {
               return (
                 <div className="driver-bar-row" key={d.driver}>
                   <div className="driver-bar-pos">{d.position}</div>
-                  <div className="driver-bar-name">{driverLastName(d.driver)}</div>
+                  <div
+                    className="driver-bar-name"
+                    title={d.driver}
+                    style={{ fontFamily: compact ? "var(--font-jetbrains-mono)" : undefined, fontWeight: 700 }}
+                  >
+                    {compact ? driverCode(d.driver) : driverLastName(d.driver)}
+                  </div>
                   <div className="driver-bar-track">
                     <div
                       className="driver-bar-fill"
                       style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${color}, ${color}88)` }}
                     >
-                      {Number(d.points) > 0 ? Number(d.points) : ""}
+                      {Number(d.points) > 0 ? `${Number(d.points)}${d.wins ? ` · ${d.wins}W` : ""}` : ""}
                     </div>
                   </div>
                   <div className="driver-bar-pts">{Number(d.points)}</div>
@@ -327,26 +344,32 @@ export function F1Section() {
             {loading ? <Loading /> : constructors.length === 0 ? (
               <div style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>No standings data yet.</div>
             ) : (
-              <table className="standings-table">
+              <table className="standings-table f1-constructors">
                 <thead>
-                  <tr><th>#</th><th>Team</th><th>Pts</th></tr>
+                  <tr><th>#</th><th>Team</th><th>Code</th><th>Wins</th><th>Pts</th></tr>
                 </thead>
                 <tbody>
-                  {constructors.map((c) => {
-                    const color = F1_TEAM_COLORS[c.driver] ?? "#888";
-                    return (
-                      <tr key={c.driver}>
-                        <td><span className="pos-num">{c.position}</span></td>
-                        <td>
-                          <div className="team-cell">
-                            <div className="driver-team-line" style={{ background: color }} />
-                            {c.driver}
-                          </div>
-                        </td>
-                        <td className="points-cell">{Number(c.points)}</td>
-                      </tr>
-                    );
-                  })}
+                  {(() => {
+                    const winsMap = driverWinsByTeam(drivers);
+                    return constructors.map((c) => {
+                      const color = F1_TEAM_COLORS[c.driver] ?? "#888";
+                      const code = constructorCode(c.driver);
+                      return (
+                        <tr key={c.driver}>
+                          <td><span className="pos-num">{c.position}</span></td>
+                          <td>
+                            <div className="team-cell">
+                              <div className="driver-team-line" style={{ background: color }} />
+                              {compact ? code : c.driver}
+                            </div>
+                          </td>
+                          <td style={{ fontFamily: "var(--font-jetbrains-mono)", fontWeight: 700 }}>{code}</td>
+                          <td>{winsMap[c.driver] ?? 0}</td>
+                          <td className="points-cell">{Number(c.points)}</td>
+                        </tr>
+                      );
+                    });
+                  })()}
                 </tbody>
               </table>
             )}
