@@ -6,17 +6,11 @@ import { competitionLogoUrl } from "../../lib/image-utils";
 import {
   fetchWcGroupStandings,
   fetchWcFixturesByStage,
-  fetchTeamsForCompetition,
   type FootballFixtureRow,
-  type FootballTeamDetailRow,
   type WcGroupStandingRow,
 } from "../../lib/fetch-standings-client";
 import { teamCode, teamColor, formatFixtureDate, formatGD } from "../../lib/team-meta";
-import { TeamDetailPanel } from "../TeamDetailPanel";
-
-function normalizeName(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]/g, "");
-}
+import { TeamsTabPanel } from "../TeamsTabPanel";
 
 type Tab = "fixtures" | "groups" | "bracket" | "teams";
 
@@ -227,19 +221,8 @@ export function WorldCup2026Section() {
   const [groups, setGroups] = useState<Record<string, WcGroupStandingRow[]>>({});
   const [allFixtures, setAllFixtures] = useState<FootballFixtureRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [teamMap, setTeamMap] = useState<Map<string, FootballTeamDetailRow>>(new Map());
-  const [selectedTeam, setSelectedTeam] = useState<FootballTeamDetailRow | null>(null);
 
   useEffect(() => {
-    fetchTeamsForCompetition("WC2026").then((teams) => {
-      const m = new Map<string, FootballTeamDetailRow>();
-      for (const t of teams) {
-        m.set(normalizeName(t.name), t);
-        if (t.short_name) m.set(normalizeName(t.short_name), t);
-        if (t.tla) m.set(normalizeName(t.tla), t);
-      }
-      setTeamMap(m);
-    });
     Promise.all([
       fetchWcFixturesByStage(null, 250),
       fetchWcGroupStandings(),
@@ -296,13 +279,9 @@ export function WorldCup2026Section() {
         )}
       </div>
 
-      {!selectedTeam && <TabBar active={activeTab} onChange={setActiveTab} />}
+      <TabBar active={activeTab} onChange={setActiveTab} />
 
-      {selectedTeam && (
-        <TeamDetailPanel team={selectedTeam} accent={ACCENT} onBack={() => setSelectedTeam(null)} />
-      )}
-
-      {!selectedTeam && activeTab === "fixtures" && (
+      {activeTab === "fixtures" && (
         <div className="grid-12 fade-in fd2">
           <div className="card span-6">
             <div className="card-header">
@@ -324,7 +303,7 @@ export function WorldCup2026Section() {
         </div>
       )}
 
-      {!selectedTeam && activeTab === "groups" && (
+      {activeTab === "groups" && (
         <div className="fade-in fd2">
           {loading ? (
             <Loading />
@@ -346,7 +325,7 @@ export function WorldCup2026Section() {
         </div>
       )}
 
-      {!selectedTeam && activeTab === "bracket" && (
+      {activeTab === "bracket" && (
         <div className="fade-in fd2">
           {loading ? (
             <Loading />
@@ -365,91 +344,7 @@ export function WorldCup2026Section() {
         </div>
       )}
 
-      {!selectedTeam && activeTab === "teams" && (
-        <div className="fade-in fd2">
-          {loading ? (
-            <Loading />
-          ) : teamsByGroup.length === 0 ? (
-            <Empty icon="🌍" label="Teams will appear after the draw is loaded" />
-          ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-                gap: "1rem",
-              }}
-            >
-              {teamsByGroup.map(([name, rows]) => (
-                <div key={name} className="card">
-                  <div className="card-header">
-                    <div className="card-title">Group {name}</div>
-                  </div>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                      gap: "0.5rem",
-                      paddingTop: "0.5rem",
-                    }}
-                  >
-                    {rows.map((r) => {
-                      const team = teamMap.get(normalizeName(r.team));
-                      const clickable = !!team;
-                      return (
-                        <button
-                          key={r.team}
-                          onClick={() => team && setSelectedTeam(team)}
-                          disabled={!clickable}
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            gap: "0.4rem",
-                            padding: "0.75rem 0.5rem",
-                            background: "var(--bg-elevated, rgba(255,255,255,0.02))",
-                            border: "1px solid var(--border-subtle)",
-                            borderRadius: 8,
-                            color: "var(--text-primary)",
-                            cursor: clickable ? "pointer" : "default",
-                            opacity: clickable ? 1 : 0.6,
-                            transition: "all 0.15s",
-                            textAlign: "center",
-                          }}
-                          onMouseEnter={(e) => {
-                            if (clickable) {
-                              e.currentTarget.style.borderColor = ACCENT;
-                              e.currentTarget.style.transform = "translateY(-1px)";
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = "var(--border-subtle)";
-                            e.currentTarget.style.transform = "translateY(0)";
-                          }}
-                        >
-                          {team?.crest ? (
-                             
-                            <img src={team.crest} alt={r.team} style={{ width: 40, height: 40, objectFit: "contain" }} />
-                          ) : (
-                            <div style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <TeamLogo code={teamCode(r.team)} sport="football" leagueCode={LEAGUE} color={teamColor(teamCode(r.team))} size={36} />
-                            </div>
-                          )}
-                          <div style={{ fontSize: "0.72rem", fontWeight: 600, lineHeight: 1.15 }}>
-                            {team?.short_name ?? r.team}
-                          </div>
-                          {team?.tla && (
-                            <div style={{ fontSize: "0.6rem", color: "var(--text-muted)", letterSpacing: "0.05em" }}>{team.tla}</div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {activeTab === "teams" && <TeamsTabPanel competitionShort="WC2026" accent={ACCENT} />}
 
     </>
   );

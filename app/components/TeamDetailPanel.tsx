@@ -115,7 +115,7 @@ export function TeamDetailPanel({ team, accent, onBack }: Props) {
         {loading ? (
           <div style={{ color: "var(--text-muted)", padding: "1rem 0", fontSize: "0.85rem" }}>Loading squad…</div>
         ) : players.length === 0 ? (
-          <div style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>No squad data available.</div>
+          <div style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>Coming soon.</div>
         ) : (
           groupKeys.map((g) => (
             <div key={g} style={{ marginBottom: "1rem" }}>
