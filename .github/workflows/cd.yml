@@ -108,6 +108,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Need full history to test whether the tagged commit is reachable
+          # from main (decides the "Latest" flag).
+          fetch-depth: 0
 
       - name: Extract release notes from RELEASE.md
         id: notes
@@ -128,16 +132,31 @@ jobs:
         id: flags
         run: |
           TAG="${{ github.ref_name }}"
+
+          # Pre-release tags (-rc/-beta/-alpha) never claim "Latest" regardless of branch.
           case "$TAG" in
             *-rc.*|*-beta.*|*-alpha.*)
               echo "prerelease=true"  >> $GITHUB_OUTPUT
               echo "latest=false"     >> $GITHUB_OUTPUT
+              echo "Pre-release tag $TAG — not latest."
+              exit 0
               ;;
             *)
               echo "prerelease=false" >> $GITHUB_OUTPUT
-              echo "latest=true"      >> $GITHUB_OUTPUT
               ;;
           esac
+
+          # Only mark a prod tag as "Latest" if the tagged commit is reachable
+          # from origin/main. Tags pushed from feature branches are still
+          # deployed + released, but don't take the Latest badge.
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          if git merge-base --is-ancestor "${{ github.sha }}" origin/main; then
+            echo "latest=true"  >> $GITHUB_OUTPUT
+            echo "Tag $TAG is on main — marking Latest."
+          else
+            echo "latest=false" >> $GITHUB_OUTPUT
+            echo "Tag $TAG is NOT on main — skipping Latest."
+          fi
 
       - name: Create or update GitHub Release
         env:
@@ -145,9 +164,12 @@ jobs:
         run: |
           TAG="${{ github.ref_name }}"
           PRERELEASE_FLAG=""
-          LATEST_FLAG="--latest"
           if [ "${{ steps.flags.outputs.prerelease }}" = "true" ]; then
             PRERELEASE_FLAG="--prerelease"
+          fi
+          if [ "${{ steps.flags.outputs.latest }}" = "true" ]; then
+            LATEST_FLAG="--latest"
+          else
             LATEST_FLAG="--latest=false"
           fi
           if gh release view "$TAG" >/dev/null 2>&1; then
