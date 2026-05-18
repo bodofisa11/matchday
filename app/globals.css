@@ -662,11 +662,22 @@ table { table-layout: auto; width: 100%; }
   .stat-row { grid-template-columns: repeat(2, 1fr); }
   .driver-bar-name { width: clamp(50px, 22vw, 70px); }
   .driver-bar-pts { width: 28px; font-size: 0.72rem; }
-  /* League standings on phones: hide W/D/L (cols 4-6) — keep #, Team, P, GD, Pts. */
-  .league-table th:nth-child(n+4):nth-child(-n+6),
-  .league-table td:nth-child(n+4):nth-child(-n+6) { display: none; }
-  .league-table th, .league-table td { padding: 0.4rem 0.1rem; font-size: 0.7rem; }
-  .league-table .team-cell { gap: 0.25rem; font-size: 0.72rem; }
+  /* Football standings on phones: hide W/D/L/GF/GA (cols 4-8) — keep
+     #, Team, P, GD, Form, Pts. 11-col layout. */
+  .football-standings th:nth-child(n+4):nth-child(-n+8),
+  .football-standings td:nth-child(n+4):nth-child(-n+8) { display: none; }
+  .football-standings th, .football-standings td { padding: 0.4rem 0.1rem; font-size: 0.7rem; }
+  .football-standings .team-cell { gap: 0.25rem; font-size: 0.72rem; }
+  /* Cricket standings on phones: hide W/L/T/NR (cols 4-7) — keep
+     #, Team, P, NRR, Pts. 9-col layout. */
+  .cricket-standings th:nth-child(n+4):nth-child(-n+7),
+  .cricket-standings td:nth-child(n+4):nth-child(-n+7) { display: none; }
+  .cricket-standings th, .cricket-standings td { padding: 0.4rem 0.1rem; font-size: 0.7rem; }
+  .cricket-standings .team-cell { gap: 0.25rem; font-size: 0.72rem; }
+  /* F1 constructors on phones: hide Wins (col 4) — keep
+     #, Team, Code, Pts. 5-col layout. */
+  .f1-constructors th:nth-child(4),
+  .f1-constructors td:nth-child(4) { display: none; }
   /* Top scorers on phones: hide Team col (3) — keep #, Player, MP, A, G. */
   .scorers-table th:nth-child(3),
   .scorers-table td:nth-child(3) { display: none; }
@@ -688,10 +699,35 @@ table { table-layout: auto; width: 100%; }
 .compact-tables .standings-table td { padding: 0.35rem 0.15rem; }
 .compact-tables .standings-table td { font-size: 0.72rem; }
 .compact-tables .standings-table .team-cell { gap: 0.3rem; font-weight: 700; font-family: var(--font-jetbrains-mono, monospace); }
-.compact-tables .league-table th:nth-child(n+4):nth-child(-n+6),
-.compact-tables .league-table td:nth-child(n+4):nth-child(-n+6) { display: none; }
+.compact-tables .football-standings th:nth-child(n+4):nth-child(-n+8),
+.compact-tables .football-standings td:nth-child(n+4):nth-child(-n+8) { display: none; }
+.compact-tables .cricket-standings th:nth-child(n+4):nth-child(-n+7),
+.compact-tables .cricket-standings td:nth-child(n+4):nth-child(-n+7) { display: none; }
 .compact-tables .scorers-table th:nth-child(3),
 .compact-tables .scorers-table td:nth-child(3) { display: table-cell; font-family: var(--font-jetbrains-mono, monospace); font-weight: 700; }
+
+/* FORM BAR — colored recent-results pills used in football standings.
+   Newest result on the right (football-data.org convention). */
+.form-bar { display: inline-flex; gap: 2px; align-items: center; justify-content: center; }
+.form-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  font-size: 0.55rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: var(--font-jetbrains-mono, monospace);
+}
+.form-w { background: #22c55e; }
+.form-d { background: #eab308; color: #111; }
+.form-l { background: #ef4444; }
+.form-bar-compact .form-dot { width: 7px; height: 7px; border-radius: 50%; }
+@media (max-width: 480px) {
+  .form-dot { width: 11px; height: 11px; font-size: 0.5rem; border-radius: 2px; }
+}
 
 /* FOOTER */
 .sp-footer {

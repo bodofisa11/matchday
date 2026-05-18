@@ -104,9 +104,9 @@ export function IPLSection() {
                 </div>
               </div>
             ) : (
-              <table className="standings-table league-table">
+              <table className="standings-table cricket-standings">
                 <thead>
-                  <tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>NRR</th><th>Pts</th></tr>
+                  <tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>L</th><th>T</th><th>NR</th><th>NRR</th><th>Pts</th></tr>
                 </thead>
                 <tbody>
                   {standings.map((row) => {
@@ -123,6 +123,8 @@ export function IPLSection() {
                         <td>{row.played}</td>
                         <td>{row.won}</td>
                         <td>{row.lost}</td>
+                        <td>{row.tied}</td>
+                        <td>{row.no_result}</td>
                         <td>{formatNRR(row.net_run_rate)}</td>
                         <td className="points-cell">{row.points}</td>
                       </tr>

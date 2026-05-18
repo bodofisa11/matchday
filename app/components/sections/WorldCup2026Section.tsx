@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { TeamLogo } from "../TeamLogo";
 import { TeamName } from "../TeamName";
+import { LeagueStandingsTable } from "../LeagueStandingsTable";
 import { competitionLogoUrl } from "../../lib/image-utils";
 import {
   fetchWcGroupStandings,
@@ -144,38 +145,7 @@ function GroupCard({ name, rows }: { name: string; rows: WcGroupStandingRow[] })
       <div className="card-header">
         <div className="card-title">Group {name}</div>
       </div>
-      <table className="standings-table league-table">
-        <thead>
-          <tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => {
-            const code = teamCode(row.team);
-            const qualified = row.position <= 2;
-            return (
-              <tr key={row.team}>
-                <td>
-                  <span
-                    className="pos-num"
-                    style={qualified ? { background: `${ACCENT}33`, color: ACCENT } : undefined}
-                  >
-                    {row.position}
-                  </span>
-                </td>
-                <td>
-                  <div className="team-cell">
-                    <TeamLogo code={code} sport="football" leagueCode={LEAGUE} color={teamColor(code)} />
-                    <TeamName code={code} name={row.team} />
-                  </div>
-                </td>
-                <td>{row.played}</td><td>{row.won}</td><td>{row.drawn}</td><td>{row.lost}</td>
-                <td>{formatGD(row.goal_difference)}</td>
-                <td className="points-cell">{row.points}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <LeagueStandingsTable rows={rows} leagueCode={LEAGUE} highlightTopN={2} accent={ACCENT} />
     </div>
   );
 }

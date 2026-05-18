@@ -1,16 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { TeamLogo } from "../TeamLogo";
-import { TeamName } from "../TeamName";
 import { competitionLogoUrl } from "../../lib/image-utils";
 import {
   fetchFootballStandings,
   type FootballStandingRow,
 } from "../../lib/fetch-standings-client";
-import { teamCode, teamColor, formatGD } from "../../lib/team-meta";
 import { FixturesTabPanel } from "../FixturesTabPanel";
 import { TeamsTabPanel } from "../TeamsTabPanel";
+import { LeagueStandingsTable } from "../LeagueStandingsTable";
 
 type Tab = "upcoming" | "results" | "standings" | "stats" | "teams";
 
@@ -109,30 +107,7 @@ export function EuropaLeagueSection() {
             {loading ? <Loading /> : standings.length === 0 ? (
               <div style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>No standings data yet.</div>
             ) : (
-              <table className="standings-table league-table">
-                <thead>
-                  <tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th></tr>
-                </thead>
-                <tbody>
-                  {standings.map((row) => {
-                    const code = teamCode(row.team);
-                    return (
-                      <tr key={row.position}>
-                        <td><span className="pos-num">{row.position}</span></td>
-                        <td>
-                          <div className="team-cell">
-                            <TeamLogo code={code} sport="football" leagueCode={LEAGUE} color={teamColor(code)} />
-                            <TeamName code={code} name={row.team} />
-                          </div>
-                        </td>
-                        <td>{row.played}</td><td>{row.won}</td><td>{row.drawn}</td><td>{row.lost}</td>
-                        <td>{formatGD(row.goal_difference)}</td>
-                        <td className="points-cell">{row.points}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <LeagueStandingsTable rows={standings} leagueCode={LEAGUE} />
             )}
           </div>
         </div>

@@ -57,7 +57,11 @@ and publishes to GitHub Pages. Tag also acts as the permanent git marker.
 <!-- Add bullets here for every PR merged to main. Promote this block to a
      versioned heading on deploy. -->
 
-- _(none yet — next deploy will become v1.2.1 / v1.3.0)_
+- Football standings now show full stats: P / W / D / L / GF / GA / GD / Form / Pts. Recent form rendered as colored W/D/L pills (newest on the right). Mobile keeps #, Team, P, GD, Form, Pts; compact mode collapses form pills to dots and hides W/D/L/GF/GA at all widths.
+- Extracted shared `<LeagueStandingsTable />` so every football competition (PL, La Liga, Serie A, Bundesliga, Ligue 1, ISL, UEL, WC2026 groups) renders identical column layouts. WC2026 groups still highlight the top 2 qualifiers.
+- Cricket (IPL): standings now include T (tied) and NR (no-result) columns alongside P/W/L/NRR/Pts.
+- F1 Constructors: added Code (3-letter FIA short) and Wins columns, with team color stripe and compact mode collapsing the name down to the code. New `app/lib/f1-codes.ts` maps drivers and constructors to standard FIA abbreviations (VER, HAM, RBR, MER…).
+- F1 Drivers: bar shows total wins next to points; compact mode shows the 3-letter driver code instead of last name.
 
 ---
 
