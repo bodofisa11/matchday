@@ -11,10 +11,11 @@ import { teamCode, teamColor, formatGD } from "../../lib/team-meta";
 import { FixturesTabPanel } from "../FixturesTabPanel";
 import { TeamsTabPanel } from "../TeamsTabPanel";
 
-type Tab = "fixtures" | "standings" | "stats" | "teams";
+type Tab = "upcoming" | "results" | "standings" | "stats" | "teams";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "fixtures", label: "Fixtures" },
+  { id: "upcoming", label: "Upcoming" },
+  { id: "results", label: "Results" },
   { id: "standings", label: "Standings" },
   { id: "stats", label: "Stats" },
   { id: "teams", label: "Teams" },
@@ -63,7 +64,7 @@ function Loading() {
 }
 
 export function EuropaLeagueSection() {
-  const [activeTab, setActiveTab] = useState<Tab>("fixtures");
+  const [activeTab, setActiveTab] = useState<Tab>("upcoming");
   const [standings, setStandings] = useState<FootballStandingRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -90,8 +91,12 @@ export function EuropaLeagueSection() {
 
       <TabBar active={activeTab} onChange={setActiveTab} />
 
-      {activeTab === "fixtures" && (
-        <FixturesTabPanel competitionShort="UEL" leagueCode={LEAGUE} accent={ACCENT} />
+      {activeTab === "upcoming" && (
+        <FixturesTabPanel competitionShort="UEL" leagueCode={LEAGUE} accent={ACCENT} mode="upcoming" />
+      )}
+
+      {activeTab === "results" && (
+        <FixturesTabPanel competitionShort="UEL" leagueCode={LEAGUE} accent={ACCENT} mode="results" />
       )}
 
       {activeTab === "standings" && (
