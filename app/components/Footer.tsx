@@ -4,11 +4,19 @@ import { APP_VERSION } from "../lib/version";
 
 const CURRENT_YEAR = new Date().getFullYear();
 
-const SPORT_LINKS = [
-  { label: "World Cup 2026", href: "#" },
-  { label: "Football", href: "#" },
+const EVENT_LINKS = [
+  { label: "Premier League", href: "#" },
+  { label: "La Liga", href: "#" },
+  { label: "Serie A", href: "#" },
+  { label: "Bundesliga", href: "#" },
+  { label: "Ligue 1", href: "#" },
+  { label: "UEFA Champions League", href: "#" },
+  { label: "UEFA Europa League", href: "#" },
+  { label: "Indian Super League", href: "#" },
+  { label: "FIFA World Cup 2026", href: "#" },
   { label: "Formula 1", href: "#" },
-  { label: "Cricket", href: "#" },
+  { label: "IPL", href: "#" },
+  { label: "UFC", href: "#" },
 ];
 
 const RESOURCE_LINKS = [
@@ -58,9 +66,9 @@ export function Footer() {
           </div>
 
           <div className="sp-footer-col">
-            <h4>Sports</h4>
+            <h4>Events</h4>
             <ul>
-              {SPORT_LINKS.map((l) => (
+              {EVENT_LINKS.map((l) => (
                 <li key={l.label}>
                   <a href={l.href}>{l.label}</a>
                 </li>
