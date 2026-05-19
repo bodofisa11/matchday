@@ -13,7 +13,7 @@ Deploys are tag-driven, not push-driven. Pushes to `main` do not deploy. To depl
 
 On deploy, rename `## Upcoming` in `RELEASE.md` to `## vX.Y.Z — YYYY-MM-DD` and add a fresh empty `## Upcoming` header at the top. The tag name is embedded into the app at build time via `NEXT_PUBLIC_APP_VERSION` (see [`app/lib/version.ts`](app/lib/version.ts)) and displayed in the Navbar chip and footer.
 
-See `RELEASE.md` for the full versioning scheme (semver + pre-release naming).
+See [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PROCESS.md) for the full versioning scheme (semver + pre-release naming), workflow rules, and deploy commands. `RELEASE.md` is the user-facing changelog.
 
 ## Commands
 
