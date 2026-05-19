@@ -253,6 +253,10 @@ html.light .navbar { background: rgba(241, 245, 249, 0.92); }
   position: relative;
   z-index: 1;
   width: 100%;
+  /* Push footer below the fold even when content is short. 100vh guarantees
+     the viewport-height worth of main + navbar/compbar sits above footer,
+     so footer is never visible without scroll. */
+  min-height: 100vh;
 }
 
 @keyframes fadeUp {
