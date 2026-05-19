@@ -65,17 +65,6 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="sp-footer-col sp-footer-col-events">
-            <h4>Events</h4>
-            <ul className="sp-footer-events-list">
-              {EVENT_LINKS.map((l) => (
-                <li key={l.label}>
-                  <a href={l.href}>{l.label}</a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
           <div className="sp-footer-col">
             <h4>Resources</h4>
             <ul>
@@ -98,6 +87,17 @@ export function Footer() {
             <h4>About</h4>
             <ul>
               {ABOUT_LINKS.map((l) => (
+                <li key={l.label}>
+                  <a href={l.href}>{l.label}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="sp-footer-col sp-footer-col-events">
+            <h4>Events</h4>
+            <ul className="sp-footer-events-list">
+              {EVENT_LINKS.map((l) => (
                 <li key={l.label}>
                   <a href={l.href}>{l.label}</a>
                 </li>

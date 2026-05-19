@@ -754,20 +754,20 @@ table { table-layout: auto; width: 100%; }
 }
 .sp-footer-grid {
   display: grid;
-  grid-template-columns: 1.6fr 2fr 1fr 1fr;
+  grid-template-columns: 1.6fr 1fr 1fr 2fr;
   gap: clamp(1.5rem, 3vw, 2.5rem);
   padding-bottom: clamp(1.25rem, 2.5vw, 2rem);
 }
 .sp-footer-col ul.sp-footer-events-list {
   display: block;
   column-count: 2;
-  column-gap: clamp(1rem, 2vw, 1.5rem);
-  max-height: 160px;
+  column-gap: clamp(0.75rem, 1.5vw, 1.25rem);
+  column-fill: balance;
   gap: 0;
 }
 .sp-footer-col ul.sp-footer-events-list li {
   break-inside: avoid;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.3rem;
 }
 .sp-footer-col ul.sp-footer-events-list li:last-child { margin-bottom: 0; }
 .sp-footer-brand { display: flex; flex-direction: column; gap: 0.85rem; }
