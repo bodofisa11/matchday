@@ -5,7 +5,7 @@ import { APP_VERSION } from "../lib/version";
 const CURRENT_YEAR = new Date().getFullYear();
 
 const SPORT_LINKS = [
-  { label: "Today", href: "#" },
+  { label: "World Cup 2026", href: "#" },
   { label: "Football", href: "#" },
   { label: "Formula 1", href: "#" },
   { label: "Cricket", href: "#" },
