@@ -57,6 +57,7 @@ and publishes to GitHub Pages. Tag also acts as the permanent git marker.
 <!-- Add bullets here for every PR merged to main. Promote this block to a
      versioned heading on deploy. -->
 
+- Modern multi-column footer: brand block + Sports / Resources / About link columns, GitHub social button, bottom bar with auto-updating copyright year and version pill. Responsive 4-col → 2-col (≤900px) → 1-col (≤520px).
 - Football standings now show full stats: P / W / D / L / GF / GA / GD / Form / Pts. Recent form rendered as colored W/D/L pills (newest on the right). Mobile keeps #, Team, P, GD, Form, Pts; compact mode collapses form pills to dots and hides W/D/L/GF/GA at all widths.
 - Extracted shared `<LeagueStandingsTable />` so every football competition (PL, La Liga, Serie A, Bundesliga, Ligue 1, ISL, UEL, WC2026 groups) renders identical column layouts. WC2026 groups still highlight the top 2 qualifiers.
 - Cricket (IPL): standings now include T (tied) and NR (no-result) columns alongside P/W/L/NRR/Pts.
