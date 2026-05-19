@@ -758,17 +758,18 @@ table { table-layout: auto; width: 100%; }
   gap: clamp(1.5rem, 3vw, 2.5rem);
   padding-bottom: clamp(1.25rem, 2.5vw, 2rem);
 }
-.sp-footer-events-list {
+.sp-footer-col ul.sp-footer-events-list {
   display: block;
   column-count: 2;
   column-gap: clamp(1rem, 2vw, 1.5rem);
   max-height: 160px;
+  gap: 0;
 }
-.sp-footer-events-list li {
+.sp-footer-col ul.sp-footer-events-list li {
   break-inside: avoid;
   margin-bottom: 0.45rem;
 }
-.sp-footer-events-list li:last-child { margin-bottom: 0; }
+.sp-footer-col ul.sp-footer-events-list li:last-child { margin-bottom: 0; }
 .sp-footer-brand { display: flex; flex-direction: column; gap: 0.85rem; }
 .sp-footer-logo {
   display: flex;
