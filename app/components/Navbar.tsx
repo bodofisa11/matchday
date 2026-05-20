@@ -5,7 +5,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { CompactTablesToggle } from "./CompactTablesToggle";
 import { APP_VERSION, isPrerelease } from "../lib/version";
 
-export type SportGroup = "today" | "football" | "f1" | "cricket" | "ufc";
+export type SportGroup = "today" | "football" | "f1" | "cricket" | "ufc" | "predict";
 
 const GROUP_LABELS: Record<SportGroup, string> = {
   today: "Today",
@@ -13,9 +13,10 @@ const GROUP_LABELS: Record<SportGroup, string> = {
   f1: "Formula 1",
   cricket: "Cricket",
   ufc: "UFC",
+  predict: "Predict",
 };
 
-const GROUPS: SportGroup[] = ["today", "football", "f1", "cricket", "ufc"];
+const GROUPS: SportGroup[] = ["today", "football", "f1", "cricket", "ufc", "predict"];
 
 interface NavbarProps {
   activeGroup: SportGroup;

@@ -877,3 +877,42 @@ table { table-layout: auto; width: 100%; }
   .sp-footer-events-list { column-count: 2; max-height: none; }
   .sp-footer-bottom { justify-content: center; text-align: center; }
 }
+
+/* WC2026 PREDICT — mobile responsiveness. Inline-style components add these
+   classes for media-query overrides without abandoning the inline idiom. */
+.predict-tabbar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.predict-grid-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+.predict-grid-teams {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.5rem;
+}
+@media (max-width: 640px) {
+  .predict-tabbar {
+    gap: 0.35rem;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    padding: 0 0.5rem 0.25rem;
+  }
+  .predict-tabbar::-webkit-scrollbar { display: none; }
+  .predict-tabbar > button { flex-shrink: 0; }
+  .predict-grid-groups { grid-template-columns: 1fr; gap: 0.75rem; }
+  .predict-grid-teams { grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
+}
+@media (max-width: 480px) {
+  .predict-grid-teams { grid-template-columns: 1fr; }
+}
+
