@@ -138,6 +138,9 @@ export function PredictionsView() {
   }
 
   useEffect(() => {
+    // Initial load fetches remote state + hydrates form. setState here is
+    // intentional — this is the subscription-to-external-system pattern.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refresh();
   }, []);
 
