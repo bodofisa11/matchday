@@ -16,6 +16,7 @@ import { EuropaLeagueSection } from "./components/sections/EuropaLeagueSection";
 import { WorldCup2026Section } from "./components/sections/WorldCup2026Section";
 import { F1Section } from "./components/sections/F1Section";
 import { IPLSection } from "./components/sections/IPLSection";
+import { PredictSection } from "./components/sections/PredictSection";
 import { APP_VERSION } from "./lib/version";
 
 const GROUP_DEFAULT: Partial<Record<SportGroup, CompId>> = {
@@ -56,6 +57,7 @@ export default function Home() {
         {activeComp === "wc2026" && activeGroup === "football" && <WorldCup2026Section />}
         {activeComp === "f1main" && activeGroup === "f1" && <F1Section />}
         {activeComp === "ipl" && activeGroup === "cricket" && <IPLSection />}
+        {activeGroup === "predict" && <PredictSection />}
       </main>
       <footer className="sp-footer">
         <span>MatchDay © 2026</span>
