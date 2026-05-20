@@ -3,52 +3,8 @@
 This file tracks every deployment of MatchDay. The version displayed in the app
 header and footer matches the latest tag deployed to GitHub Pages.
 
-## Versioning
-
-We use [Semantic Versioning](https://semver.org/) — `MAJOR.MINOR.PATCH`:
-
-- **MAJOR** (`v2.0.0`) — breaking UX/data changes, new core architecture, removed competitions/sports.
-- **MINOR** (`v1.1.0`) — new feature, new competition, new tab/section, additive change.
-- **PATCH** (`v1.0.1`) — bug fix, copy tweak, styling fix, dependency bump.
-
-Pre-release builds (test deploys from feature branches before prod):
-
-- `v1.1.0-rc.1`, `v1.1.0-rc.2` — release candidates (final stabilization).
-- `v1.1.0-beta.1` — broader test build (multiple features bundled, may be unstable).
-- `v1.1.0-alpha.1` — early test build (work-in-progress).
-
-Pre-release tags deploy to the same GitHub Pages URL and overwrite prod
-temporarily. Re-tag with the prod version (`v1.1.0`) when ready to lock.
-
-## Workflow rules
-
-1. **No auto-deploy on merge.** Pushes to `main` do NOT deploy. Deploys are
-   triggered exclusively by pushing a `v*` tag (or via the Actions tab).
-2. **Every PR to `main` must update this file** under `## Upcoming`. Enforced by
-   the `release-notes-check` workflow. Bypass with the `no-release-note` label
-   only for pure tooling/docs PRs.
-3. **Bundle features before deploying.** Merge several PRs to `main`, each
-   adding bullets under `## Upcoming`, then tag once when the batch is ready.
-4. **On deploy:** rename `## Upcoming` to `## vX.Y.Z — YYYY-MM-DD`, then add a
-   fresh empty `## Upcoming` header at the top.
-
-## How to deploy
-
-```bash
-# Prod deploy
-git checkout main
-git pull
-git tag v1.1.0
-git push origin v1.1.0
-
-# Test deploy from a feature branch
-git checkout feat/my-thing
-git tag v1.1.0-rc.1
-git push origin v1.1.0-rc.1
-```
-
-The workflow reads the tag name, embeds it as `NEXT_PUBLIC_APP_VERSION`, builds,
-and publishes to GitHub Pages. Tag also acts as the permanent git marker.
+For versioning rules, workflow policy, and deploy commands see
+[`docs/RELEASE-PROCESS.md`](docs/RELEASE-PROCESS.md).
 
 ---
 
@@ -58,6 +14,8 @@ and publishes to GitHub Pages. Tag also acts as the permanent git marker.
      versioned heading on deploy. -->
 
 - New top-level **Predict** tab in the Navbar (beside UFC). Public, no-login World Cup 2026 prediction game with four sub-sections: **Feed** (post field placeholder), **Predictions** (Phase 1 — partial picks allowed for group standings 1–4 in any of the 12 groups, up to 4 semifinalists, up to 2 top scorers; Phase 2 — knockout bracket through champion, opens after groups finish), **Leaderboard** (sorted by points, ties broken by earliest submission), and **Users** (browse everyone's picks with search). Identity stored in `localStorage` so picks persist across reloads. Iteration ships frontend + localStorage-backed dummy data; Supabase wiring follows in a separate PR.
+- Split release docs: moved versioning, workflow rules, and deploy commands out of `RELEASE.md` into `docs/RELEASE-PROCESS.md`. `RELEASE.md` is now changelog-only. Removed deprecated `CHANGELOG.md` and the stale `docs/RELEASES.md` policy doc (superseded by tag-driven flow).
+- Modern multi-column footer: brand block + Sports / Resources / About link columns, GitHub social button, bottom bar with auto-updating copyright year and version pill. Responsive 4-col → 2-col (≤900px) → 1-col (≤520px).
 - Football standings now show full stats: P / W / D / L / GF / GA / GD / Form / Pts. Recent form rendered as colored W/D/L pills (newest on the right). Mobile keeps #, Team, P, GD, Form, Pts; compact mode collapses form pills to dots and hides W/D/L/GF/GA at all widths.
 - Extracted shared `<LeagueStandingsTable />` so every football competition (PL, La Liga, Serie A, Bundesliga, Ligue 1, ISL, UEL, WC2026 groups) renders identical column layouts. WC2026 groups still highlight the top 2 qualifiers.
 - Cricket (IPL): standings now include T (tied) and NR (no-result) columns alongside P/W/L/NRR/Pts.
