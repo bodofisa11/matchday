@@ -2,7 +2,7 @@
 
 import { TeamLogo } from "../../TeamLogo";
 import { teamColor } from "../../../lib/team-meta";
-import { teamNameByCode } from "../../../lib/wc2026-groups";
+import { useWc2026Teams } from "../../../lib/use-wc2026-teams";
 import { KO_BRACKET, KO_ROUND_LABEL, type KoMatchSlot } from "../../../lib/wc2026-ko-bracket";
 import type { KoPicks } from "../../../lib/predictions-types";
 
@@ -41,6 +41,7 @@ function MatchCard({
   onPick: (matchId: string, winner: string) => void;
   readOnly?: boolean;
 }) {
+  const { byCode } = useWc2026Teams();
   const top = resolveTeam(match.top, seeds, picks);
   const bot = resolveTeam(match.bot, seeds, picks);
   const winner = picks[match.id];
@@ -71,7 +72,7 @@ function MatchCard({
         {code ? (
           <>
             <TeamLogo code={code} sport="football" leagueCode="wc2026" color={teamColor(code)} size={16} />
-            <span style={{ flex: 1 }}>{teamNameByCode(code)}</span>
+            <span style={{ flex: 1 }}>{byCode(code)}</span>
           </>
         ) : (
           <span style={{ fontStyle: "italic" }}>{slotLabel}</span>

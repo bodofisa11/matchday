@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { TeamLogo } from "../../TeamLogo";
 import { teamColor } from "../../../lib/team-meta";
-import { teamNameByCode, GROUP_LETTERS } from "../../../lib/wc2026-groups";
+import { GROUP_LETTERS } from "../../../lib/wc2026-groups";
+import { useWc2026Teams } from "../../../lib/use-wc2026-teams";
 import type { Prediction } from "../../../lib/predictions-types";
 import type { ScoreBreakdown } from "../../../lib/predictions-scoring";
 
@@ -18,6 +19,7 @@ interface Props {
 
 export function PredictionCard({ rank, prediction: p, score, isMine }: Props) {
   const [open, setOpen] = useState(false);
+  const { byCode } = useWc2026Teams();
 
   return (
     <div
@@ -71,7 +73,7 @@ export function PredictionCard({ rank, prediction: p, score, isMine }: Props) {
             )}
           </div>
           <div style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>
-            Champion: {p.champion_pick ? teamNameByCode(p.champion_pick) : p.champion ? teamNameByCode(p.champion) : "—"}
+            Champion: {p.champion_pick ? byCode(p.champion_pick) : p.champion ? byCode(p.champion) : "—"}
             {"  ·  "}Scorers: {p.top_scorers.filter(Boolean).join(", ") || "—"}
           </div>
         </div>
@@ -123,7 +125,7 @@ export function PredictionCard({ rank, prediction: p, score, isMine }: Props) {
                 fontSize: "0.74rem",
               }}>
                 <TeamLogo code={code} sport="football" leagueCode="wc2026" color={teamColor(code)} size={14} />
-                {teamNameByCode(code)}
+                {byCode(code)}
               </div>
             ))}
           </div>
