@@ -13,13 +13,11 @@ import type {
   KoPicks,
   LocalIdentity,
 } from "./predictions-types";
-import { generateDummyPredictions } from "./dummy-predictions";
 
 // Bump the v2 suffix when storage shape changes — old keys are abandoned so
 // stale tuples don't crash the picker.
 const LS_DUMMY = "wc2026.predict.dummy.v3";
 const LS_ME = "wc2026.predict.me.v3";
-const LS_SEEDED = "wc2026.predict.seeded.v3";
 
 function isBrowser(): boolean {
   return typeof window !== "undefined" && typeof localStorage !== "undefined";
@@ -34,12 +32,6 @@ function uuid(): string {
 
 function readAll(): Prediction[] {
   if (!isBrowser()) return [];
-  // Seed dummy leaderboard on first run
-  if (!localStorage.getItem(LS_SEEDED)) {
-    const seeded = generateDummyPredictions(20);
-    localStorage.setItem(LS_DUMMY, JSON.stringify(seeded));
-    localStorage.setItem(LS_SEEDED, "1");
-  }
   const raw = localStorage.getItem(LS_DUMMY);
   if (!raw) return [];
   try {
@@ -149,5 +141,4 @@ export function _resetLocalPredictions(): void {
   if (!isBrowser()) return;
   localStorage.removeItem(LS_DUMMY);
   localStorage.removeItem(LS_ME);
-  localStorage.removeItem(LS_SEEDED);
 }
