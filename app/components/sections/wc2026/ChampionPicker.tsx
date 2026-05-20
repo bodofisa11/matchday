@@ -2,7 +2,7 @@
 
 import { TeamLogo } from "../../TeamLogo";
 import { teamColor } from "../../../lib/team-meta";
-import { WC2026_TEAMS } from "../../../lib/wc2026-groups";
+import { useWc2026Teams } from "../../../lib/use-wc2026-teams";
 
 const ACCENT = "#0066cc";
 
@@ -13,13 +13,14 @@ interface Props {
 }
 
 export function ChampionPicker({ value, onChange, readOnly }: Props) {
-  const sorted = [...WC2026_TEAMS].sort((a, b) => a.name.localeCompare(b.name));
+  const { teams } = useWc2026Teams();
+  const sorted = [...teams].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div>
       <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginBottom: "0.75rem" }}>
         Pick one team to lift the trophy. {value ? `Selected: ` : "None picked."}
-        {value && <strong style={{ color: ACCENT }}>{WC2026_TEAMS.find((t) => t.code === value)?.name ?? value}</strong>}
+        {value && <strong style={{ color: ACCENT }}>{teams.find((t) => t.code === value)?.name ?? value}</strong>}
       </div>
       <div className="predict-grid-teams">
         {sorted.map((t) => {

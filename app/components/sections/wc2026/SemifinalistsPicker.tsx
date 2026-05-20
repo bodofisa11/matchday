@@ -2,7 +2,7 @@
 
 import { TeamLogo } from "../../TeamLogo";
 import { teamColor } from "../../../lib/team-meta";
-import { WC2026_TEAMS } from "../../../lib/wc2026-groups";
+import { useWc2026Teams } from "../../../lib/use-wc2026-teams";
 
 const ACCENT = "#0066cc";
 
@@ -13,6 +13,7 @@ interface Props {
 }
 
 export function SemifinalistsPicker({ value, onChange, readOnly }: Props) {
+  const { teams } = useWc2026Teams();
   // Filter empty strings — they only exist because the storage type is a
   // fixed-length tuple, not because the user has picked something.
   const picked = value.filter(Boolean);
@@ -26,7 +27,7 @@ export function SemifinalistsPicker({ value, onChange, readOnly }: Props) {
     }
   }
 
-  const sorted = [...WC2026_TEAMS].sort((a, b) => a.name.localeCompare(b.name));
+  const sorted = [...teams].sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div>

@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { TeamLogo } from "../../TeamLogo";
 import { teamColor } from "../../../lib/team-meta";
-import { teamNameByCode, GROUP_LETTERS } from "../../../lib/wc2026-groups";
+import { GROUP_LETTERS } from "../../../lib/wc2026-groups";
+import { useWc2026Teams } from "../../../lib/use-wc2026-teams";
 import { getAllPredictions, getLocalIdentity } from "../../../lib/predictions-client";
 import type { Prediction } from "../../../lib/predictions-types";
 
@@ -11,6 +12,7 @@ const ACCENT = "#0066cc";
 
 function UserCard({ p, isMine }: { p: Prediction; isMine: boolean }) {
   const [open, setOpen] = useState(false);
+  const { byCode } = useWc2026Teams();
   const filledGroups = GROUP_LETTERS.filter((g) => {
     const v = p.group_picks[g];
     return v && (v[0] || v[1]);
@@ -53,7 +55,7 @@ function UserCard({ p, isMine }: { p: Prediction; isMine: boolean }) {
           </div>
           <div style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>
             {filledGroups}/12 groups · {filledSemis}/4 semis · {filledScorers}/2 scorers
-            {p.champion_pick ? ` · Champion: ${teamNameByCode(p.champion_pick)}` : p.champion ? ` · KO champion: ${teamNameByCode(p.champion)}` : ""}
+            {p.champion_pick ? ` · Champion: ${byCode(p.champion_pick)}` : p.champion ? ` · KO champion: ${byCode(p.champion)}` : ""}
           </div>
         </div>
         <div style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>{open ? "▾" : "▸"}</div>
@@ -79,7 +81,7 @@ function UserCard({ p, isMine }: { p: Prediction; isMine: boolean }) {
                   }}>
                     <span>🏆</span>
                     <TeamLogo code={p.champion_pick} sport="football" leagueCode="wc2026" color={teamColor(p.champion_pick)} size={16} />
-                    {teamNameByCode(p.champion_pick)}
+                    {byCode(p.champion_pick)}
                     <span style={{ fontSize: "0.6rem", color: "var(--text-muted)", fontWeight: 600 }}>Phase 1</span>
                   </div>
                 )}
@@ -95,7 +97,7 @@ function UserCard({ p, isMine }: { p: Prediction; isMine: boolean }) {
                   }}>
                     <span>🥇</span>
                     <TeamLogo code={p.champion} sport="football" leagueCode="wc2026" color={teamColor(p.champion)} size={16} />
-                    {teamNameByCode(p.champion)}
+                    {byCode(p.champion)}
                     <span style={{ fontSize: "0.6rem", color: "var(--text-muted)", fontWeight: 600 }}>KO</span>
                   </div>
                 )}
@@ -131,7 +133,7 @@ function UserCard({ p, isMine }: { p: Prediction; isMine: boolean }) {
                     border: "1px solid var(--border-subtle)", borderRadius: "5px", fontSize: "0.74rem",
                   }}>
                     <TeamLogo code={code} sport="football" leagueCode="wc2026" color={teamColor(code)} size={14} />
-                    {teamNameByCode(code)}
+                    {byCode(code)}
                   </div>
                 ))}
               </div>

@@ -2,7 +2,8 @@
 
 import { TeamLogo } from "../../TeamLogo";
 import { teamColor } from "../../../lib/team-meta";
-import { WC2026_GROUPS, GROUP_LETTERS } from "../../../lib/wc2026-groups";
+import { GROUP_LETTERS } from "../../../lib/wc2026-groups";
+import { useWc2026Teams } from "../../../lib/use-wc2026-teams";
 import type { GroupLetter, GroupPicks, GroupStandingPicks } from "../../../lib/predictions-types";
 
 const ACCENT = "#0066cc";
@@ -18,6 +19,7 @@ interface Props {
  * next free slot (1st, then 2nd). Click an already-picked team to clear it.
  */
 export function GroupPicker({ value, onChange, readOnly }: Props) {
+  const { groups } = useWc2026Teams();
   function toggle(g: GroupLetter, code: string) {
     if (readOnly) return;
     const current: GroupStandingPicks = value[g] ?? ["", ""];
@@ -51,7 +53,7 @@ export function GroupPicker({ value, onChange, readOnly }: Props) {
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
-              {WC2026_GROUPS[g].map((team) => {
+              {groups[g].map((team) => {
                 const slot = picks[0] === team.code ? 1 : picks[1] === team.code ? 2 : null;
                 return (
                   <button
