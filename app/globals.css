@@ -873,7 +873,9 @@ table { table-layout: auto; width: 100%; }
   .sp-footer-col-events { grid-column: 1 / -1; }
 }
 @media (max-width: 520px) {
-  .sp-footer-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+  .sp-footer-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .sp-footer-brand { grid-column: 1 / -1; }
+  .sp-footer-col-events { grid-column: 1 / -1; }
   .sp-footer-events-list { column-count: 2; max-height: none; }
   .sp-footer-bottom { justify-content: center; text-align: center; }
 }
