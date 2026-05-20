@@ -50,5 +50,8 @@ next-env.d.ts
 /myNotes/
 docker-compose.yml
 
+# caveman:compress local backups
+*.original.md
+
 # vscode
 .vscode/
