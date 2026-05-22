@@ -2,7 +2,6 @@
 
 import { TeamLogo } from "./TeamLogo";
 import { TeamName } from "./TeamName";
-import { FormBar } from "./FormBar";
 import { teamCode, teamColor, formatGD } from "../lib/team-meta";
 
 // Lightweight row shape — accepts both FootballStandingRow and
@@ -18,7 +17,6 @@ export interface LeagueStandingRow {
   goals_against: number;
   goal_difference: number;
   points: number;
-  form?: string | null;
 }
 
 interface Props {
@@ -49,7 +47,6 @@ export function LeagueStandingsTable({
           <th>GF</th>
           <th>GA</th>
           <th>GD</th>
-          <th>Form</th>
           <th>Pts</th>
         </tr>
       </thead>
@@ -83,7 +80,6 @@ export function LeagueStandingsTable({
               <td>{row.goals_for}</td>
               <td>{row.goals_against}</td>
               <td>{formatGD(row.goal_difference)}</td>
-              <td><FormBar form={row.form} /></td>
               <td className="points-cell">{row.points}</td>
             </tr>
           );
