@@ -10,6 +10,7 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- Teams grid: denser on mobile (≥3 tiles per row instead of 1) with smaller crests. Standings: dropped the **Form** column; mobile now keeps W/D/L visible (hides GF/GA instead).
 - Footer mobile (≤520px): **Resources** and **About** now sit side-by-side instead of stacking, with brand + Events still full-width.
 - **Predict** tab now loads WC2026 teams from the same Supabase source (`wc_group_standings`) as the Football → WC2026 section, so group/semifinalist/champion pickers always show the real teams instead of the placeholder draw. Falls back to the static list if the DB hasn't seeded yet.
 - New top-level **Predict** tab (Navbar, beside UFC). Public no-login WC2026 prediction game, 4 sub-sections: **Feed** (post field placeholder), **Predictions** (Phase 1: partial picks for group standings 1–4 across 12 groups, ≤4 semifinalists, ≤2 top scorers; Phase 2: KO bracket → champion, opens after groups finish), **Leaderboard** (points DESC, tie-break = earliest submit), **Users** (browse + search picks). Identity in `localStorage`. Ships frontend + localStorage dummy; Supabase wiring next PR.

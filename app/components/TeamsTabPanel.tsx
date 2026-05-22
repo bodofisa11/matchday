@@ -57,14 +57,7 @@ export function TeamsTabPanel({ competitionShort, accent }: Props) {
           <div style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>No team data yet.</div>
         ) : (
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: compact
-                ? "repeat(auto-fill, minmax(110px, 1fr))"
-                : "repeat(auto-fill, minmax(180px, 1fr))",
-              gap: compact ? "0.5rem" : "0.75rem",
-              marginTop: "0.5rem",
-            }}
+            className={compact ? "team-grid team-grid--compact" : "team-grid"}
           >
             {teams.map((t) => (
               <button
