@@ -899,6 +899,24 @@ table { table-layout: auto; width: 100%; }
   .sp-footer-bottom { justify-content: center; text-align: center; }
 }
 
+/* Section sub-tab bar: always horizontally scrollable, scrollbar hidden. Used
+   inside every sport/competition section in place of a wrapping flex row. */
+.section-tabbar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: x proximity;
+}
+.section-tabbar::-webkit-scrollbar { display: none; height: 0; }
+.section-tabbar > * { flex-shrink: 0; scroll-snap-align: start; }
+
 /* WC2026 PREDICT — mobile responsiveness. Inline-style components add these
    classes for media-query overrides without abandoning the inline idiom. */
 .predict-tabbar {

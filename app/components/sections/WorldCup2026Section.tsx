@@ -98,7 +98,7 @@ const TAB_STYLE_INACTIVE: React.CSSProperties = {
 
 function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
   return (
-    <div className="fade-in fd1" style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
+    <div className="fade-in fd1 section-tabbar">
       {TABS.map((tab) => (
         <button
           key={tab.id}

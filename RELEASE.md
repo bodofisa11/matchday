@@ -10,6 +10,7 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- Section sub-tab bars (WC2026, PL, La Liga, Serie A, Bundesliga, Ligue 1, ISL, UCL, UEL, IPL, F1) now scroll horizontally on a single row instead of wrapping. Hidden scrollbar; mirrors the Football competition bar behavior.
 - World Cup 2026 moved to its own route at `/wc26` (previously a sub-tab of Football). New top-level **WC26** group in the Navbar replaces the **Predict** group; the prediction game now lives at `/wc26/prediction` and is reached via a **Prediction** pill on the WC26 sub-tab bar. Football comp bar no longer lists World Cup 2026. Deep-linking works — `next.config` sets `trailingSlash: true` so GitHub Pages serves nested routes (`/wc26/`, `/wc26/prediction/`) on refresh.
 - New `auto-deploy.yml` workflow: every PR merge to `main` triggers an automatic patch-bump tag, build, and deploy to GitHub Pages so feature changes are instantly viewable on the live site. Auto-tags are flagged as prereleases (so manual versioned releases keep the **Latest** badge) and use stub release notes. RELEASE.md `## Upcoming` is left untouched — only manual deploys via `cd.yml` lock the block and promote it to a versioned heading.
 - F1 tab: removed **News** sub-tab. Default tab remains **Drivers**.
