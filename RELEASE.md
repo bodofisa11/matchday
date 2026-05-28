@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- Fixture row mobile fix: stopped wrapping the meta column below teams (which pushed the group chip + kickoff time to a second row that looked detached). Teams and meta now stay side-by-side at all widths, top-aligned, with the meta column shrinking to fit.
+
 - Fixture row alignment: top-align teams column with meta column (group chip + date + time/score) instead of vertically centering, so the chip sits next to the home team instead of the gap between rows.
 - Section sub-tab bars (WC2026, PL, La Liga, Serie A, Bundesliga, Ligue 1, ISL, UCL, UEL, IPL, F1) now scroll horizontally on a single row instead of wrapping. Hidden scrollbar; mirrors the Football competition bar behavior.
 - Fix `auto-deploy.yml` release step: previous runs (v1.4.0, v1.4.1) deployed to GitHub Pages and created the tags fine, but the GitHub Release creation step shelled to `gh release` without a checkout, so `git`-based repo resolution failed (`fatal: not a git repository`). Now passes `--repo "$REPO"` to every `gh release` call so no working tree is required.

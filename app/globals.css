@@ -663,9 +663,10 @@ table { table-layout: auto; width: 100%; }
   .nav-menu-wrap { display: block; }
   .hero-badge { display: none; }
   .card-header { flex-wrap: wrap; gap: 0.4rem; }
-  .fixture-item { flex-wrap: wrap; gap: 0.4rem; }
-  .fixture-teams { flex-basis: 100%; }
-  .fixture-meta { flex-basis: 100%; flex-direction: row; align-items: center; justify-content: space-between; }
+  .fixture-item { gap: 0.5rem; }
+  .fixture-teams { min-width: 0; flex: 1 1 auto; }
+  .fixture-team { font-size: 0.75rem; }
+  .fixture-meta { flex: 0 0 auto; }
   .scorecard-header { padding: 0.6rem 0.85rem; }
   .scorecard-body { padding: 0.6rem 0.85rem; }
   .driver-bar-row { gap: 0.45rem; }
