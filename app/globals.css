@@ -456,7 +456,7 @@ html.light .navbar { background: rgba(241, 245, 249, 0.92); }
 /* FIXTURES */
 .fixture-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   padding: 0.65rem 0;
   border-bottom: 1px solid var(--border-subtle);
