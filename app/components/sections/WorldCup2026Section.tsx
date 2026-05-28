@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { TeamLogo } from "../TeamLogo";
 import { TeamName } from "../TeamName";
@@ -69,6 +70,32 @@ function StageChip({ stage, group }: { stage?: string | null; group?: string | n
   );
 }
 
+const TAB_STYLE_ACTIVE: React.CSSProperties = {
+  padding: "0.4rem 1.1rem",
+  borderRadius: "20px",
+  border: "none",
+  background: ACCENT,
+  color: "#fff",
+  fontWeight: 700,
+  fontSize: "0.78rem",
+  cursor: "pointer",
+  transition: "all 0.15s",
+  textDecoration: "none",
+};
+
+const TAB_STYLE_INACTIVE: React.CSSProperties = {
+  padding: "0.4rem 1.1rem",
+  borderRadius: "20px",
+  border: "1px solid var(--border-subtle)",
+  background: "transparent",
+  color: "var(--text-secondary)",
+  fontWeight: 500,
+  fontSize: "0.78rem",
+  cursor: "pointer",
+  transition: "all 0.15s",
+  textDecoration: "none",
+};
+
 function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
   return (
     <div className="fade-in fd1" style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
@@ -76,21 +103,14 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
         <button
           key={tab.id}
           onClick={() => onChange(tab.id)}
-          style={{
-            padding: "0.4rem 1.1rem",
-            borderRadius: "20px",
-            border: active === tab.id ? "none" : "1px solid var(--border-subtle)",
-            background: active === tab.id ? ACCENT : "transparent",
-            color: active === tab.id ? "#fff" : "var(--text-secondary)",
-            fontWeight: active === tab.id ? 700 : 500,
-            fontSize: "0.78rem",
-            cursor: "pointer",
-            transition: "all 0.15s",
-          }}
+          style={active === tab.id ? TAB_STYLE_ACTIVE : TAB_STYLE_INACTIVE}
         >
           {tab.label}
         </button>
       ))}
+      <Link href="/wc26/prediction" style={TAB_STYLE_INACTIVE}>
+        Prediction
+      </Link>
     </div>
   );
 }

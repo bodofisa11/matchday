@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTeamCodes } from "./lib/use-team-codes";
 import { Navbar, type SportGroup } from "./components/Navbar";
 import { CompBar, type CompId } from "./components/CompBar";
@@ -13,10 +14,8 @@ import { BundesligaSection } from "./components/sections/BundesligaSection";
 import { Ligue1Section } from "./components/sections/Ligue1Section";
 import { ISLSection } from "./components/sections/ISLSection";
 import { EuropaLeagueSection } from "./components/sections/EuropaLeagueSection";
-import { WorldCup2026Section } from "./components/sections/WorldCup2026Section";
 import { F1Section } from "./components/sections/F1Section";
 import { IPLSection } from "./components/sections/IPLSection";
-import { PredictSection } from "./components/sections/PredictSection";
 import { Footer } from "./components/Footer";
 
 const GROUP_DEFAULT: Partial<Record<SportGroup, CompId>> = {
@@ -25,12 +24,25 @@ const GROUP_DEFAULT: Partial<Record<SportGroup, CompId>> = {
   cricket: "ipl",
 };
 
-export default function Home() {
-  const [activeGroup, setActiveGroup] = useState<SportGroup>("today");
-  const [activeComp, setActiveComp] = useState<CompId>("pl");
+const VALID_GROUPS: SportGroup[] = ["today", "football", "f1", "cricket", "ufc", "wc26"];
+const VALID_COMPS: CompId[] = ["pl", "ucl", "uel", "laliga", "seriea", "bundesliga", "ligue1", "isl", "f1main", "ipl"];
 
-  // Preload DB-backed team code cache once for the whole app.
-  // Triggers a re-render when ready so descendants pick up TLA values.
+function HomeInner() {
+  const params = useSearchParams();
+  const initialGroup: SportGroup = (() => {
+    const g = params.get("group");
+    if (g && (VALID_GROUPS as string[]).includes(g) && g !== "wc26") return g as SportGroup;
+    return "today";
+  })();
+  const initialComp: CompId = (() => {
+    const c = params.get("comp");
+    if (c && (VALID_COMPS as string[]).includes(c)) return c as CompId;
+    return GROUP_DEFAULT[initialGroup] ?? "pl";
+  })();
+
+  const [activeGroup, setActiveGroup] = useState<SportGroup>(initialGroup);
+  const [activeComp, setActiveComp] = useState<CompId>(initialComp);
+
   useTeamCodes();
 
   function handleGroupChange(group: SportGroup) {
@@ -54,12 +66,18 @@ export default function Home() {
         {activeComp === "ligue1" && activeGroup === "football" && <Ligue1Section />}
         {activeComp === "isl" && activeGroup === "football" && <ISLSection />}
         {activeComp === "uel" && activeGroup === "football" && <EuropaLeagueSection />}
-        {activeComp === "wc2026" && activeGroup === "football" && <WorldCup2026Section />}
         {activeComp === "f1main" && activeGroup === "f1" && <F1Section />}
         {activeComp === "ipl" && activeGroup === "cricket" && <IPLSection />}
-        {activeGroup === "predict" && <PredictSection />}
       </main>
       <Footer />
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={null}>
+      <HomeInner />
+    </Suspense>
   );
 }

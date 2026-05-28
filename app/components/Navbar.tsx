@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ThemeToggle } from "./ThemeToggle";
 import { CompactTablesToggle } from "./CompactTablesToggle";
 import { APP_VERSION, isPrerelease } from "../lib/version";
 
-export type SportGroup = "today" | "football" | "f1" | "cricket" | "ufc" | "predict";
+export type SportGroup = "today" | "football" | "f1" | "cricket" | "ufc" | "wc26";
 
 const GROUP_LABELS: Record<SportGroup, string> = {
   today: "Today",
@@ -13,19 +15,36 @@ const GROUP_LABELS: Record<SportGroup, string> = {
   f1: "Formula 1",
   cricket: "Cricket",
   ufc: "UFC",
-  predict: "Predict",
+  wc26: "WC26",
 };
 
-const GROUPS: SportGroup[] = ["today", "football", "f1", "cricket", "ufc", "predict"];
+const GROUPS: SportGroup[] = ["today", "football", "f1", "cricket", "ufc", "wc26"];
+
+// Groups other than wc26 live on the home page. Click navigates to /?group=<id>.
+function groupHref(group: SportGroup): string {
+  if (group === "wc26") return "/wc26";
+  if (group === "today") return "/";
+  return `/?group=${group}`;
+}
 
 interface NavbarProps {
-  activeGroup: SportGroup;
-  onGroupChange: (group: SportGroup) => void;
+  // Provided only when rendered inside the home route. When set, in-route group
+  // switching uses the setter instead of a Link navigation so state is preserved.
+  activeGroup?: SportGroup;
+  onGroupChange?: (group: SportGroup) => void;
 }
 
 export function Navbar({ activeGroup, onGroupChange }: NavbarProps) {
+  const pathname = usePathname() ?? "/";
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const onHome = pathname === "/" || pathname === "";
+  const onWc26 = pathname.startsWith("/wc26");
+  // On /wc26 the active group is wc26 regardless of any prop. On home use the prop.
+  const resolvedActive: SportGroup | null = onWc26
+    ? "wc26"
+    : (activeGroup ?? null);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -46,28 +65,58 @@ export function Navbar({ activeGroup, onGroupChange }: NavbarProps) {
   }, [menuOpen]);
 
   function handleSelect(group: SportGroup) {
-    onGroupChange(group);
     setMenuOpen(false);
+    // In-route group switch only works on home for non-wc26 groups.
+    if (onHome && group !== "wc26" && onGroupChange) {
+      onGroupChange(group);
+    }
+  }
+
+  function renderTab(group: SportGroup, isMenu: boolean) {
+    const isActive = resolvedActive === group;
+    const className = isMenu
+      ? `nav-menu-item${isActive ? " active" : ""}`
+      : `sport-group-tab${isActive ? " active" : ""}${group === "today" ? " today-tab" : ""}`;
+    const label = GROUP_LABELS[group];
+
+    // Use a button (state switch) when on home and group is home-bound.
+    if (onHome && group !== "wc26" && onGroupChange) {
+      return (
+        <button
+          key={group}
+          className={className}
+          role={isMenu ? "menuitem" : undefined}
+          onClick={() => handleSelect(group)}
+        >
+          {label}
+        </button>
+      );
+    }
+
+    // Otherwise navigate via Link.
+    return (
+      <Link
+        key={group}
+        href={groupHref(group)}
+        className={className}
+        role={isMenu ? "menuitem" : undefined}
+        onClick={() => setMenuOpen(false)}
+      >
+        {label}
+      </Link>
+    );
   }
 
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-        <a href="#" className="logo">
+        <Link href="/" className="logo">
           <div className="logo-icon">M</div>
           MATCHDAY
-        </a>
+        </Link>
 
         <div className="sport-group-tabs">
-          {GROUPS.map((group) => (
-            <button
-              key={group}
-              className={`sport-group-tab${activeGroup === group ? " active" : ""}${group === "today" ? " today-tab" : ""}`}
-              onClick={() => onGroupChange(group)}
-            >
-              {GROUP_LABELS[group]}
-            </button>
-          ))}
+          {GROUPS.map((group) => renderTab(group, false))}
         </div>
 
         <div className="nav-right">
@@ -110,16 +159,7 @@ export function Navbar({ activeGroup, onGroupChange }: NavbarProps) {
             </button>
             {menuOpen && (
               <div className="nav-menu-dropdown" role="menu">
-                {GROUPS.map((group) => (
-                  <button
-                    key={group}
-                    role="menuitem"
-                    className={`nav-menu-item${activeGroup === group ? " active" : ""}`}
-                    onClick={() => handleSelect(group)}
-                  >
-                    {GROUP_LABELS[group]}
-                  </button>
-                ))}
+                {GROUPS.map((group) => renderTab(group, true))}
               </div>
             )}
           </div>
