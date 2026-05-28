@@ -138,11 +138,11 @@ function FixtureRow({ f }: { f: FootballFixtureRow }) {
       <div className="fixture-teams">
         <div className="fixture-team">
           <TeamLogo code={hCode} sport="football" leagueCode={LEAGUE} color={teamColor(hCode)} />
-          {f.home_team}
+          <span className="fixture-team-name">{f.home_team}</span>
         </div>
         <div className="fixture-team">
           <TeamLogo code={aCode} sport="football" leagueCode={LEAGUE} color={teamColor(aCode)} />
-          {f.away_team}
+          <span className="fixture-team-name">{f.away_team}</span>
         </div>
       </div>
       <div className="fixture-meta" style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem" }}>
