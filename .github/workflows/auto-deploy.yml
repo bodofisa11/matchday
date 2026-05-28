@@ -1,0 +1,187 @@
+name: Auto-deploy on merge to main
+
+# Dev-stage convenience: every push to `main` (i.e. every PR merge) auto-deploys
+# a patch-bumped tag to GitHub Pages so the latest feature is immediately
+# viewable on the live site. Rollback = re-tag a previous SHA via the manual
+# workflow in cd.yml, or revert the merge commit.
+#
+# Differences vs `cd.yml`:
+#   - Forced patch bump, no prerelease channel.
+#   - Does NOT modify RELEASE.md. The `## Upcoming` block keeps accumulating
+#     bullets and is only promoted to a versioned heading on a manual deploy.
+#   - Release notes for the auto-tag are a stub pointing at the merge commit
+#     (no `## vX.Y.Z` section exists yet for these auto-tags).
+#
+# Manual deploys (cd.yml `workflow_dispatch` + explicit tag pushes) remain the
+# source of truth for "real" versioned releases that lock the Upcoming block.
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# Share the `pages` group with cd.yml so manual + auto deploys serialize.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  compute-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+      sha: ${{ steps.sha.outputs.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Capture HEAD SHA
+        id: sha
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Compute next patch version
+        id: ver
+        run: |
+          set -euo pipefail
+
+          LATEST=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' \
+            | grep -Ev -- '-(rc|beta|alpha)\.' \
+            | sort -V | tail -n1 || true)
+          if [ -z "$LATEST" ]; then
+            LATEST="v0.0.0"
+            echo "No prior prod tag — starting from v0.0.0."
+          fi
+          echo "Latest prod tag: $LATEST"
+
+          VER=${LATEST#v}
+          MAJOR=${VER%%.*}
+          REST=${VER#*.}
+          MINOR=${REST%%.*}
+          PATCH=${REST#*.}
+          PATCH=$((PATCH + 1))
+          NEXT="v${MAJOR}.${MINOR}.${PATCH}"
+
+          if git rev-parse -q --verify "refs/tags/$NEXT" >/dev/null; then
+            echo "Tag $NEXT already exists — aborting." >&2
+            exit 1
+          fi
+
+          echo "Next version: $NEXT"
+          echo "version=$NEXT" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: [compute-version]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.compute-version.outputs.sha }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        with:
+          static_site_generator: next
+
+      - name: Restore cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build with Next.js
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_BASE_PATH: /matchday
+          NEXT_PUBLIC_APP_VERSION: ${{ needs.compute-version.outputs.version }}
+        run: npx next build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  deploy:
+    needs: [build]
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  tag:
+    needs: [compute-version, deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.compute-version.outputs.sha }}
+
+      - name: Create and push tag
+        env:
+          NEXT: ${{ needs.compute-version.outputs.version }}
+          SHA:  ${{ needs.compute-version.outputs.sha }}
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git rev-parse -q --verify "refs/tags/$NEXT" >/dev/null; then
+            echo "Tag $NEXT already exists — aborting." >&2
+            exit 1
+          fi
+          git tag -a "$NEXT" -m "Auto-deploy $NEXT (merge $SHA)" "$SHA"
+          git push origin "$NEXT"
+          echo "Tagged $SHA as $NEXT."
+
+  release:
+    needs: [compute-version, deploy, tag]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub Release (stub notes)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.compute-version.outputs.version }}
+          SHA: ${{ needs.compute-version.outputs.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          cat > release-notes.md <<EOF
+          Auto-deploy from merge to \`main\` at commit [\`${SHA:0:7}\`](https://github.com/${REPO}/commit/${SHA}).
+
+          See [\`RELEASE.md\` → Upcoming](https://github.com/${REPO}/blob/main/RELEASE.md) for the running list of changes since the last versioned release.
+          EOF
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" \
+              --title "$TAG" \
+              --notes-file release-notes.md \
+              --latest=false --prerelease
+          else
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --notes-file release-notes.md \
+              --latest=false --prerelease
+          fi

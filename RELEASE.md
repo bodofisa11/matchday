@@ -10,6 +10,7 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- New `auto-deploy.yml` workflow: every PR merge to `main` triggers an automatic patch-bump tag, build, and deploy to GitHub Pages so feature changes are instantly viewable on the live site. Auto-tags are flagged as prereleases (so manual versioned releases keep the **Latest** badge) and use stub release notes. RELEASE.md `## Upcoming` is left untouched — only manual deploys via `cd.yml` lock the block and promote it to a versioned heading.
 - F1 tab: removed **News** sub-tab. Default tab remains **Drivers**.
 - Teams grid: denser on mobile (≥3 tiles per row instead of 1) with smaller crests. Standings: dropped the **Form** column; mobile now keeps W/D/L visible (hides GF/GA instead).
 - Footer mobile (≤520px): **Resources** and **About** now sit side-by-side instead of stacking, with brand + Events still full-width.
