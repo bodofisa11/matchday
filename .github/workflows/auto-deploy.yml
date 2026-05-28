@@ -174,13 +174,15 @@ jobs:
           See [\`RELEASE.md\` → Upcoming](https://github.com/${REPO}/blob/main/RELEASE.md) for the running list of changes since the last versioned release.
           EOF
 
-          if gh release view "$TAG" >/dev/null 2>&1; then
+          if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
             gh release edit "$TAG" \
+              --repo "$REPO" \
               --title "$TAG" \
               --notes-file release-notes.md \
               --latest=false --prerelease
           else
             gh release create "$TAG" \
+              --repo "$REPO" \
               --title "$TAG" \
               --notes-file release-notes.md \
               --latest=false --prerelease
