@@ -15,7 +15,7 @@ const GROUP_LABELS: Record<SportGroup, string> = {
   f1: "Formula 1",
   cricket: "Cricket",
   ufc: "UFC",
-  wc26: "WC26",
+  wc26: "FIFA World Cup",
 };
 
 const GROUPS: SportGroup[] = ["today", "football", "f1", "cricket", "ufc", "wc26"];
