@@ -15,14 +15,12 @@ import {
 } from "../../lib/fetch-standings-client";
 import { F1_TEAM_COLORS, todayStr } from "../../lib/team-meta";
 import { driverCode, constructorCode } from "../../lib/f1-codes";
-import { NewsTab } from "../NewsTab";
 import { useCompactTables } from "../../lib/use-compact-tables";
 
-type Tab = "news" | "schedule" | "teams" | "drivers";
+type Tab = "schedule" | "teams" | "drivers";
 type ResultTab = "race" | "sprint";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "news", label: "News" },
   { id: "schedule", label: "F1 Schedule" },
   { id: "teams", label: "Teams" },
   { id: "drivers", label: "Drivers" },
@@ -295,8 +293,6 @@ export function F1Section() {
       </div>
 
       <TabBar active={activeTab} onChange={handleTabChange} />
-
-      {activeTab === "news" && <NewsTab competition="Formula 1" accent={ACCENT} />}
 
       {activeTab === "drivers" && (
         <div className="grid-12 fade-in fd2">
