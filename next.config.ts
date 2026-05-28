@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
   ...(isProd ? { output: "export" } : {}),
   basePath,
   assetPrefix: isProd ? "/matchday/" : "",
+  // Ensures nested routes export as <path>/index.html so GitHub Pages serves
+  // deep-link refreshes without 404s.
+  trailingSlash: true,
 };
 
 export default nextConfig;
