@@ -2,21 +2,21 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTeamCodes } from "./lib/use-team-codes";
-import { Navbar, type SportGroup } from "./components/Navbar";
-import { CompBar, type CompId } from "./components/CompBar";
-import { TodaySection } from "./components/sections/TodaySection";
-import { PremierLeagueSection } from "./components/sections/PremierLeagueSection";
-import { UCLSection } from "./components/sections/UCLSection";
-import { LaLigaSection } from "./components/sections/LaLigaSection";
-import { SerieASection } from "./components/sections/SerieASection";
-import { BundesligaSection } from "./components/sections/BundesligaSection";
-import { Ligue1Section } from "./components/sections/Ligue1Section";
-import { ISLSection } from "./components/sections/ISLSection";
-import { EuropaLeagueSection } from "./components/sections/EuropaLeagueSection";
-import { F1Section } from "./components/sections/F1Section";
-import { IPLSection } from "./components/sections/IPLSection";
-import { Footer } from "./components/Footer";
+import { useTeamCodes } from "@/app/lib/v1/use-team-codes";
+import { Navbar, type SportGroup } from "@/app/components/v1/Navbar";
+import { CompBar, type CompId } from "@/app/components/v1/CompBar";
+import { TodaySection } from "@/app/components/v1/sections/TodaySection";
+import { PremierLeagueSection } from "@/app/components/v1/sections/PremierLeagueSection";
+import { UCLSection } from "@/app/components/v1/sections/UCLSection";
+import { LaLigaSection } from "@/app/components/v1/sections/LaLigaSection";
+import { SerieASection } from "@/app/components/v1/sections/SerieASection";
+import { BundesligaSection } from "@/app/components/v1/sections/BundesligaSection";
+import { Ligue1Section } from "@/app/components/v1/sections/Ligue1Section";
+import { ISLSection } from "@/app/components/v1/sections/ISLSection";
+import { EuropaLeagueSection } from "@/app/components/v1/sections/EuropaLeagueSection";
+import { F1Section } from "@/app/components/v1/sections/F1Section";
+import { IPLSection } from "@/app/components/v1/sections/IPLSection";
+import { Footer } from "@/app/components/v1/Footer";
 
 const GROUP_DEFAULT: Partial<Record<SportGroup, CompId>> = {
   football: "pl",

@@ -1,9 +1,9 @@
 "use client";
 
-import { useTeamCodes } from "../lib/use-team-codes";
-import { Navbar } from "../components/Navbar";
-import { Footer } from "../components/Footer";
-import { WorldCup2026Section } from "../components/sections/WorldCup2026Section";
+import { useTeamCodes } from "@/app/lib/v1/use-team-codes";
+import { Navbar } from "@/app/components/v1/Navbar";
+import { Footer } from "@/app/components/v1/Footer";
+import { WorldCup2026Section } from "@/app/components/v1/sections/WorldCup2026Section";
 
 export default function Wc26Page() {
   useTeamCodes();

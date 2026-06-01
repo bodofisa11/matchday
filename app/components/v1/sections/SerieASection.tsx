@@ -1,0 +1,116 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { competitionLogoUrl } from "@/app/lib/v1/image-utils";
+import {
+  fetchFootballStandings,
+  type FootballStandingRow,
+} from "@/app/lib/v1/fetch-standings-client";
+import { FixturesTabPanel } from "@/app/components/v1/FixturesTabPanel";
+import { TopScorersTable } from "@/app/components/v1/TopScorersTable";
+import { TeamsTabPanel } from "@/app/components/v1/TeamsTabPanel";
+import { LeagueStandingsTable } from "@/app/components/v1/LeagueStandingsTable";
+
+type Tab = "upcoming" | "results" | "standings" | "stats" | "teams";
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: "upcoming", label: "Upcoming" },
+  { id: "results", label: "Results" },
+  { id: "standings", label: "Standings" },
+  { id: "stats", label: "Stats" },
+  { id: "teams", label: "Teams" },
+];
+
+const ACCENT = "#008fd5";
+const LEAGUE = "seriea";
+
+function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
+  return (
+    <div className="fade-in fd1 section-tabbar">
+      {TABS.map((tab) => (
+        <button
+          key={tab.id}
+          onClick={() => onChange(tab.id)}
+          style={{
+            padding: "0.4rem 1.1rem",
+            borderRadius: "20px",
+            border: active === tab.id ? "none" : "1px solid var(--border-subtle)",
+            background: active === tab.id ? ACCENT : "transparent",
+            color: active === tab.id ? "#fff" : "var(--text-secondary)",
+            fontWeight: active === tab.id ? 700 : 500,
+            fontSize: "0.78rem",
+            cursor: "pointer",
+            transition: "all 0.15s",
+          }}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function Loading() {
+  return <div style={{ color: "var(--text-muted)", padding: "1rem 0", fontSize: "0.85rem" }}>Loading…</div>;
+}
+
+export function SerieASection() {
+  const [activeTab, setActiveTab] = useState<Tab>("upcoming");
+  const [standings, setStandings] = useState<FootballStandingRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFootballStandings("Serie A").then((s) => {
+      setStandings(s);
+      setLoading(false);
+    });
+  }, []);
+
+  const matchday = standings.length > 0 ? Math.max(...standings.map((r) => r.played)) : null;
+
+  return (
+    <>
+      <div className="section-hero fade-in">
+        <div className="hero-bar" style={{ background: ACCENT }} />
+        <div className="hero-icon"><img src={competitionLogoUrl("SRA") ?? ""} alt="Serie A" style={{ width: "100%", height: "100%", objectFit: "contain" }} /></div>
+        <div className="hero-text">
+          <h2>SERIE A</h2>
+          <p>Italy — 2025/26 Season</p>
+        </div>
+        {matchday !== null && (
+          <div className="hero-badge" style={{ background: "#008fd520", color: ACCENT }}>
+            Matchday {matchday}
+          </div>
+        )}
+      </div>
+
+      <TabBar active={activeTab} onChange={setActiveTab} />
+
+      {activeTab === "upcoming" && (
+        <FixturesTabPanel competitionShort="SRA" leagueCode={LEAGUE} accent={ACCENT} mode="upcoming" />
+      )}
+
+      {activeTab === "results" && (
+        <FixturesTabPanel competitionShort="SRA" leagueCode={LEAGUE} accent={ACCENT} mode="results" />
+      )}
+
+      {activeTab === "standings" && (
+        <div className="grid-12 fade-in fd2">
+          <div className="card span-12">
+            <div className="card-header">
+              <div className="card-title">Standings</div>
+            </div>
+            {loading ? <Loading /> : standings.length === 0 ? (
+              <div style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>No standings data yet.</div>
+            ) : (
+              <LeagueStandingsTable rows={standings} leagueCode={LEAGUE} />
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === "stats" && <TopScorersTable competitionShort="SRA" accent={ACCENT} />}
+      {activeTab === "teams" && <TeamsTabPanel competitionShort="SRA" accent={ACCENT} />}
+    </>
+  );
+}
