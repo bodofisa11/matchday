@@ -31,39 +31,39 @@ export function Navbar({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: 
   }, [open]);
 
   return (
-    <>
-      <nav className="wf-nav">
-        <Link href="/v2/home" className="wf-logo">
-          MATCHDAY
-        </Link>
-        <div className="wf-tabs">
-          {TABS.map((t) => (
-            <Link key={t.href} href={t.href} className={`wf-tab${isOn(t.href) ? " on" : ""}`}>
-              {t.dot && <span className={`wf-dot ${t.dot}`} />}
-              {t.label}
-            </Link>
-          ))}
-        </div>
-        <div className="wf-navicons">
-          <button type="button" className="wf-ico" aria-label="Search">
-            ⌕
-          </button>
-          <button
-            type="button"
-            className="wf-ico"
-            onClick={onToggleTheme}
-            aria-label="Toggle theme"
-          >
-            {dark ? "☀" : "◑"}
-          </button>
-          <span className="wf-ico round" aria-hidden />
-        </div>
-      </nav>
+    <nav className="wf-nav">
+      <Link href="/v2/home" className="wf-logo">
+        MATCHDAY
+      </Link>
 
-      {/* Mobile floating menu — hidden on desktop via CSS */}
+      <div className="wf-tabs">
+        {TABS.map((t) => (
+          <Link key={t.href} href={t.href} className={`wf-tab${isOn(t.href) ? " on" : ""}`}>
+            {t.dot && <span className={`wf-dot ${t.dot}`} />}
+            {t.label}
+          </Link>
+        ))}
+      </div>
+
+      <div className="wf-navicons">
+        <button type="button" className="wf-ico" aria-label="Search">
+          ⌕
+        </button>
+        <button
+          type="button"
+          className="wf-ico"
+          onClick={onToggleTheme}
+          aria-label="Toggle theme"
+        >
+          {dark ? "☀" : "◑"}
+        </button>
+        <span className="wf-ico round" aria-hidden />
+      </div>
+
+      {/* Mobile burger + dropdown (hidden on desktop via CSS) */}
       <button
         type="button"
-        className="wf-fab"
+        className="wf-burger"
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? "Close menu" : "Open menu"}
         aria-expanded={open}
@@ -72,17 +72,14 @@ export function Navbar({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: 
       </button>
       {open && (
         <>
-          <div className="wf-fab-backdrop" onClick={() => setOpen(false)} aria-hidden />
-          <div className="wf-fab-menu" role="menu">
-            <Link href="/v2/home" className="wf-fab-logo" onClick={() => setOpen(false)}>
-              MATCHDAY
-            </Link>
-            <div className="wf-fab-tabs">
+          <div className="wf-nav-backdrop" onClick={() => setOpen(false)} aria-hidden />
+          <div className="wf-nav-menu" role="menu">
+            <div className="wf-nav-menu-tabs">
               {TABS.map((t) => (
                 <Link
                   key={t.href}
                   href={t.href}
-                  className={`wf-fab-tab${isOn(t.href) ? " on" : ""}`}
+                  className={`wf-nav-menu-tab${isOn(t.href) ? " on" : ""}`}
                   role="menuitem"
                   onClick={() => setOpen(false)}
                 >
@@ -91,16 +88,14 @@ export function Navbar({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: 
                 </Link>
               ))}
             </div>
-            <div className="wf-fab-actions">
-              <button type="button" className="wf-fab-action" aria-label="Search">
+            <div className="wf-nav-menu-actions">
+              <button type="button" className="wf-nav-menu-action" aria-label="Search">
                 <span>⌕</span> Search
               </button>
               <button
                 type="button"
-                className="wf-fab-action"
-                onClick={() => {
-                  onToggleTheme();
-                }}
+                className="wf-nav-menu-action"
+                onClick={onToggleTheme}
                 aria-label="Toggle theme"
               >
                 <span>{dark ? "☀" : "◑"}</span> {dark ? "Light mode" : "Dark mode"}
@@ -109,6 +104,6 @@ export function Navbar({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: 
           </div>
         </>
       )}
-    </>
+    </nav>
   );
 }

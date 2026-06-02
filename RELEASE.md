@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- Reworked the `/v2` mobile navigation: instead of removing the top bar in favor of a corner button, the navbar itself is now a floating pill that stays pinned at the top of the screen. The MATCHDAY logo sits on the left, and a single ≡ button on the right opens a dropdown with all sport tabs, search, and theme toggle. Desktop nav is unchanged.
+
 - On phones, the `/v2` top navigation is replaced by a floating menu button in the top-right corner. Tap it to open a dropdown with all nav links, search, and theme toggle. The top nav bar is no longer pinned/fixed on mobile, freeing the full screen for content. Desktop nav is unchanged.
 
 - `/v2` is now responsive on phones and tablets — layout adapts down to small screens, nav tabs scroll, the hero/standings/squad/grids stack and condense, type and component sizes scale for mobile, and the "Top events" rail bleeds to the screen edge so cards aren't clipped.
