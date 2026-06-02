@@ -1156,6 +1156,11 @@ table { table-layout: auto; width: 100%; }
 /* empty state */
 .v2 .wf-empty { padding: 60px 20px; text-align: center; color: var(--wf-muted); border: 1px dashed var(--wf-line-2); border-radius: var(--wf-r); }
 
+/* floating mobile menu (hidden on desktop) */
+.v2 .wf-fab,
+.v2 .wf-fab-backdrop,
+.v2 .wf-fab-menu { display: none; }
+
 /* ===== v2 responsive (tablet) ===== */
 @media (max-width: 900px) {
   .v2 .wf-shell { padding: 0 18px 48px; }
@@ -1173,22 +1178,57 @@ table { table-layout: auto; width: 100%; }
   .v2 { font-size: 13px; }
   .v2 .wf-shell { padding: 0 14px 40px; }
 
-  /* nav: keep logo + icons; tabs scroll horizontally below */
-  .v2 .wf-nav {
-    height: auto; flex-wrap: wrap; gap: 10px;
-    padding: 10px 0; row-gap: 8px;
+  /* mobile: hide top nav entirely; floating button takes over */
+  .v2 .wf-nav { display: none; }
+
+  .v2 .wf-fab {
+    display: flex; align-items: center; justify-content: center;
+    position: fixed; top: 14px; right: 14px; z-index: 50;
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 1px solid var(--wf-line); background: var(--wf-paper);
+    color: var(--wf-ink); font-size: 20px; line-height: 1; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
   }
-  .v2 .wf-tabs {
-    order: 3; width: 100%;
-    overflow-x: auto; flex-wrap: nowrap;
-    margin: 0 -14px; padding: 0 14px;
-    scrollbar-width: none;
+  .v2 .wf-fab:hover { background: var(--wf-fill); }
+
+  .v2 .wf-fab-backdrop {
+    display: block; position: fixed; inset: 0; z-index: 45;
+    background: rgba(0,0,0,0.35);
   }
-  .v2 .wf-tabs::-webkit-scrollbar { display: none; }
-  .v2 .wf-tab { padding: 6px 11px; font-size: 12px; }
-  .v2 .wf-logo { font-size: 14px; }
-  .v2 .wf-ico { width: 30px; height: 30px; font-size: 14px; }
-  .v2 .wf-navicons { gap: 6px; }
+
+  .v2 .wf-fab-menu {
+    display: flex; flex-direction: column; gap: 14px;
+    position: fixed; top: 68px; right: 14px; z-index: 50;
+    min-width: 220px; max-width: calc(100vw - 28px);
+    padding: 16px; border: 1px solid var(--wf-line); border-radius: var(--wf-r);
+    background: var(--wf-paper);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.22);
+  }
+  .v2 .wf-fab-logo {
+    font-family: var(--font-martian-mono), monospace; font-weight: 800;
+    letter-spacing: 0.12em; font-size: 14px; text-decoration: none; color: inherit;
+  }
+  .v2 .wf-fab-tabs { display: flex; flex-direction: column; gap: 2px; }
+  .v2 .wf-fab-tab {
+    display: flex; align-items: center; gap: 9px;
+    padding: 10px 12px; border-radius: 9px;
+    font-size: 14px; color: var(--wf-ink-2); text-decoration: none;
+  }
+  .v2 .wf-fab-tab:hover { background: var(--wf-fill); }
+  .v2 .wf-fab-tab.on { background: var(--wf-ink); color: var(--wf-paper); }
+  .v2 .wf-fab-actions {
+    display: flex; flex-direction: column; gap: 4px;
+    padding-top: 10px; border-top: 1px solid var(--wf-line);
+  }
+  .v2 .wf-fab-action {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 9px;
+    background: none; border: none; cursor: pointer;
+    font-size: 14px; color: var(--wf-ink-2); text-align: left;
+    font-family: inherit;
+  }
+  .v2 .wf-fab-action:hover { background: var(--wf-fill); }
+  .v2 .wf-fab-action span { font-size: 16px; width: 20px; text-align: center; }
 
   /* live bar */
   .v2 .wf-livebar { padding: 10px 0; gap: 10px; }
