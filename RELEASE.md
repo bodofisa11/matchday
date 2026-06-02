@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- `/v2` is now responsive on phones and tablets — layout adapts down to small screens, nav tabs scroll, the hero/standings/squad/grids stack and condense, type and component sizes scale for mobile, and the "Top events" rail bleeds to the screen edge so cards aren't clipped.
+
 - `/v2` home "Top events" rail now shows today's actual top matches (live first, then upcoming by kickoff) instead of a static list of competitions. Each card links to its competition page.
 
 - New look (preview) at `/v2`: a multi-page redesign living alongside the current site — the existing pages are untouched. `/v2/home` is an overview with a live-score ticker, "Top events", and today's schedule grouped by competition; per-sport pages (`/v2/football`, `/v2/f1`, `/v2/cricket`) have a competition picker, top fixtures and recent results; competition pages (`/v2/football/premier-league`) show standings and upcoming matches; team pages (`/v2/football/premier-league/arsenal`) show club records and full squads. You can star matches as favorites. `/v2` redirects to `/v2/home`. Desktop-only for now; Cricket is a placeholder pending data. Fixtures read live from the current (v1) database until the v2 schema is provisioned; standings and squads currently use sample data.
