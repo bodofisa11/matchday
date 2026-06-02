@@ -1231,14 +1231,14 @@ table { table-layout: auto; width: 100%; }
   .v2 { font-size: 13px; }
   .v2 .wf-shell { padding: 0 14px 40px; }
 
-  /* mobile: floating-pill nav, logo + burger only */
+  /* mobile: full-width sticky rectangle nav, logo + burger only */
   .v2 .wf-nav {
-    position: sticky; top: 10px; z-index: 30;
-    height: auto; padding: 10px 14px;
-    margin: 10px 0 4px;
-    border: 1px solid var(--wf-line); border-radius: 999px;
+    position: sticky; top: 0; z-index: 30;
+    height: 54px; padding: 0 14px;
+    margin: 0 -14px;
+    border: none; border-bottom: 1px solid var(--wf-line); border-radius: 0;
     background: var(--wf-paper);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    box-shadow: none;
     gap: 10px;
   }
   .v2 .wf-tabs,
@@ -1261,7 +1261,7 @@ table { table-layout: auto; width: 100%; }
 
   .v2 .wf-nav-menu {
     display: flex; flex-direction: column; gap: 14px;
-    position: absolute; top: calc(100% + 8px); right: 0; z-index: 50;
+    position: absolute; top: 100%; right: 14px; z-index: 50;
     min-width: 220px; max-width: calc(100vw - 28px);
     padding: 14px; border: 1px solid var(--wf-line); border-radius: var(--wf-r);
     background: var(--wf-paper);
