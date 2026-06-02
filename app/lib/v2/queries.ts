@@ -1,13 +1,14 @@
 /**
  * v2 query layer. Single entry point the v2 UI uses for data.
  *
- * Fixtures: live from the v2 Supabase schema ([fetch-fixtures.ts]); falls back
- * to dummy fixtures when Supabase is unconfigured (local dev / build) so the
- * pages still render.
+ * Fixtures: live from the v1 database (existing `football_fixtures` /
+ * `f1_fixtures` Supabase tables, via [v1/fetch-fixtures-client]) until the v2
+ * schema is provisioned. Falls back to dummy fixtures when no data source is
+ * configured (local dev / build) so the pages still render.
  * Standings, squads, top events, competitions: dummy ([dummy.ts]) — no v2
  * tables yet. Marked TODO; swap for live queries once the schema lands.
  */
-import { fetchFromSupabaseV2 } from "./fetch-fixtures";
+import { fetchFixturesByISTDateRange, type SportId } from "@/app/lib/v1/fetch-fixtures-client";
 import type { Fixture } from "@/app/lib/fixtures";
 import {
   COMPETITIONS,
@@ -71,14 +72,16 @@ function mapFixture(f: Fixture): MatchV2 {
 
 async function liveMatches(sport: SportSlug | "all", date: string): Promise<MatchV2[]> {
   if (sport === "cricket") return [];
-  const sportId = sport === "all" ? "all" : sport === "f1" ? "f1" : "football";
+  const sportId: SportId = sport === "all" ? "all" : sport === "f1" ? "f1" : "football";
   try {
-    const fixtures = await fetchFromSupabaseV2(sportId, { utcStart: date, utcEnd: date });
+    // `date` is an IST day string; the v1 client handles IST↔UTC and returns
+    // fixtures already mapped to the shared `Fixture` shape.
+    const { fixtures } = await fetchFixturesByISTDateRange(sportId, date, date);
     if (fixtures.length > 0) return fixtures.map(mapFixture);
   } catch {
     /* fall through to dummy */
   }
-  // dummy fallback (local dev / unconfigured Supabase)
+  // dummy fallback (local dev / no data source configured)
   const dummy = dummyMatches(date);
   return sport === "all" ? dummy : dummy.filter((m) => m.sport === sport);
 }
