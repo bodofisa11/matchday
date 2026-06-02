@@ -14,6 +14,7 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 - Internal: scaffolded v2 Supabase schema bindings (`events`, `fb_clubs`, `f1_circuits`, v2 `fb_fixtures` / `f1_fixtures`) and a parallel fetch path gated by `NEXT_PUBLIC_USE_V2_SCHEMA=1`. Default path unchanged — no user-visible behavior yet; flag flip planned once v2 ETL populates rows.
 
+- Backend v2 schema support (opt-in via `NEXT_PUBLIC_DB_VERSION=v2`). New query path reads `fb_fixtures` + `f1_fixtures` from the rewritten `public` schema, joining `fb_clubs` for team names and `f1_circuits` for circuit/country, and resolves competition labels via a prefetched `events` cache (`app/lib/events.ts`). Default remains v1 so production behavior is unchanged until the flag flips. No UI changes — `Fixture` shape and daily view rendering are identical.
 - Fixture row mobile fix: stopped wrapping the meta column below teams (which pushed the group chip + kickoff time to a second row that looked detached). Teams and meta now stay side-by-side at all widths, top-aligned, with the meta column shrinking to fit. Long team names now ellipsis-truncate instead of running under the chip.
 
 - Fixture row alignment: top-align teams column with meta column (group chip + date + time/score) instead of vertically centering, so the chip sits next to the home team instead of the gap between rows.
