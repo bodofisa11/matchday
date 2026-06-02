@@ -1,10 +1,5 @@
-import { V2Shell } from "./components/v2/V2Shell";
-import { HomeView } from "./components/v2/home/HomeView";
+import { V1HomePage } from "./components/v1/V1HomePage";
 
 export default function Page() {
-  return (
-    <V2Shell>
-      <HomeView />
-    </V2Shell>
-  );
+  return <V1HomePage />;
 }

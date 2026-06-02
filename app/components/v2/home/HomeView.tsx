@@ -42,7 +42,7 @@ function CompetitionGroup({ comp, matches }: { comp: CompetitionMeta; matches: M
     <div>
       <div className="wf-comphead">
         <span className={`wf-dot ${sportDot(comp.sport)}`} />
-        <Link href={`/${comp.sport}/${comp.slug}`} className="wf-h3" style={{ textDecoration: "none", color: "inherit" }}>
+        <Link href={`/v2/${comp.sport}/${comp.slug}`} className="wf-h3" style={{ textDecoration: "none", color: "inherit" }}>
           {comp.name}
         </Link>
         <span className="wf-compmeta">
@@ -87,7 +87,7 @@ export function HomeView() {
           {events.map((e) => (
             <Link
               key={e.competitionSlug}
-              href={getCompetition(e.competitionSlug) ? `/${e.sport}/${e.competitionSlug}` : `/${e.sport}`}
+              href={getCompetition(e.competitionSlug) ? `/v2/${e.sport}/${e.competitionSlug}` : `/v2/${e.sport}`}
               className="wf-eventcard"
             >
               <span className={`wf-dot ${sportDot(e.sport)}`} />

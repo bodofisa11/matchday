@@ -94,7 +94,7 @@ export function SportView({ sport }: { sport: SportSlug }) {
             {comps.map((c) => (
               <Link
                 key={c.slug}
-                href={`/${sport}/${c.slug}`}
+                href={`/v2/${sport}/${c.slug}`}
                 className="wf-box wf-pad"
                 style={{ width: 190, textDecoration: "none", color: "inherit" }}
               >

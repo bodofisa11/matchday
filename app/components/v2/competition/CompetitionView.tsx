@@ -57,7 +57,7 @@ export function CompetitionView({ competition }: { competition: CompetitionMeta 
                 <div key={r.team.slug} className="wf-trow" style={{ gridTemplateColumns: COLS }}>
                   <span className="wf-rank">{r.rank}</span>
                   <Link
-                    href={`/${competition.sport}/${competition.slug}/${r.team.slug}`}
+                    href={`/v2/${competition.sport}/${competition.slug}/${r.team.slug}`}
                     className="wf-center wf-gap8"
                     style={{ textDecoration: "none", color: "inherit", minWidth: 0 }}
                   >
