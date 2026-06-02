@@ -1,9 +1,9 @@
 "use client";
 
-import { useTeamCodes } from "../../lib/use-team-codes";
-import { Navbar } from "../../components/Navbar";
-import { Footer } from "../../components/Footer";
-import { PredictSection } from "../../components/sections/PredictSection";
+import { useTeamCodes } from "@/app/lib/v1/use-team-codes";
+import { Navbar } from "@/app/components/v1/Navbar";
+import { Footer } from "@/app/components/v1/Footer";
+import { PredictSection } from "@/app/components/v1/sections/PredictSection";
 
 export default function Wc26PredictionPage() {
   useTeamCodes();

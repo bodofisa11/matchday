@@ -10,6 +10,10 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- New look (preview) at `/v2`: a multi-page redesign living alongside the current site — the existing pages are untouched. `/v2/home` is an overview with a live-score ticker, "Top events", and today's schedule grouped by competition; per-sport pages (`/v2/football`, `/v2/f1`, `/v2/cricket`) have a competition picker, top fixtures and recent results; competition pages (`/v2/football/premier-league`) show standings and upcoming matches; team pages (`/v2/football/premier-league/arsenal`) show club records and full squads. You can star matches as favorites. `/v2` redirects to `/v2/home`. Desktop-only for now; Cricket is a placeholder pending data. Fixtures read live from the current (v1) database until the v2 schema is provisioned; standings and squads currently use sample data.
+
+- Internal: scaffolded v2 Supabase schema bindings (`events`, `fb_clubs`, `f1_circuits`, v2 `fb_fixtures` / `f1_fixtures`) and a parallel fetch path gated by `NEXT_PUBLIC_USE_V2_SCHEMA=1`. Default path unchanged — no user-visible behavior yet; flag flip planned once v2 ETL populates rows.
+
 - Backend v2 schema support (opt-in via `NEXT_PUBLIC_DB_VERSION=v2`). New query path reads `fb_fixtures` + `f1_fixtures` from the rewritten `public` schema, joining `fb_clubs` for team names and `f1_circuits` for circuit/country, and resolves competition labels via a prefetched `events` cache (`app/lib/events.ts`). Default remains v1 so production behavior is unchanged until the flag flips. No UI changes — `Fixture` shape and daily view rendering are identical.
 - Fixture row mobile fix: stopped wrapping the meta column below teams (which pushed the group chip + kickoff time to a second row that looked detached). Teams and meta now stay side-by-side at all widths, top-aligned, with the meta column shrinking to fit. Long team names now ellipsis-truncate instead of running under the chip.
 

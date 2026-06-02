@@ -4,7 +4,7 @@
 // DATABASE_URL isn't set in CI). The production app never calls these routes.
 export const dynamic = "force-static";
 
-import { fetchFixtures, type SportId } from "@/app/lib/fetch-fixtures";
+import { fetchFixtures, type SportId } from "@/app/lib/v1/fetch-fixtures";
 
 const VALID_SPORTS: SportId[] = ["all", "football", "f1"];
 

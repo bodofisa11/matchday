@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, JetBrains_Mono, Bebas_Neue } from "next/font/google";
+import { Outfit, JetBrains_Mono, Bebas_Neue, Martian_Mono } from "next/font/google";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -18,6 +18,12 @@ const bebasNeue = Bebas_Neue({
   variable: "--font-bebas-neue",
   subsets: ["latin"],
   weight: ["400"],
+});
+
+const martianMono = Martian_Mono({
+  variable: "--font-martian-mono",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -43,7 +49,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${outfit.variable} ${jetbrainsMono.variable} ${bebasNeue.variable}`}
+        className={`${outfit.variable} ${jetbrainsMono.variable} ${bebasNeue.variable} ${martianMono.variable}`}
       >
         {children}
       </body>
