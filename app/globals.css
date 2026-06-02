@@ -977,7 +977,6 @@ table { table-layout: auto; width: 100%; }
   --wf-r: 14px;
   --wf-r-sm: 9px;
 
-  min-width: 1024px;
   min-height: 100vh;
   background: var(--wf-paper);
   color: var(--wf-ink);
@@ -1156,4 +1155,124 @@ table { table-layout: auto; width: 100%; }
 
 /* empty state */
 .v2 .wf-empty { padding: 60px 20px; text-align: center; color: var(--wf-muted); border: 1px dashed var(--wf-line-2); border-radius: var(--wf-r); }
+
+/* ===== v2 responsive (tablet) ===== */
+@media (max-width: 900px) {
+  .v2 .wf-shell { padding: 0 18px 48px; }
+  .v2 .wf-h1 { font-size: 40px; }
+  .v2 .wf-grid { grid-template-columns: 1fr; gap: 14px; }
+  .v2 .wf-grid-3 { grid-template-columns: 1fr; gap: 20px; }
+  .v2 .wf-hero { grid-template-columns: 1fr; gap: 16px; padding: 24px 0; }
+  .v2 .wf-hero .wf-ph { min-width: 0; width: 100%; }
+  .v2 .wf-stats { grid-template-columns: repeat(3, 1fr); }
+  .v2 .wf-stat .n { font-size: 22px; }
+}
+
+/* ===== v2 responsive (mobile) ===== */
+@media (max-width: 640px) {
+  .v2 { font-size: 13px; }
+  .v2 .wf-shell { padding: 0 14px 40px; }
+
+  /* nav: keep logo + icons; tabs scroll horizontally below */
+  .v2 .wf-nav {
+    height: auto; flex-wrap: wrap; gap: 10px;
+    padding: 10px 0; row-gap: 8px;
+  }
+  .v2 .wf-tabs {
+    order: 3; width: 100%;
+    overflow-x: auto; flex-wrap: nowrap;
+    margin: 0 -14px; padding: 0 14px;
+    scrollbar-width: none;
+  }
+  .v2 .wf-tabs::-webkit-scrollbar { display: none; }
+  .v2 .wf-tab { padding: 6px 11px; font-size: 12px; }
+  .v2 .wf-logo { font-size: 14px; }
+  .v2 .wf-ico { width: 30px; height: 30px; font-size: 14px; }
+  .v2 .wf-navicons { gap: 6px; }
+
+  /* live bar */
+  .v2 .wf-livebar { padding: 10px 0; gap: 10px; }
+  .v2 .wf-vdivider { display: none; }
+  .v2 .wf-livechip { padding: 5px 8px; font-size: 12px; }
+
+  /* sections + headings */
+  .v2 .wf-section { padding: 20px 0; }
+  .v2 .wf-h1 { font-size: 30px; }
+  .v2 .wf-h3 { font-size: 15px; }
+  .v2 .wf-hero { padding: 18px 0; gap: 12px; }
+  .v2 .wf-hero .wf-ph { min-height: 90px; }
+
+  /* top events / competition picker cards */
+  .v2 .wf-eventcard { width: 180px; padding: 13px; gap: 10px; }
+  .v2 .wf-eventcard .wf-evtitle { font-size: 13px; }
+
+  /* horizontal scroll rails bleed to edge */
+  .v2 .wf-hscroll {
+    margin: 0 -14px;
+    padding: 0 14px 8px;
+  }
+
+  /* vs row: tighter */
+  .v2 .wf-vsrow {
+    grid-template-columns: 22px 1fr auto;
+    gap: 8px; padding: 9px 0;
+  }
+  .v2 .wf-vsteams { gap: 6px; flex-wrap: nowrap; }
+  .v2 .wf-vsteam { gap: 6px; }
+  .v2 .wf-vsteam span.nm { font-size: 12px; }
+  .v2 .wf-vs { font-size: 10px; }
+  .v2 .wf-kick { font-size: 12px; }
+  .v2 .wf-crest { width: 18px; height: 18px; font-size: 8px; }
+  .v2 .wf-crest.lg { width: 44px; height: 44px; font-size: 14px; }
+
+  /* stats grid → 2 cols */
+  .v2 .wf-stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .v2 .wf-stat { padding: 12px; }
+  .v2 .wf-stat .n { font-size: 20px; }
+  .v2 .wf-stat .l { font-size: 10px; }
+
+  /* tables: override inline grid-template-columns */
+  .v2 .wf-trow { padding: 9px 10px; gap: 6px; font-size: 12px; }
+
+  /* standings: keep #, Club, P, Pts, Form. Hide W/D/GF/GA. */
+  .v2 .wf-box > .wf-trow[style*="20px 1fr 28px"] {
+    grid-template-columns: 18px 1fr 24px 30px auto !important;
+  }
+  .v2 .wf-box > .wf-trow[style*="20px 1fr 28px"] > *:nth-child(4),
+  .v2 .wf-box > .wf-trow[style*="20px 1fr 28px"] > *:nth-child(5),
+  .v2 .wf-box > .wf-trow[style*="20px 1fr 28px"] > *:nth-child(6),
+  .v2 .wf-box > .wf-trow[style*="20px 1fr 28px"] > *:nth-child(7) {
+    display: none;
+  }
+  .v2 .wf-fbadge { width: 14px; height: 14px; font-size: 8px; }
+
+  /* squad: hide Nationality column */
+  .v2 .wf-box > .wf-trow[style*="32px 1fr 56px"] {
+    grid-template-columns: 28px 1fr 44px 36px !important;
+  }
+  .v2 .wf-box > .wf-trow[style*="32px 1fr 56px"] > *:nth-child(4) {
+    display: none;
+  }
+
+  /* sport fixtures row */
+  .v2 .wf-trow[style*="56px 1fr auto"] {
+    grid-template-columns: 48px 1fr auto !important;
+  }
+  .v2 .wf-score { font-size: 13px; }
+
+  /* tab chips wrap */
+  .v2 .wf-chip { padding: 6px 11px; font-size: 11px; }
+
+  /* hero team header (TeamView): stack crest above name */
+  .v2 .wf-hero .wf-center.wf-gap20 { flex-direction: column; align-items: flex-start; gap: 12px; }
+
+  /* empty state padding */
+  .v2 .wf-empty { padding: 32px 14px; font-size: 12px; }
+}
+
+@media (max-width: 380px) {
+  .v2 .wf-h1 { font-size: 26px; }
+  .v2 .wf-eventcard { width: 160px; }
+  .v2 .wf-tab { padding: 6px 9px; font-size: 11px; }
+}
 
