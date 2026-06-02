@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from "react";
 import { Navbar } from "./Navbar";
 import { LiveBar } from "./LiveBar";
+import { Footer } from "./Footer";
 
 const THEME_KEY = "wf-theme";
 const listeners = new Set<() => void>();
@@ -42,6 +43,7 @@ export function V2Shell({ children }: { children: React.ReactNode }) {
         <Navbar dark={dark} onToggleTheme={toggleTheme} />
         <LiveBar />
         {children}
+        <Footer />
       </div>
     </div>
   );
