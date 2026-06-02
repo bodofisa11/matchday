@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, JetBrains_Mono, Bebas_Neue, Martian_Mono } from "next/font/google";
+import { Outfit, JetBrains_Mono, Bebas_Neue, Martian_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -26,6 +26,13 @@ const martianMono = Martian_Mono({
   weight: ["300", "400", "500", "600", "700", "800"],
 });
 
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
+});
+
 export const metadata: Metadata = {
   title: "MatchDay",
   description: "Live scores, standings and fixtures for Football, F1 and Cricket",
@@ -49,7 +56,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${outfit.variable} ${jetbrainsMono.variable} ${bebasNeue.variable} ${martianMono.variable}`}
+        className={`${outfit.variable} ${jetbrainsMono.variable} ${bebasNeue.variable} ${martianMono.variable} ${instrumentSerif.variable}`}
       >
         {children}
       </body>
