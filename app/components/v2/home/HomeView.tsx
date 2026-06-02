@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getCompetition, getScheduleByCompetition, getTopEvents } from "@/app/lib/v2/queries";
+import { getCompetition, getScheduleByCompetition, getTopMatches } from "@/app/lib/v2/queries";
 import { istTodayStr } from "@/app/lib/timezone";
 import { sportDot } from "@/app/lib/v2/types";
 import type { CompetitionMeta, MatchV2 } from "@/app/lib/v2/types";
@@ -61,12 +61,16 @@ function CompetitionGroup({ comp, matches }: { comp: CompetitionMeta; matches: M
 
 export function HomeView() {
   const [groups, setGroups] = useState<{ competition: CompetitionMeta; matches: MatchV2[] }[]>([]);
-  const events = getTopEvents();
+  const [topMatches, setTopMatches] = useState<MatchV2[]>([]);
 
   useEffect(() => {
     let alive = true;
-    getScheduleByCompetition(istTodayStr()).then((g) => {
+    const date = istTodayStr();
+    getScheduleByCompetition(date).then((g) => {
       if (alive) setGroups(g);
+    });
+    getTopMatches(date).then((m) => {
+      if (alive) setTopMatches(m);
     });
     return () => {
       alive = false;
@@ -84,22 +88,37 @@ export function HomeView() {
       <section className="wf-section">
         <span className="wf-eyebrow">Top events</span>
         <div className="wf-hscroll" style={{ marginTop: 12 }}>
-          {events.map((e) => (
-            <Link
-              key={e.competitionSlug}
-              href={getCompetition(e.competitionSlug) ? `/v2/${e.sport}/${e.competitionSlug}` : `/v2/${e.sport}`}
-              className="wf-eventcard"
-            >
-              <span className={`wf-dot ${sportDot(e.sport)}`} />
-              <span className="wf-evtitle">{e.title}</span>
-              <div className="wf-col wf-gap6">
-                <span className="wf-mono-sm">{e.subtitle}</span>
-                <span className="wf-muted" style={{ fontSize: 12 }}>
-                  {e.meta}
-                </span>
-              </div>
-            </Link>
-          ))}
+          {topMatches.length === 0 ? (
+            <div className="wf-muted" style={{ fontSize: 13 }}>No events today.</div>
+          ) : (
+            topMatches.map((m) => {
+              const compHref = getCompetition(m.competitionSlug)
+                ? `/v2/${m.sport}/${m.competitionSlug}`
+                : `/v2/${m.sport}`;
+              const subtitle =
+                m.status === "live"
+                  ? `${m.homeScore ?? 0}–${m.awayScore ?? 0}`
+                  : m.status === "finished"
+                  ? `${m.homeScore ?? 0}–${m.awayScore ?? 0} FT`
+                  : m.kickoff;
+              const metaLabel =
+                m.status === "live" ? (m.clock ?? "LIVE") : m.competitionShort || m.competitionSlug;
+              return (
+                <Link key={m.id} href={compHref} className="wf-eventcard">
+                  <span className={`wf-dot ${sportDot(m.sport)}`} />
+                  <span className="wf-evtitle">
+                    {m.home.shortName} vs {m.away.shortName}
+                  </span>
+                  <div className="wf-col wf-gap6">
+                    <span className="wf-mono-sm">{subtitle}</span>
+                    <span className="wf-muted" style={{ fontSize: 12 }}>
+                      {metaLabel}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })
+          )}
         </div>
       </section>
 

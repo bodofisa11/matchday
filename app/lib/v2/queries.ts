@@ -127,6 +127,24 @@ export function getTopEvents(): EventCardItem[] {
   return TOP_EVENTS;
 }
 
+/**
+ * Top matches for the given IST date. Ranks live first (by kickoff), then
+ * scheduled (by kickoff), then finished (most recent kickoff first). Used by
+ * the v2 Home "Top events" rail.
+ */
+export async function getTopMatches(date: string, limit = 8): Promise<MatchV2[]> {
+  const matches = await liveMatches("all", date);
+  const rank = (s: MatchV2["status"]) => (s === "live" ? 0 : s === "scheduled" ? 1 : 2);
+  const sorted = [...matches].sort((a, b) => {
+    const r = rank(a.status) - rank(b.status);
+    if (r !== 0) return r;
+    return a.status === "finished"
+      ? b.kickoff.localeCompare(a.kickoff)
+      : a.kickoff.localeCompare(b.kickoff);
+  });
+  return sorted.slice(0, limit);
+}
+
 export function getCompetitions(sport: SportSlug): CompetitionMeta[] {
   return competitionsForSport(sport);
 }

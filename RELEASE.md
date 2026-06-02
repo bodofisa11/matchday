@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- `/v2` home "Top events" rail now shows today's actual top matches (live first, then upcoming by kickoff) instead of a static list of competitions. Each card links to its competition page.
+
 - New look (preview) at `/v2`: a multi-page redesign living alongside the current site — the existing pages are untouched. `/v2/home` is an overview with a live-score ticker, "Top events", and today's schedule grouped by competition; per-sport pages (`/v2/football`, `/v2/f1`, `/v2/cricket`) have a competition picker, top fixtures and recent results; competition pages (`/v2/football/premier-league`) show standings and upcoming matches; team pages (`/v2/football/premier-league/arsenal`) show club records and full squads. You can star matches as favorites. `/v2` redirects to `/v2/home`. Desktop-only for now; Cricket is a placeholder pending data. Fixtures read live from the current (v1) database until the v2 schema is provisioned; standings and squads currently use sample data.
 
 - Internal: scaffolded v2 Supabase schema bindings (`events`, `fb_clubs`, `f1_circuits`, v2 `fb_fixtures` / `f1_fixtures`) and a parallel fetch path gated by `NEXT_PUBLIC_USE_V2_SCHEMA=1`. Default path unchanged — no user-visible behavior yet; flag flip planned once v2 ETL populates rows.
