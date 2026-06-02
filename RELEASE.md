@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- Reworked the `/v2` mobile navigation: instead of removing the top bar in favor of a corner button, the navbar itself is now a floating pill that stays pinned at the top of the screen. The MATCHDAY logo sits on the left, and a single ≡ button on the right opens a dropdown with all sport tabs, search, and theme toggle. Desktop nav is unchanged.
+
 - `/v2` pages now have a proper footer: MATCHDAY brand block with tagline and GitHub link, plus columns for Sports (links to Football / F1 / Cricket), Resources (GitHub / Releases / Issues), and About. A bottom strip shows the copyright, data-refresh note, and the app version pill. Layout collapses to single-column on phones.
 
 - On phones, the `/v2` top navigation is replaced by a floating menu button in the top-right corner. Tap it to open a dropdown with all nav links, search, and theme toggle. The top nav bar is no longer pinned/fixed on mobile, freeing the full screen for content. Desktop nav is unchanged.
