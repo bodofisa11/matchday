@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- Removed the small colored sport dots that prefixed nav tabs, section headers, fixture rows, and footer sport links across `/v2`. Layout is now cleaner; colors still live in cards/badges elsewhere.
+
 - `/v2` mobile navbar is now a classic full-width rectangle sticky bar at the top (was floating rounded pill). Bleeds to the viewport edges, no margin or drop shadow, single bottom border. Logo on the left, ≡ dropdown on the right. Desktop unchanged.
 
 - Reworked the `/v2` mobile navigation: instead of removing the top bar in favor of a corner button, the navbar itself is now a floating pill that stays pinned at the top of the screen. The MATCHDAY logo sits on the left, and a single ≡ button on the right opens a dropdown with all sport tabs, search, and theme toggle. Desktop nav is unchanged.

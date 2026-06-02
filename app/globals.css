@@ -1025,11 +1025,8 @@ table { table-layout: auto; width: 100%; }
 .v2 .wf-num { font-variant-numeric: tabular-nums; font-size: 13px; }
 .v2 .wf-muted { color: var(--wf-muted); }
 
-/* sport dots */
-.v2 .wf-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--wf-muted); display: inline-block; flex: 0 0 auto; }
-.v2 .wf-dot.foot { background: var(--wf-foot); }
-.v2 .wf-dot.f1 { background: var(--wf-f1); }
-.v2 .wf-dot.crk { background: var(--wf-crk); }
+/* sport dots — visually hidden across v2 (kept in markup for now) */
+.v2 .wf-dot { display: none; }
 
 /* nav */
 .v2 .wf-nav {
