@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- Hid the horizontal scrollbar on the `/v2` "Top events" rail and any other horizontal-scroll rows. Section still scrolls horizontally (drag/wheel/touch) — only the visible scrollbar is removed for a cleaner look.
+
 - Refreshed the `/v2` visual design: editorial monospace look swapped for a modern serif-led style. Headlines now use Instrument Serif (mixed case, with italic blue-underlined accent), body text uses Outfit sans, cards have larger rounded corners with soft shadows, pill buttons/chips are bigger and rounder, and Top-event tiles get subtle blue/orange/peach gradient washes. Color palette is anchored on deep blue + warm orange (with soft sky-blue, peach, and cream supporting shades) over a warm paper background. Layout, components, and data flow unchanged.
 
 - Removed the small colored sport dots that prefixed nav tabs, section headers, fixture rows, and footer sport links across `/v2`. Layout is now cleaner; colors still live in cards/badges elsewhere.
