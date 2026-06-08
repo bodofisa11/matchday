@@ -1142,7 +1142,8 @@ table { table-layout: auto; width: 100%; }
   overflow: hidden;
 }
 .v2 .wf-section { padding: 36px 0; }
-.v2 .wf-hscroll { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; }
+.v2 .wf-hscroll { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; -ms-overflow-style: none; }
+.v2 .wf-hscroll::-webkit-scrollbar { display: none; width: 0; height: 0; }
 .v2 .wf-hscroll > * { flex: 0 0 auto; }
 
 /* chips — pill buttons */
