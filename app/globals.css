@@ -1199,7 +1199,7 @@ table { table-layout: auto; width: 100%; }
 
 /* vs row */
 .v2 .wf-vsrow {
-  display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 14px;
+  display: grid; grid-template-columns: 26px 1fr auto 1fr; align-items: center; gap: 14px;
   padding: 14px 4px; border-top: 1px solid var(--wf-line);
   transition: background 0.15s;
 }
@@ -1207,13 +1207,23 @@ table { table-layout: auto; width: 100%; }
 .v2 .wf-star { background: none; border: none; cursor: pointer; font-size: 16px; color: var(--wf-muted); line-height: 1; padding: 0; transition: color 0.15s; }
 .v2 .wf-star:hover { color: var(--wf-accent); }
 .v2 .wf-star.on { color: var(--wf-accent); }
-.v2 .wf-vsteams { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .v2 .wf-vsteam { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.v2 .wf-vsteam-home { justify-content: flex-end; text-align: right; }
+.v2 .wf-vsteam-away { justify-content: flex-start; text-align: left; }
 .v2 .wf-vsteam span.nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
-.v2 .wf-vs { color: var(--wf-muted); font-style: italic; font-family: var(--font-instrument-serif), serif; font-size: 14px; }
-.v2 .wf-kick {
+.v2 .wf-vsmid {
+  display: flex; align-items: center; justify-content: center;
+  min-width: 64px;
+}
+.v2 .wf-vs-center {
   font-family: var(--font-jetbrains-mono), monospace;
   font-size: 13px; font-variant-numeric: tabular-nums; color: var(--wf-ink-2);
+  white-space: nowrap;
+}
+.v2 .wf-score {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums;
+  color: var(--wf-ink); min-width: 18px; text-align: center;
 }
 
 /* table rows (standings / fixtures) */
@@ -1446,10 +1456,10 @@ table { table-layout: auto; width: 100%; }
 
   /* vs row: tighter */
   .v2 .wf-vsrow {
-    grid-template-columns: 22px 1fr auto;
+    grid-template-columns: 22px 1fr auto 1fr;
     gap: 8px; padding: 9px 0;
   }
-  .v2 .wf-vsteams { gap: 6px; flex-wrap: nowrap; }
+  .v2 .wf-vsmid { min-width: 48px; }
   .v2 .wf-vsteam { gap: 6px; }
   .v2 .wf-vsteam span.nm { font-size: 12px; }
   .v2 .wf-vs { font-size: 10px; }

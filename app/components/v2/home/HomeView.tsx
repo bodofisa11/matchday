@@ -10,28 +10,28 @@ import { Crest } from "../common";
 import { Star } from "../Star";
 
 function VsRow({ m }: { m: MatchV2 }) {
+  const showScores = m.status === "live" || m.status === "finished";
+  const center =
+    m.status === "live" ? (
+      <span className="wf-live">{m.clock ?? "LIVE"}</span>
+    ) : m.status === "finished" ? (
+      <span className="wf-vs-center">FT</span>
+    ) : (
+      <span className="wf-vs-center">{m.kickoff}</span>
+    );
   return (
     <div className="wf-vsrow">
       <Star id={m.id} />
-      <div className="wf-vsteams">
-        <span className="wf-vsteam">
-          <Crest team={m.home} />
-          <span className="nm">{m.home.name}</span>
-        </span>
-        <span className="wf-vs">vs</span>
-        <span className="wf-vsteam">
-          <Crest team={m.away} />
-          <span className="nm">{m.away.name}</span>
-        </span>
-      </div>
-      <span className="wf-kick">
-        {m.status === "live" ? (
-          <span className="wf-live">{m.clock ?? "LIVE"}</span>
-        ) : m.status === "finished" ? (
-          `${m.homeScore ?? 0}–${m.awayScore ?? 0}`
-        ) : (
-          m.kickoff
-        )}
+      <span className="wf-vsteam wf-vsteam-home">
+        <span className="nm">{m.home.name}</span>
+        <Crest team={m.home} />
+        {showScores && <span className="wf-score">{m.homeScore ?? 0}</span>}
+      </span>
+      <span className="wf-vsmid">{center}</span>
+      <span className="wf-vsteam wf-vsteam-away">
+        {showScores && <span className="wf-score">{m.awayScore ?? 0}</span>}
+        <Crest team={m.away} />
+        <span className="nm">{m.away.name}</span>
       </span>
     </div>
   );
