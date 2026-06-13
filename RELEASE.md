@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- The `/v2` **Formula 1** page is now a full section (was a placeholder): opens on an **Overview** tab (blank for now), plus **Schedule** (2026 race calendar — tap a completed round for full race/sprint classification), **Drivers** (championship standings), and **Constructors** (team standings). All live data, team colors on each row, matching the v1 F1 layout.
+
 - `/v2` football competition pages now open on a new **Overview** tab (a summary section, blank for now) and the **Standings** tab shows the full live league table — every team with played/won/drawn/lost, goal difference, points, and recent form — instead of placeholder rows.
 
 - The **FIFA World Cup** is now its own top-level tab in the `/v2` navigation (no longer listed under Football), with **Fixtures** (upcoming + recent results), **Groups** (live group standings, qualifiers highlighted), a knockout **Bracket**, and **Teams** — matching the v1 World Cup layout.
