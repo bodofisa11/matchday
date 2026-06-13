@@ -10,6 +10,12 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- `/v2` football competition pages now open on a new **Overview** tab (a summary section, blank for now) and the **Standings** tab shows the full live league table — every team with played/won/drawn/lost, goal difference, points, and recent form — instead of placeholder rows.
+
+- The **FIFA World Cup** is now its own top-level tab in the `/v2` navigation (no longer listed under Football), with **Fixtures** (upcoming + recent results), **Groups** (live group standings, qualifiers highlighted), a knockout **Bracket**, and **Teams** — matching the v1 World Cup layout.
+
+- `/v2` football competition pages now have working **Fixtures**, **Results**, **Stats**, and **Teams** tabs (previously only Standings rendered). Fixtures lists upcoming matches from today, Results shows finished matches with scores (both with "Load more" paging), Stats shows the competition's top scorers, and Teams shows every club with crests — tap a club to see its full squad grouped by position. All pull live data, matching the v1 experience.
+
 - Restyled `/v2` home schedule rows: competition headers (Premier League, La Liga, etc.) stay left-aligned, but each match row now centers the kickoff time (or live minute / FT). Home team aligns right of center, away team aligns left of center, so the middle column stays perfectly aligned across all matches. Live and finished matches show scores beside each team's crest with the clock/FT marker in the center.
 
 - Hid the horizontal scrollbar on the `/v2` "Top events" rail and any other horizontal-scroll rows. Section still scrolls horizontally (drag/wheel/touch) — only the visible scrollbar is removed for a cleaner look.

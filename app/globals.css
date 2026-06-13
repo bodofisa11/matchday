@@ -1300,6 +1300,42 @@ table { table-layout: auto; width: 100%; }
   background: var(--wf-surface);
 }
 
+/* load-more button (fixtures / results) */
+.v2 .wf-loadmore {
+  display: block; width: 100%; margin-top: 14px; padding: 10px;
+  border: 1px solid var(--wf-line); border-radius: var(--wf-r-sm);
+  background: var(--wf-surface); color: var(--wf-ink-2);
+  font-family: var(--font-jetbrains-mono), monospace; font-size: 12px; letter-spacing: 0.03em;
+  cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.v2 .wf-loadmore:hover { background: var(--wf-fill); color: var(--wf-ink); border-color: var(--wf-line-2); }
+.v2 .wf-loadmore:disabled { opacity: 0.55; cursor: default; }
+
+/* teams grid */
+.v2 .wf-teamgrid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px;
+}
+.v2 .wf-teamcard {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 18px 12px; text-align: center;
+  border: 1px solid var(--wf-line); border-radius: var(--wf-r); background: var(--wf-surface);
+  box-shadow: var(--wf-shadow-sm); cursor: pointer; color: inherit;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.v2 .wf-teamcard:hover { transform: translateY(-2px); border-color: var(--wf-line-2); box-shadow: var(--wf-shadow-md); }
+.v2 .wf-teamcard-nm { font-weight: 600; font-size: 14px; line-height: 1.2; }
+
+/* world cup */
+.v2 .wf-wcstage {
+  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 2px 7px; border-radius: 6px;
+  background: var(--wf-blue-soft); color: var(--wf-foot);
+}
+.v2 .wf-wcgroups {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;
+}
+.v2 .wf-trow.wf-qual { box-shadow: inset 3px 0 0 var(--wf-foot); }
+
 /* footer */
 .v2 .wf-footer {
   margin-top: 60px;

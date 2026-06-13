@@ -9,6 +9,21 @@
  * tables yet. Marked TODO; swap for live queries once the schema lands.
  */
 import { fetchFixturesByISTDateRange, type SportId } from "@/app/lib/v1/fetch-fixtures-client";
+import {
+  fetchFootballFixturesPaged,
+  fetchFootballScorers,
+  fetchFootballStandings,
+  fetchSquadByTeamApiId,
+  fetchTeamsForCompetition,
+  fetchWcFixturesByStage,
+  fetchWcGroupStandings,
+  type FootballFixtureRow,
+  type FootballScorerRow,
+  type FootballStandingRow,
+  type FootballSquadPlayerRow,
+  type FootballTeamDetailRow,
+  type WcGroupStandingRow,
+} from "@/app/lib/v1/fetch-standings-client";
 import type { Fixture } from "@/app/lib/fixtures";
 import {
   COMPETITIONS,
@@ -41,7 +56,7 @@ function initials(name: string): string {
   return parts.slice(0, 3).map((p) => p[0]).join("").toUpperCase();
 }
 
-function teamRefFromName(name: string): TeamRef {
+export function teamRefFromName(name: string): TeamRef {
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
   return {
@@ -165,4 +180,100 @@ export function getTeamProfile(teamSlug: string): TeamProfile | null {
 
 export function getTeamsForCompetition(competitionSlug: string): TeamRef[] {
   return teamsForCompetition(competitionSlug);
+}
+
+// ---- live competition queries (fixtures / results / stats / teams) --------
+// Maps a v2 competition slug to the DB `competition_short` value used by the
+// existing v1 Supabase tables. The v2 dummy `shortName` (e.g. "PL") differs
+// from the stored short code (e.g. "EPL"), so this mapping is the bridge.
+
+interface CompDbInfo {
+  /** value stored in `competition_short` columns */
+  short: string;
+  /** competition name used by the league standings tables (FOOTBALL_TABLE_MAP).
+   *  Omitted for cup/group-stage competitions that have no league table. */
+  standings?: string;
+}
+
+const COMP_DB: Record<string, CompDbInfo> = {
+  "premier-league": { short: "EPL", standings: "Premier League" },
+  "champions-league": { short: "UCL" },
+  "la-liga": { short: "LAL", standings: "La Liga" },
+  "serie-a": { short: "SRA", standings: "Serie A" },
+  bundesliga: { short: "BUN", standings: "Bundesliga" },
+  "europa-league": { short: "UEL", standings: "UEFA Europa League" },
+  "fa-cup": { short: "FAC" },
+  "world-cup": { short: "WC2026" },
+};
+
+/** DB `competition_short` for a v2 slug, or null if not wired to live data. */
+export function competitionDbShort(competitionSlug: string): string | null {
+  return COMP_DB[competitionSlug]?.short ?? null;
+}
+
+export type {
+  FootballFixtureRow,
+  FootballScorerRow,
+  FootballStandingRow,
+  FootballSquadPlayerRow,
+  FootballTeamDetailRow,
+  WcGroupStandingRow,
+};
+
+/** League standings (all teams) for a competition. Empty for cup/group-stage
+ *  competitions with no league table, or when no data source is configured. */
+export async function getCompetitionStandings(
+  competitionSlug: string,
+): Promise<FootballStandingRow[]> {
+  const name = COMP_DB[competitionSlug]?.standings;
+  if (!name) return [];
+  return fetchFootballStandings(name);
+}
+
+/** All World Cup fixtures (every stage), oldest first. */
+export async function getWcFixtures(): Promise<FootballFixtureRow[]> {
+  return fetchWcFixturesByStage(null, 250);
+}
+
+/** World Cup group standings keyed by group name (A, B, …). */
+export async function getWcGroupStandings(): Promise<Record<string, WcGroupStandingRow[]>> {
+  return fetchWcGroupStandings();
+}
+
+/** Paged fixtures/results for a competition. Empty when the slug is unmapped. */
+export async function getCompetitionFixtures(
+  competitionSlug: string,
+  status: "scheduled" | "finished",
+  page: number,
+  pageSize = 12,
+  fromDate?: string,
+  toDate?: string,
+): Promise<{ rows: FootballFixtureRow[]; hasMore: boolean }> {
+  const short = competitionDbShort(competitionSlug);
+  if (!short) return { rows: [], hasMore: false };
+  return fetchFootballFixturesPaged(short, status, page, pageSize, fromDate, toDate);
+}
+
+/** Top scorers for a competition. Empty when the slug is unmapped. */
+export async function getCompetitionScorers(
+  competitionSlug: string,
+  limit = 20,
+): Promise<FootballScorerRow[]> {
+  const short = competitionDbShort(competitionSlug);
+  if (!short) return [];
+  return fetchFootballScorers(short, limit);
+}
+
+/** Team list (with crests) for a competition. Empty when unmapped. */
+export async function getCompetitionTeamDetails(
+  competitionSlug: string,
+): Promise<FootballTeamDetailRow[]> {
+  const short = competitionDbShort(competitionSlug);
+  if (!short) return [];
+  return fetchTeamsForCompetition(short);
+}
+
+/** Squad for a team (by football-data API id). */
+export async function getTeamSquad(teamApiId: number): Promise<FootballSquadPlayerRow[]> {
+  return fetchSquadByTeamApiId(teamApiId);
 }
