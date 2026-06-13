@@ -7,6 +7,7 @@ import { istTodayStr } from "@/app/lib/timezone";
 import { SPORTS, sportDot } from "@/app/lib/v2/types";
 import type { MatchV2, SportSlug } from "@/app/lib/v2/types";
 import { Crest } from "../common";
+import { F1View } from "../f1/F1View";
 
 function ScoreCol({ m }: { m: MatchV2 }) {
   if (m.status === "scheduled") {
@@ -65,6 +66,10 @@ export function SportView({ sport }: { sport: SportSlug }) {
       alive = false;
     };
   }, [sport]);
+
+  if (sport === "f1") {
+    return <F1View />;
+  }
 
   if (sport === "cricket") {
     return (

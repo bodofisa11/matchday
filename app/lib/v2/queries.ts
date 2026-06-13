@@ -10,6 +10,11 @@
  */
 import { fetchFixturesByISTDateRange, type SportId } from "@/app/lib/v1/fetch-fixtures-client";
 import {
+  fetchF1Calendar,
+  fetchF1ConstructorStandings,
+  fetchF1DriverStandings,
+  fetchF1RaceResults,
+  fetchF1SprintResults,
   fetchFootballFixturesPaged,
   fetchFootballScorers,
   fetchFootballStandings,
@@ -17,6 +22,11 @@ import {
   fetchTeamsForCompetition,
   fetchWcFixturesByStage,
   fetchWcGroupStandings,
+  type F1ConstructorRow,
+  type F1DriverRow,
+  type F1RaceResultRow,
+  type F1RaceRow,
+  type F1SprintResultRow,
   type FootballFixtureRow,
   type FootballScorerRow,
   type FootballStandingRow,
@@ -238,6 +248,45 @@ export async function getWcFixtures(): Promise<FootballFixtureRow[]> {
 /** World Cup group standings keyed by group name (A, B, …). */
 export async function getWcGroupStandings(): Promise<Record<string, WcGroupStandingRow[]>> {
   return fetchWcGroupStandings();
+}
+
+// ---- live Formula 1 queries ----------------------------------------------
+
+export type {
+  F1ConstructorRow,
+  F1DriverRow,
+  F1RaceResultRow,
+  F1RaceRow,
+  F1SprintResultRow,
+};
+
+/** Full F1 race calendar, ordered by round. */
+export async function getF1Calendar(): Promise<F1RaceRow[]> {
+  return fetchF1Calendar();
+}
+
+/** Driver championship standings, highest points first. */
+export async function getF1DriverStandings(): Promise<F1DriverRow[]> {
+  const rows = await fetchF1DriverStandings();
+  return [...rows].sort((a, b) => Number(b.points) - Number(a.points));
+}
+
+/** Constructor championship standings, highest points first. */
+export async function getF1ConstructorStandings(): Promise<F1ConstructorRow[]> {
+  const rows = await fetchF1ConstructorStandings();
+  return [...rows].sort((a, b) => Number(b.points) - Number(a.points));
+}
+
+/** Race classification for a given season/round, sorted by finish position. */
+export async function getF1RaceResults(season: string, round: number): Promise<F1RaceResultRow[]> {
+  const rows = await fetchF1RaceResults(season, round);
+  return [...rows].sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
+}
+
+/** Sprint classification for a given season/round, sorted by finish position. */
+export async function getF1SprintResults(season: string, round: number): Promise<F1SprintResultRow[]> {
+  const rows = await fetchF1SprintResults(season, round);
+  return [...rows].sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
 }
 
 /** Paged fixtures/results for a competition. Empty when the slug is unmapped. */
