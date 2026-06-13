@@ -47,8 +47,9 @@ export const COMPETITIONS: CompetitionMeta[] = [
   { slug: "bundesliga", name: "Bundesliga", shortName: "BUN", sport: "football", country: "Germany", season: "2025/26" },
   { slug: "europa-league", name: "Europa League", shortName: "UEL", sport: "football", country: "Europe", season: "2025/26" },
   { slug: "fa-cup", name: "FA Cup", shortName: "FAC", sport: "football", country: "England", season: "2025/26" },
-  { slug: "world-cup", name: "World Cup", shortName: "WC", sport: "football", country: "International", season: "2026" },
 ];
+// FIFA World Cup is not a league competition — it has its own top-level route
+// (`/v2/world-cup`, see [WorldCupView]) and is intentionally excluded here.
 
 export function competitionsForSport(sport: SportSlug): CompetitionMeta[] {
   return COMPETITIONS.filter((c) => c.sport === sport);

@@ -8,6 +8,7 @@ import { SPORTS } from "@/app/lib/v2/types";
 const TABS = [
   { href: "/v2/home", label: "Home", dot: null as null | "foot" | "f1" | "crk" },
   ...SPORTS.map((s) => ({ href: `/v2/${s.slug}`, label: s.label, dot: s.dot })),
+  { href: "/v2/world-cup", label: "FIFA World Cup", dot: "foot" as const },
 ];
 
 export function Navbar({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: () => void }) {

@@ -1,0 +1,102 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  getCompetitionStandings,
+  teamRefFromName,
+  type FootballStandingRow,
+} from "@/app/lib/v2/queries";
+import { Crest, FormBadge } from "../common";
+
+const COLS = "22px 1fr 28px 28px 28px 28px 36px 40px auto";
+
+function parseForm(form: string | null): ("W" | "D" | "L")[] {
+  if (!form) return [];
+  return ((form.toUpperCase().match(/[WDL]/g) ?? []).slice(-5)) as ("W" | "D" | "L")[];
+}
+
+export function StandingsPanel({ competitionSlug }: { competitionSlug: string }) {
+  const [rows, setRows] = useState<FootballStandingRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Reset during render when the competition changes (avoids a sync setState
+  // inside the effect, which triggers cascading renders).
+  const [prevKey, setPrevKey] = useState(competitionSlug);
+  if (prevKey !== competitionSlug) {
+    setPrevKey(competitionSlug);
+    setRows([]);
+    setLoading(true);
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    getCompetitionStandings(competitionSlug).then((data) => {
+      if (cancelled) return;
+      setRows(data);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [competitionSlug]);
+
+  return (
+    <div className="wf-col wf-gap12">
+      <span className="wf-h3">Standings</span>
+      {loading ? (
+        <div className="wf-empty">Loading…</div>
+      ) : rows.length === 0 ? (
+        <div className="wf-empty">Standings not available for this competition yet.</div>
+      ) : (
+        <div style={{ overflowX: "auto" }}>
+          <div className="wf-box" style={{ minWidth: 520 }}>
+            <div className="wf-trow head" style={{ gridTemplateColumns: COLS }}>
+              <span>#</span>
+              <span>Club</span>
+              <span>P</span>
+              <span>W</span>
+              <span>D</span>
+              <span>L</span>
+              <span>GD</span>
+              <span>Pts</span>
+              <span>Form</span>
+            </div>
+            {rows.map((r) => {
+              const team = teamRefFromName(r.team);
+              return (
+                <div
+                  key={`${r.position}-${r.team}`}
+                  className="wf-trow"
+                  style={{ gridTemplateColumns: COLS }}
+                >
+                  <span className="wf-rank">{r.position}</span>
+                  <span className="wf-center wf-gap8" style={{ minWidth: 0 }}>
+                    <Crest team={team} />
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {r.team}
+                    </span>
+                  </span>
+                  <span className="wf-num">{r.played}</span>
+                  <span className="wf-num">{r.won}</span>
+                  <span className="wf-num">{r.drawn}</span>
+                  <span className="wf-num">{r.lost}</span>
+                  <span className="wf-num">
+                    {r.goal_difference > 0 ? `+${r.goal_difference}` : r.goal_difference}
+                  </span>
+                  <span className="wf-num" style={{ fontWeight: 700 }}>
+                    {r.points}
+                  </span>
+                  <span className="wf-form">
+                    {parseForm(r.form).map((f, i) => (
+                      <FormBadge key={i} r={f} />
+                    ))}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
