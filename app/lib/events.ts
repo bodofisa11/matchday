@@ -10,6 +10,11 @@ import { createSupabaseClient } from "./supabase-client";
 
 export type EventSport = "fb" | "f1";
 
+/** Default season filters for the live editions seeded in `events`. */
+export const DEFAULT_FB_SEASON = "2025-26";
+export const DEFAULT_F1_SEASON = "2026";
+export const WC_SEASON = "2026";
+
 export interface EventRow {
   id: string;
   sport: EventSport;
@@ -32,7 +37,7 @@ export async function loadEvents(): Promise<EventRow[]> {
       if (!supabase) return [];
       const { data, error } = await supabase
         .from("events")
-        .select("id, sport, short_code, season, status, name");
+        .select("id, sport, short_code, season, status, name:competition_name");
       if (error || !data) return [];
       return data as EventRow[];
     })();
@@ -54,6 +59,29 @@ export async function getEventId(
     (r) => r.sport === sport && r.short_code === shortCode && r.season === season,
   );
   return match?.id ?? null;
+}
+
+/**
+ * Resolve a full football event row by its `short_code`. Season defaults by
+ * code (World Cup uses {@link WC_SEASON}, leagues/cups use
+ * {@link DEFAULT_FB_SEASON}). Returns `null` when not seeded.
+ */
+export async function getFbEvent(shortCode: string): Promise<EventRow | null> {
+  const rows = await loadEvents();
+  const season = shortCode === "WC" ? WC_SEASON : DEFAULT_FB_SEASON;
+  return (
+    rows.find(
+      (r) => r.sport === "fb" && r.short_code === shortCode && r.season === season,
+    ) ?? null
+  );
+}
+
+/** Resolve the Formula 1 event row for a season (defaults to the live season). */
+export async function getF1Event(season: string = DEFAULT_F1_SEASON): Promise<EventRow | null> {
+  const rows = await loadEvents();
+  return (
+    rows.find((r) => r.sport === "f1" && r.short_code === "F1" && r.season === season) ?? null
+  );
 }
 
 /**

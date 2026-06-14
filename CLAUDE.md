@@ -30,39 +30,40 @@ No test suite is configured.
 Create `.env.local` with:
 
 ```
-# Local dev (Docker Postgres)
-DATABASE_URL=postgresql://sports:sports@localhost:5432/sports_calendar
-
-# Production (Supabase) — required for static build and CI
+# Supabase — required for dev, static build, and CI
 NEXT_PUBLIC_SUPABASE_URL=<supabase project url>
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<supabase anon key>
 ```
 
 ## Architecture
 
-**Next.js 16 app** (App Router) with React 19, TypeScript, Tailwind CSS v4, Drizzle ORM.
+**Next.js 16 app** (App Router) with React 19, TypeScript, Tailwind CSS v4.
 
 Deployed as a **static export** (`output: "export"`) to GitHub Pages.
 
 ### Data flow
 
-#### Production (GitHub Pages — static)
-- **`app/page.tsx`** calls `fetchFixturesClient()` from `app/lib/fetch-fixtures-client.ts`
-- `fetch-fixtures-client.ts` detects `NODE_ENV === "production"` and queries Supabase directly from the browser using the anon key
-- No server or API routes involved
+**Supabase-only, browser-direct.** Both dev and production query the Supabase
+project directly from the browser using the anon key. There is no server, API
+route, or local Postgres. When Supabase is unconfigured, fetches return empty
+and the UI renders empty states.
 
-#### Local development
-- **`app/page.tsx`** calls `fetchFixturesClient()` which falls back to `GET /api/fixtures?sport=<id>`
-- **`app/api/fixtures/route.ts`** — GET endpoint that delegates to `fetchFixtures()`
-- **`app/lib/fetch-fixtures.ts`** — reads from **local Docker Postgres** via Drizzle ORM
+The database uses the normalized **Matchday schema** (defined and provisioned
+by the sibling `db-postgres-sports-data` repo): an `events` hub table plus
+FK-joined `fb_*` / `f1_*` reference, fixture, standings, and results tables.
+The frontend resolves an `events` row, then queries the matching table with
+PostgREST embedded joins for display names.
+
+- **`app/page.tsx`** (v1 daily view) → `fetchFixturesClient()` / `fetchFixturesByISTDateRange()`.
+- **v2 pages** (`app/v2/**`) → `app/lib/v2/queries.ts`, which funnels through the same v1 fetch modules.
 
 ### Key files
 
-- **`app/lib/fetch-fixtures-client.ts`** — Browser-safe fetch entry point. Production: Supabase direct. Dev: API route proxy.
-- **`app/lib/fetch-fixtures.ts`** — Server-only. Used by the local dev API route. Reads from Docker Postgres via Drizzle.
-- **`app/lib/db-schema.ts`** — Drizzle schema for `football_fixtures` and `f1_fixtures` tables.
+- **`app/lib/events.ts`** — Loads + caches the `events` table; resolves event UUIDs by sport/short_code/season (`getFbEvent`, `getF1Event`). Season constants: `DEFAULT_FB_SEASON`, `DEFAULT_F1_SEASON`, `WC_SEASON`.
+- **`app/lib/v1/fetch-fixtures-client.ts`** — Daily fixtures from `fb_fixtures` / `f1_fixtures` (IST date range), mapped to the shared `Fixture` shape.
+- **`app/lib/v1/fetch-standings-client.ts`** — Standings, fixtures (paged), teams, squads, scorers, World Cup groups, and all F1 queries. Stable return shapes consumed by both v1 sections and `v2/queries.ts`. Dead features (`fetchNews`, `fetchIPLStandings`) return empty.
 - **`app/lib/supabase-client.ts`** — Creates Supabase client from env vars (returns `null` if not configured).
-- **`app/lib/postgres-client.ts`** — Singleton `pg.Pool` for local dev; returns `null` outside development.
+- **`app/lib/v2/queries.ts`** — v2 query layer; maps v2 slugs → event short codes via `COMP_DB`.
 
 ### Shared types and constants
 
@@ -83,21 +84,34 @@ Class-based dark mode (`dark` class on `<html>`). Tailwind v4 variant configured
 - **`app/components/FootballCard.tsx`** — Football fixture card (full + compact variants).
 - **`app/components/F1Card.tsx`** — F1 fixture card (full + compact variants).
 
-### Database tables
+### Database tables (Matchday schema)
 
-Both local Docker Postgres and Supabase use the same two-table schema:
+Owned by the `db-postgres-sports-data` repo; the frontend reads them via the
+Supabase anon key. Key tables and the columns the frontend relies on:
 
-| Table | Columns |
+| Table | Columns used |
 |---|---|
-| `football_fixtures` | `id`, `home_team`, `away_team`, `competition`, `competition_short`, `kickoff`, `date`, `venue`, `status`, `home_score`, `away_score` |
-| `f1_fixtures` | `id`, `round`, `circuit`, `country`, `date`, `status` |
+| `events` | `id`, `sport` (`fb`/`f1`), `competition_name`, `short_code`, `season`, `status` |
+| `fb_fixtures` | `id`, `event_id`, `home_team_id`, `away_team_id`, `match_date`, `kickoff_time_utc`, `stadium_name`, `match_type`, `status`, `home_score`, `away_score` |
+| `fb_clubs` | `id`, `full_name`, `common_name`, `short_code`, `crest_url`, `founded_year`, `stadium_name`, `head_coach_name`, `manager_name`, `primary_color` |
+| `fb_league_club_standings` | `club_id`, `event_id`, `position`, `played`, `wins`, `draws`, `losses`, `goals_for`, `goals_against`, `goal_difference`, `points`, `last5` |
+| `fb_group_standings` | same + `group_label` (World Cup groups) |
+| `fb_squads` / `fb_players` / `fb_nations` | squad rows joined to player + nation for name/position/DOB/nationality |
+| `fb_top_scorers` | `event_id`, `position`, `matches_played`, `goals` + player/club joins |
+| `f1_fixtures` | `id`, `event_id`, `circuit_id`, `round`, `start_at`, `end_at`, `status`, `has_sprint` |
+| `f1_circuits` / `f1_teams` / `f1_drivers` | reference joins for circuit/team/driver names |
+| `f1_driver_standings` / `f1_constructor_standings` | `event_id`, `points`, `wins` + driver/team joins |
+| `f1_race_results` | `fixture_id`, `is_sprint`, `position`, `grid`, `points`, `laps_completed`, `total_time`, `status` |
 
-F1 status values: `scheduled` / `practice` / `qualifying` / `race` / `completed` / `cancelled`
-Football status values: `scheduled` / `live` / `finished`
+Short codes (events): `PL`, `PD`, `BL1`, `SA`, `FL1`, `CL`, `EL`, `WC` (fb) and `F1` (f1).
+Default seasons: fb `2025-26`, F1 `2026`, World Cup `2026`.
 
-### F1 fixture mapping
+`fb_fixtures.status`: `scheduled`/`live`/`finished`/`postponed`/`cancelled`.
+`f1_fixtures.status`: `scheduled`/`practice`/`qualifying`/`sprint`/`race`/`completed`/`cancelled`.
 
-F1 rows are mapped to the `Fixture` interface with `circuit` as `homeTeam`, `country` as `awayTeam`, and a fixed `14:00` kickoff. Status mapping: `practice/qualifying/race` → `live`, `completed/cancelled` → `finished`.
+### Fixture mapping
+
+Football fixtures: `common_name` → `homeTeam`/`awayTeam`, event `competition_name`/`short_code` → competition labels, `kickoff_time_utc` split to UTC date+time then converted to IST, `stadium_name` → `venue`. F1 fixtures: circuit `name` → `homeTeam`, `country` → `awayTeam`, `start_at` → IST date/time. F1 status: `practice`/`qualifying`/`sprint`/`race` → `live`, `completed`/`cancelled` → `finished`.
 
 ### View
 

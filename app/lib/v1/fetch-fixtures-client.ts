@@ -1,8 +1,9 @@
 /**
- * Browser-safe fixture fetching.
+ * Browser-safe fixture fetching against the normalized Matchday schema.
  *
- * - Production (static build / GitHub Pages): queries Supabase directly.
- * - Development: calls the local /api/fixtures route → Docker Postgres.
+ * Queries Supabase directly (works in dev and the static production build).
+ * Returns empty when Supabase is not configured — the UI renders its empty
+ * states. No server / API route is involved.
  */
 import { createSupabaseClient } from "@/app/lib/supabase-client";
 import type { Fixture } from "@/app/lib/fixtures";
@@ -11,105 +12,14 @@ import { getEventIndex, type EventRow } from "@/app/lib/events";
 
 export type SportId = "all" | "football" | "f1";
 
-const DB_VERSION = process.env.NEXT_PUBLIC_DB_VERSION ?? "v1";
-const IS_V2 = DB_VERSION === "v2";
+type FootballStatus = "scheduled" | "live" | "finished" | "postponed" | "cancelled";
 
-function mapF1Status(status: string): Fixture["status"] {
-  if (status === "scheduled") return "scheduled";
-  if (["practice", "qualifying", "race"].includes(status)) return "live";
-  return "finished";
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapFootballRow(row: Record<string, any>): Fixture {
-  const dateStr = typeof row.date === "string"
-    ? row.date.split("T")[0]
-    : (row.date as Date).toISOString().split("T")[0];
-  const ist = utcToIST(dateStr, row.kickoff);
-  return {
-    id: String(row.id),
-    sport: "football",
-    homeTeam: row.home_team,
-    awayTeam: row.away_team,
-    competition: row.competition,
-    competitionShort: row.competition_short,
-    kickoff: ist.kickoff,
-    date: ist.date,
-    venue: row.venue ?? undefined,
-    status: row.status as Fixture["status"],
-    homeScore: row.home_score ?? undefined,
-    awayScore: row.away_score ?? undefined,
-  };
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapF1Row(row: Record<string, any>): Fixture {
-  const dateStr = typeof row.date === "string"
-    ? row.date.split("T")[0]
-    : (row.date as Date).toISOString().split("T")[0];
-  const ist = utcToIST(dateStr, "14:00");
-  return {
-    id: String(row.id),
-    sport: "f1",
-    homeTeam: row.circuit,
-    awayTeam: row.country,
-    competition: `Round ${row.round}`,
-    competitionShort: "F1",
-    kickoff: ist.kickoff,
-    date: ist.date,
-    venue: row.country,
-    status: mapF1Status(row.status),
-  };
-}
-
-async function fetchFromSupabase(
-  sportId: SportId,
-  utcRange?: { utcStart: string; utcEnd: string },
-): Promise<Fixture[]> {
-  if (IS_V2) return fetchFromSupabaseV2(sportId, utcRange);
-  const supabase = createSupabaseClient();
-  if (!supabase) return [];
-
-  const allFixtures: Fixture[] = [];
-
-  if (sportId === "f1" || sportId === "all") {
-    let q = supabase.from("f1_fixtures").select("*").order("date", { ascending: true });
-    if (utcRange) q = q.gte("date", utcRange.utcStart).lte("date", utcRange.utcEnd);
-    const { data } = await q;
-    if (data) allFixtures.push(...data.map(mapF1Row));
-  }
-
-  if (sportId === "football" || sportId === "all") {
-    let q = supabase
-      .from("football_fixtures")
-      .select("*")
-      .order("date", { ascending: true })
-      .order("kickoff", { ascending: true });
-    if (utcRange) q = q.gte("date", utcRange.utcStart).lte("date", utcRange.utcEnd);
-    const { data } = await q;
-    if (data) allFixtures.push(...data.map(mapFootballRow));
-  }
-
-  allFixtures.sort((a, b) => {
-    const d = a.date.localeCompare(b.date);
-    return d !== 0 ? d : a.kickoff.localeCompare(b.kickoff);
-  });
-
-  return allFixtures;
-}
-
-// ---------------------------------------------------------------------------
-// v2 schema path (NEXT_PUBLIC_DB_VERSION=v2)
-// ---------------------------------------------------------------------------
-
-type V2FootballStatus = "scheduled" | "live" | "finished" | "postponed" | "cancelled";
-
-interface V2FbClubRef {
+interface FbClubRef {
   common_name: string | null;
   full_name?: string | null;
 }
 
-interface V2FbFixtureRow {
+interface FbFixtureRow {
   id: string;
   event_id: string;
   home_team_id: string;
@@ -117,36 +27,37 @@ interface V2FbFixtureRow {
   kickoff_time_utc: string; // ISO timestamptz
   match_date: string; // YYYY-MM-DD
   stadium_name: string | null;
-  status: V2FootballStatus;
+  status: FootballStatus;
   home_score: number | null;
   away_score: number | null;
-  home_team: V2FbClubRef | V2FbClubRef[] | null;
-  away_team: V2FbClubRef | V2FbClubRef[] | null;
+  home_team: FbClubRef | FbClubRef[] | null;
+  away_team: FbClubRef | FbClubRef[] | null;
 }
 
-type V2F1Status =
+type F1Status =
   | "scheduled"
   | "practice"
   | "qualifying"
+  | "sprint"
   | "race"
   | "completed"
   | "cancelled";
 
-interface V2F1CircuitRef {
+interface F1CircuitRef {
   name: string | null;
   country: string | null;
 }
 
-interface V2F1FixtureRow {
+interface F1FixtureRow {
   id: string;
   event_id: string;
   round: number;
   circuit_id: string;
   start_at: string; // ISO timestamptz
   end_at: string | null;
-  status: V2F1Status;
+  status: F1Status;
   place: string | null;
-  circuit: V2F1CircuitRef | V2F1CircuitRef[] | null;
+  circuit: F1CircuitRef | F1CircuitRef[] | null;
 }
 
 function unwrapRef<T>(ref: T | T[] | null): T | null {
@@ -166,16 +77,16 @@ function competitionLabels(
   };
 }
 
-function mapV2FootballStatus(status: V2FootballStatus): Fixture["status"] {
+function mapFootballStatus(status: FootballStatus): Fixture["status"] {
   if (status === "live") return "live";
   if (status === "finished" || status === "cancelled") return "finished";
   return "scheduled"; // scheduled | postponed
 }
 
-function mapV2F1Status(status: V2F1Status): Fixture["status"] {
+function mapF1Status(status: F1Status): Fixture["status"] {
   if (status === "scheduled") return "scheduled";
-  if (["practice", "qualifying", "race"].includes(status)) return "live";
-  return "finished";
+  if (["practice", "qualifying", "sprint", "race"].includes(status)) return "live";
+  return "finished"; // completed | cancelled
 }
 
 function splitIsoTimestamp(iso: string): { date: string; time: string } {
@@ -190,10 +101,7 @@ function splitIsoTimestamp(iso: string): { date: string; time: string } {
   return { date: `${y}-${m}-${d}`, time: `${H}:${M}` };
 }
 
-function mapV2FootballRow(
-  row: V2FbFixtureRow,
-  events: Map<string, EventRow>,
-): Fixture {
+function mapFootballRow(row: FbFixtureRow, events: Map<string, EventRow>): Fixture {
   const { date: utcDate, time: utcKickoff } = splitIsoTimestamp(row.kickoff_time_utc);
   const ist = utcToIST(utcDate, utcKickoff);
   const home = unwrapRef(row.home_team);
@@ -209,14 +117,14 @@ function mapV2FootballRow(
     kickoff: ist.kickoff,
     date: ist.date,
     venue: row.stadium_name ?? undefined,
-    status: mapV2FootballStatus(row.status),
+    status: mapFootballStatus(row.status),
     homeScore: row.home_score ?? undefined,
     awayScore: row.away_score ?? undefined,
   };
 }
 
-function mapV2F1Row(row: V2F1FixtureRow): Fixture {
-  // Bucket by start_at::date per backend guidance (race-weekend Friday).
+function mapF1Row(row: F1FixtureRow): Fixture {
+  // Bucket by start_at (race-weekend start).
   const { date: utcDate, time: utcKickoff } = splitIsoTimestamp(row.start_at);
   const ist = utcToIST(utcDate, utcKickoff);
   const circuit = unwrapRef(row.circuit);
@@ -230,11 +138,11 @@ function mapV2F1Row(row: V2F1FixtureRow): Fixture {
     kickoff: ist.kickoff,
     date: ist.date,
     venue: circuit?.country ?? row.place ?? undefined,
-    status: mapV2F1Status(row.status),
+    status: mapF1Status(row.status),
   };
 }
 
-async function fetchFromSupabaseV2(
+async function fetchFromSupabase(
   sportId: SportId,
   utcRange?: { utcStart: string; utcEnd: string },
 ): Promise<Fixture[]> {
@@ -252,14 +160,12 @@ async function fetchFromSupabaseV2(
       )
       .order("start_at", { ascending: true });
     if (utcRange) {
-      // start_at is timestamptz; compare against day bounds.
-      q = q.gte("start_at", `${utcRange.utcStart}T00:00:00Z`).lte(
-        "start_at",
-        `${utcRange.utcEnd}T23:59:59Z`,
-      );
+      q = q
+        .gte("start_at", `${utcRange.utcStart}T00:00:00Z`)
+        .lte("start_at", `${utcRange.utcEnd}T23:59:59Z`);
     }
     const { data } = await q;
-    if (data) allFixtures.push(...(data as unknown as V2F1FixtureRow[]).map(mapV2F1Row));
+    if (data) allFixtures.push(...(data as unknown as F1FixtureRow[]).map(mapF1Row));
   }
 
   if (sportId === "football" || sportId === "all") {
@@ -276,7 +182,7 @@ async function fetchFromSupabaseV2(
     const { data } = await q;
     if (data) {
       allFixtures.push(
-        ...(data as unknown as V2FbFixtureRow[]).map((r) => mapV2FootballRow(r, events)),
+        ...(data as unknown as FbFixtureRow[]).map((r) => mapFootballRow(r, events)),
       );
     }
   }
@@ -301,21 +207,9 @@ export async function fetchFixturesByISTDateRange(
 ): Promise<{ fixtures: Fixture[]; updatedAt: string }> {
   const updatedAt = new Date().toISOString();
   const utcRange = istDateRangeToUTCDateRange(istStart, istEnd);
-
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    const all = await fetchFromSupabase(sportId, utcRange);
-    const fixtures = all.filter((f) => f.date >= istStart && f.date <= istEnd);
-    return { fixtures, updatedAt };
-  }
-
-  // Local dev fallback: fetch all from API route then filter client-side.
-  const res = await fetch(`/api/fixtures/${sportId}`);
-  if (!res.ok) return { fixtures: [], updatedAt };
-  const json = (await res.json()) as { fixtures: Fixture[]; updatedAt: string };
-  return {
-    fixtures: json.fixtures.filter((f) => f.date >= istStart && f.date <= istEnd),
-    updatedAt: json.updatedAt ?? updatedAt,
-  };
+  const all = await fetchFromSupabase(sportId, utcRange);
+  const fixtures = all.filter((f) => f.date >= istStart && f.date <= istEnd);
+  return { fixtures, updatedAt };
 }
 
 /**
@@ -331,7 +225,7 @@ export async function fetchLastUpdated(sportId: SportId = "all"): Promise<string
     tables.push("f1_fixtures", "f1_driver_standings", "f1_race_results");
   }
   if (sportId === "football" || sportId === "all") {
-    tables.push(IS_V2 ? "fb_fixtures" : "football_fixtures");
+    tables.push("fb_fixtures");
   }
 
   const stamps = await Promise.all(
@@ -355,15 +249,6 @@ export async function fetchFixturesClient(sportId: SportId = "all"): Promise<{
   updatedAt: string;
 }> {
   const updatedAt = new Date().toISOString();
-
-  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
-    // Supabase configured: query directly (works in both dev and production).
-    const fixtures = await fetchFromSupabase(sportId);
-    return { fixtures, updatedAt };
-  }
-
-  // Fallback: local dev API route → Docker Postgres.
-  const res = await fetch(`/api/fixtures/${sportId}`);
-  if (!res.ok) return { fixtures: [], updatedAt };
-  return res.json();
+  const fixtures = await fetchFromSupabase(sportId);
+  return { fixtures, updatedAt };
 }

@@ -61,7 +61,7 @@ export function TeamsTabPanel({ competitionShort, accent }: Props) {
           >
             {teams.map((t) => (
               <button
-                key={t.team_api_id}
+                key={t.id}
                 onClick={() => setSelected(t)}
                 style={{
                   display: "flex",

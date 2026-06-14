@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
-  fetchSquadByTeamApiId,
+  fetchSquadByClubId,
   type FootballSquadPlayerRow,
   type FootballTeamDetailRow,
 } from "@/app/lib/v1/fetch-standings-client";
@@ -22,16 +22,16 @@ interface Props {
 export function TeamDetailPanel({ team, accent, onBack }: Props) {
   const [players, setPlayers] = useState<FootballSquadPlayerRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [prevId, setPrevId] = useState(team.team_api_id);
-  if (prevId !== team.team_api_id) {
-    setPrevId(team.team_api_id);
+  const [prevId, setPrevId] = useState(team.id);
+  if (prevId !== team.id) {
+    setPrevId(team.id);
     setPlayers([]);
     setLoading(true);
   }
 
   useEffect(() => {
     let cancelled = false;
-    fetchSquadByTeamApiId(team.team_api_id).then((data) => {
+    fetchSquadByClubId(team.id).then((data) => {
       if (cancelled) return;
       setPlayers(data);
       setLoading(false);
@@ -39,7 +39,7 @@ export function TeamDetailPanel({ team, accent, onBack }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [team.team_api_id]);
+  }, [team.id]);
 
   const grouped: Record<string, FootballSquadPlayerRow[]> = {};
   for (const p of players) {
@@ -134,7 +134,7 @@ export function TeamDetailPanel({ team, accent, onBack }: Props) {
                 </thead>
                 <tbody>
                   {grouped[g].map((p) => (
-                    <tr key={p.player_api_id}>
+                    <tr key={p.id}>
                       <td><span className="pos-num">{p.shirt_number ?? "—"}</span></td>
                       <td>{p.name}</td>
                       <td>{shortPosition(p.position) ?? p.position ?? "—"}</td>

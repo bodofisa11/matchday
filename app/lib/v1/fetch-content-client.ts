@@ -1,11 +1,10 @@
 /**
- * Browser-safe fetching for dynamic site content (hero banners, badges, etc.).
+ * Dynamic site content (hero banners, badges, etc.).
  *
- * Queries the `site_content` table from Supabase by slot names.
- * Returns a Map for O(1) lookups in components.
+ * The normalized Matchday schema has no CMS / `site_content` table, so this
+ * returns an empty Map. Hero and badge components fall back to their static
+ * defaults. Kept as a stable seam in case a content source is added later.
  */
-import { createSupabaseClient } from "@/app/lib/supabase-client";
-import { getStorageUrl } from "@/app/lib/v1/image-utils";
 
 export interface SiteContent {
   slot: string;
@@ -16,42 +15,9 @@ export interface SiteContent {
   accentColor?: string;
 }
 
-/**
- * Fetch active site_content rows for the given slot names.
- *
- * Example:
- *   const content = await fetchSiteContent(["pl-hero-banner", "f1-hero-banner"]);
- *   const plHero = content.get("pl-hero-banner");
- */
 export async function fetchSiteContent(
-  slots: string[]
+  _slots: string[],
 ): Promise<Map<string, SiteContent>> {
-  const map = new Map<string, SiteContent>();
-  if (slots.length === 0) return map;
-
-  const supabase = createSupabaseClient();
-  if (!supabase) return map;
-
-  const { data } = await supabase
-    .from("site_content")
-    .select("*")
-    .in("slot", slots)
-    .eq("is_active", true);
-
-  if (data) {
-    for (const row of data) {
-      map.set(row.slot, {
-        slot: row.slot,
-        title: row.title ?? undefined,
-        subtitle: row.subtitle ?? undefined,
-        imageUrl: row.image_path
-          ? getStorageUrl(row.image_path) ?? undefined
-          : undefined,
-        badgeText: row.badge_text ?? undefined,
-        accentColor: row.accent_color ?? undefined,
-      });
-    }
-  }
-
-  return map;
+  void _slots;
+  return new Map<string, SiteContent>();
 }

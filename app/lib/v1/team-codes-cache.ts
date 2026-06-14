@@ -1,22 +1,22 @@
-// Module-level cache of team codes (TLA) loaded from football_team_details.
+// Module-level cache of team codes (TLA) loaded from `fb_clubs`.
 // One fetch per session — DB is the source of truth, not the static
 // TEAM_CODE_MAP in team-meta.ts (which now serves only as fallback for
 // teams missing from the DB / non-football competitions).
+//
+// Clubs are global in the Matchday schema (one row per club, not per
+// competition), so lookups are keyed by normalized name only. The optional
+// `competitionShort` arg is kept for signature compatibility but unused.
 
 import { createSupabaseClient } from "@/app/lib/supabase-client";
 
-interface TeamRow {
-  competition_short: string;
-  name: string;
-  short_name: string | null;
-  tla: string | null;
+interface ClubRow {
+  common_name: string;
+  full_name: string | null;
+  short_code: string | null;
 }
 
-// Compound key: `${competition_short}::${normalized name}` for disambiguation
-// across leagues where two teams share a partial name.
-const byCompetition = new Map<string, TeamRow>();
-// Global fallback keyed by normalized name only.
-const global = new Map<string, TeamRow>();
+// Keyed by normalized name (both common and full name resolve to the row).
+const global = new Map<string, ClubRow>();
 
 let loaded = false;
 let inflight: Promise<void> | null = null;
@@ -39,15 +39,13 @@ export async function loadTeamCodes(): Promise<void> {
       return;
     }
     const { data } = await supabase
-      .from("football_team_details")
-      .select("competition_short,name,short_name,tla");
-    const rows = (data as TeamRow[]) ?? [];
+      .from("fb_clubs")
+      .select("common_name,full_name,short_code");
+    const rows = (data as ClubRow[]) ?? [];
     for (const r of rows) {
-      const keys = [r.name, r.short_name].filter(Boolean) as string[];
+      const keys = [r.common_name, r.full_name].filter(Boolean) as string[];
       for (const k of keys) {
-        const n = norm(k);
-        byCompetition.set(`${r.competition_short}::${n}`, r);
-        global.set(n, r);
+        global.set(norm(k), r);
       }
     }
     loaded = true;
@@ -57,28 +55,16 @@ export async function loadTeamCodes(): Promise<void> {
 
 export function getTeamCodeFromDB(
   name: string,
-  competitionShort?: string,
+  _competitionShort?: string,
 ): string | null {
   if (!name) return null;
-  const n = norm(name);
-  if (competitionShort) {
-    const r = byCompetition.get(`${competitionShort}::${n}`);
-    if (r?.tla) return r.tla;
-  }
-  const r = global.get(n);
-  return r?.tla ?? null;
+  return global.get(norm(name))?.short_code ?? null;
 }
 
 export function getTeamShortNameFromDB(
   name: string,
-  competitionShort?: string,
+  _competitionShort?: string,
 ): string | null {
   if (!name) return null;
-  const n = norm(name);
-  if (competitionShort) {
-    const r = byCompetition.get(`${competitionShort}::${n}`);
-    if (r?.short_name) return r.short_name;
-  }
-  const r = global.get(n);
-  return r?.short_name ?? null;
+  return global.get(norm(name))?.common_name ?? null;
 }
