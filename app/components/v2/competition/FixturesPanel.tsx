@@ -6,7 +6,7 @@ import {
   teamRefFromName,
   type FootballFixtureRow,
 } from "@/app/lib/v2/queries";
-import { formatFixtureDate } from "@/app/lib/v1/team-meta";
+import { formatFixtureDate } from "@/app/lib/team-meta";
 import { istTodayStr } from "@/app/lib/timezone";
 import { Crest } from "../common";
 

@@ -54,35 +54,47 @@ FK-joined `fb_*` / `f1_*` reference, fixture, standings, and results tables.
 The frontend resolves an `events` row, then queries the matching table with
 PostgREST embedded joins for display names.
 
-- **`app/page.tsx`** (v1 daily view) → `fetchFixturesClient()` / `fetchFixturesByISTDateRange()`.
-- **v2 pages** (`app/v2/**`) → `app/lib/v2/queries.ts`, which funnels through the same v1 fetch modules.
+There is a **single UI** (the editorial "MATCHDAY" design, `.v2`-scoped CSS) and it lives at the **root routes**. Every page goes through `app/lib/v2/queries.ts`, which funnels into the shared fetch modules (`app/lib/fetch-fixtures-client.ts`, `app/lib/fetch-standings-client.ts`).
+
+Routes (all wrapped in `app/components/v2/V2Shell.tsx`):
+
+- `/` → `HomeView` (top events, today + tomorrow schedule, live bar).
+- `/[sport]` → `SportView` (`football` / `f1` / `cricket`; `dynamicParams=false`).
+- `/[sport]/[competition]` → `CompetitionView` (sport-aware tabs; football = Overview/Standings/Fixtures/Results/Stats/Teams, cricket swaps Standings → News).
+- `/[sport]/[competition]/[team]` → `TeamView` (static dummy profile; no live club source yet).
+- `/world-cup` → `WorldCupView` (Fixtures/Groups/Bracket/Teams + Predict link).
+- `/predictions` → `PredictSection` (localStorage WC2026 game; styled by the retained v1 CSS slice, wrapped in `.predict-scope`).
+- `/ufc` → empty landing (no data source yet).
 
 ### Key files
 
 - **`app/lib/events.ts`** — Loads + caches the `events` table; resolves event UUIDs by sport/short_code/season (`getFbEvent`, `getF1Event`). Season constants: `DEFAULT_FB_SEASON`, `DEFAULT_F1_SEASON`, `WC_SEASON`.
-- **`app/lib/v1/fetch-fixtures-client.ts`** — Daily fixtures from `fb_fixtures` / `f1_fixtures` (IST date range), mapped to the shared `Fixture` shape.
-- **`app/lib/v1/fetch-standings-client.ts`** — Standings, fixtures (paged), teams, squads, scorers, World Cup groups, and all F1 queries. Stable return shapes consumed by both v1 sections and `v2/queries.ts`. Dead features (`fetchNews`, `fetchIPLStandings`) return empty.
+- **`app/lib/fetch-fixtures-client.ts`** — Daily fixtures from `fb_fixtures` / `f1_fixtures` (IST date range), mapped to the shared `Fixture` shape.
+- **`app/lib/fetch-standings-client.ts`** — Standings, fixtures (paged), teams, squads, scorers, World Cup groups, and all F1 queries. Stable return shapes consumed by `v2/queries.ts`. Dead features (`fetchNews`, `fetchIPLStandings`) return empty.
 - **`app/lib/supabase-client.ts`** — Creates Supabase client from env vars (returns `null` if not configured).
-- **`app/lib/v2/queries.ts`** — v2 query layer; maps v2 slugs → event short codes via `COMP_DB`.
+- **`app/lib/v2/queries.ts`** — query layer; maps competition slugs → event short codes via `COMP_DB` (unmapped slugs, e.g. ISL/IPL, return empty).
+- **`app/lib/v2/dummy.ts`** — static `COMPETITIONS` list + the dummy team profiles backing the `[team]` route.
+- **`app/lib/predictions/**`** + **`app/components/predictions/**`** — self-contained WC2026 prediction sub-app (localStorage-backed), kept on its own v1-era styling.
+- Other shared util in `app/lib/`: `team-meta.ts`, `team-codes-cache.ts`, `football-terms.ts`, `f1-codes.ts`, `use-team-codes.ts`, `use-compact-tables.ts`.
 
 ### Shared types and constants
 
 - **`app/lib/fixtures.ts`** — `Fixture` interface, `COMPETITION_COLORS` map (competition name → color key), `CARD_CLASSES` map (color key → Tailwind classes), and `generateDummyFixtures()` for offline development.
 
-### Dark mode
+### Theme + compact tables
 
-Class-based dark mode (`dark` class on `<html>`). Tailwind v4 variant configured via `@variant dark (&:is(.dark *))` in `globals.css`.
+The single UI owns its own theme. `app/components/v2/V2Shell.tsx` reads/writes the `wf-theme` localStorage key (`"dark"` | `"light"`) via `useSyncExternalStore` and applies a `wf-dark` class on the `.v2` wrapper — no flash, no `<html>` class needed.
 
-- **`app/layout.tsx`** — Inline script runs before paint to apply `dark` class from `localStorage` (or `prefers-color-scheme` fallback), preventing flash-of-wrong-theme. `<html>` has `suppressHydrationWarning`.
-- **`app/components/DarkModeToggle.tsx`** — Toggle button rendered in `HeaderBar`. Uses `useSyncExternalStore` + `MutationObserver` to watch `<html>` class — no `setState` in effects, no hydration errors. Persists preference to `localStorage`.
+`app/layout.tsx` keeps only one pre-paint inline script: it applies `html.compact-tables` from the `compact-tables` localStorage key. The Navbar toggle (`app/lib/use-compact-tables.ts`) flips that class; F1 tables honor it (driver names → 3-letter codes).
 
 ### UI components
 
-- **`app/components/HeaderBar.tsx`** — Sticky header with date navigation (prev/next day), dark mode toggle, and refresh button. Props: `centerDate`, `onPrev`, `onNext`, `onRefresh`, `loading`, `lastUpdated`.
-- **`app/components/DarkModeToggle.tsx`** — Self-contained dark/light mode toggle (moon/sun icon). Reads and writes `localStorage` key `theme` (`"dark"` | `"light"`).
-- **`app/components/SportSelector.tsx`** — Centered pill-button filter bar for "All sports", "Football", "F1".
-- **`app/components/FootballCard.tsx`** — Football fixture card (full + compact variants).
-- **`app/components/F1Card.tsx`** — F1 fixture card (full + compact variants).
+All under `app/components/v2/`:
+
+- **`V2Shell.tsx`** — root wrapper: `.v2` scope + theme, persistent `Navbar` + `LiveBar` + `Footer`.
+- **`Navbar.tsx`** — sticky nav (root-relative tab links, theme + compact toggles, mobile burger menu).
+- **`home/HomeView.tsx`**, **`sport/SportView.tsx`**, **`competition/CompetitionView.tsx`** (+ `StandingsPanel`/`FixturesPanel`/`StatsPanel`/`TeamsPanel`), **`f1/F1View.tsx`**, **`worldcup/WorldCupView.tsx`**, **`team/TeamView.tsx`** — the per-route views.
+- **`common.tsx`** (`Crest`, `FormBadge`), **`Star.tsx`** — shared bits.
 
 ### Database tables (Matchday schema)
 
@@ -113,9 +125,9 @@ Default seasons: fb `2025-26`, F1 `2026`, World Cup `2026`.
 
 Football fixtures: `common_name` → `homeTeam`/`awayTeam`, event `competition_name`/`short_code` → competition labels, `kickoff_time_utc` split to UTC date+time then converted to IST, `stadium_name` → `venue`. F1 fixtures: circuit `name` → `homeTeam`, `country` → `awayTeam`, `start_at` → IST date/time. F1 status: `practice`/`qualifying`/`sprint`/`race` → `live`, `completed`/`cancelled` → `finished`.
 
-### View
+### Views
 
-Single **daily** view — list of match cards for the selected date, sorted by kickoff time. No weekly or monthly views.
+Home shows top events plus today's and tomorrow's schedule grouped by competition. Sport, competition, World Cup, and F1 pages use tabbed sections (standings, fixtures, results, stats, teams). No weekly or monthly calendar views.
 
 ### Path alias
 

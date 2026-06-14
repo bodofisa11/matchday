@@ -12,7 +12,7 @@ import {
   countryDisplay,
   positionGroup,
   shortPosition,
-} from "@/app/lib/v1/football-terms";
+} from "@/app/lib/football-terms";
 
 const SQUAD_COLS = "32px 1fr 56px 1fr 96px";
 

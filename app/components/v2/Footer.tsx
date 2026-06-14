@@ -31,7 +31,7 @@ export function Footer() {
     <footer className="wf-footer">
       <div className="wf-footer-top">
         <div className="wf-footer-brand">
-          <Link href="/v2/home" className="wf-footer-logo">
+          <Link href="/" className="wf-footer-logo">
             MATCHDAY
           </Link>
           <p className="wf-footer-tag">
@@ -57,7 +57,7 @@ export function Footer() {
             <ul>
               {SPORTS.map((s) => (
                 <li key={s.slug}>
-                  <Link href={`/v2/${s.slug}`}>
+                  <Link href={`/${s.slug}`}>
                     <span className={`wf-dot ${s.dot}`} />
                     {s.label}
                   </Link>

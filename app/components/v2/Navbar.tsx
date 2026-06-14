@@ -4,21 +4,31 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SPORTS } from "@/app/lib/v2/types";
+import { useCompactTables, toggleCompactTables } from "@/app/lib/use-compact-tables";
 
-const TABS = [
-  { href: "/v2/home", label: "Home", dot: null as null | "foot" | "f1" | "crk" },
-  ...SPORTS.map((s) => ({ href: `/v2/${s.slug}`, label: s.label, dot: s.dot })),
-  { href: "/v2/world-cup", label: "FIFA World Cup", dot: "foot" as const },
+type Dot = null | "foot" | "f1" | "crk";
+
+const TABS: { href: string; label: string; dot: Dot }[] = [
+  { href: "/", label: "Home", dot: null },
+  ...SPORTS.map((s) => ({ href: `/${s.slug}`, label: s.label, dot: s.dot as Dot })),
+  { href: "/world-cup", label: "FIFA World Cup", dot: "foot" },
+  { href: "/predictions", label: "Predict", dot: null },
+  { href: "/ufc", label: "UFC", dot: null },
 ];
 
+/** First path segment, "" for the root home route. */
+function firstSeg(path: string): string {
+  return path.split("/").filter(Boolean)[0] ?? "";
+}
+
 export function Navbar({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: () => void }) {
-  const pathname = usePathname() || "/v2/home";
-  const seg = pathname.split("/").filter(Boolean)[1] ?? "home";
+  const pathname = usePathname() || "/";
+  const seg = firstSeg(pathname);
   const [open, setOpen] = useState(false);
+  const compact = useCompactTables();
 
   function isOn(href: string) {
-    const target = href.split("/").filter(Boolean)[1] ?? "home";
-    return seg === target;
+    return seg === firstSeg(href);
   }
 
   // ESC closes menu
@@ -33,7 +43,7 @@ export function Navbar({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: 
 
   return (
     <nav className="wf-nav">
-      <Link href="/v2/home" className="wf-logo">
+      <Link href="/" className="wf-logo">
         MATCHDAY
       </Link>
 
@@ -47,8 +57,15 @@ export function Navbar({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: 
       </div>
 
       <div className="wf-navicons">
-        <button type="button" className="wf-ico" aria-label="Search">
-          ⌕
+        <button
+          type="button"
+          className={`wf-ico${compact ? " on" : ""}`}
+          onClick={toggleCompactTables}
+          aria-label="Toggle compact tables"
+          aria-pressed={compact}
+          title="Compact tables"
+        >
+          ▤
         </button>
         <button
           type="button"
@@ -90,8 +107,13 @@ export function Navbar({ dark, onToggleTheme }: { dark: boolean; onToggleTheme: 
               ))}
             </div>
             <div className="wf-nav-menu-actions">
-              <button type="button" className="wf-nav-menu-action" aria-label="Search">
-                <span>⌕</span> Search
+              <button
+                type="button"
+                className="wf-nav-menu-action"
+                onClick={toggleCompactTables}
+                aria-label="Toggle compact tables"
+              >
+                <span>▤</span> {compact ? "Comfortable tables" : "Compact tables"}
               </button>
               <button
                 type="button"

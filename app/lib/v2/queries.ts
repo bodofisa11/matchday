@@ -7,7 +7,7 @@
  * The static `[team]` route still reads dummy profiles ([dummy.ts]) — the new
  * schema has no club-honours source for it.
  */
-import { fetchFixturesByISTDateRange, type SportId } from "@/app/lib/v1/fetch-fixtures-client";
+import { fetchFixturesByISTDateRange, type SportId } from "@/app/lib/fetch-fixtures-client";
 import {
   fetchF1Calendar,
   fetchF1ConstructorStandings,
@@ -32,7 +32,7 @@ import {
   type FootballSquadPlayerRow,
   type FootballTeamDetailRow,
   type WcGroupStandingRow,
-} from "@/app/lib/v1/fetch-standings-client";
+} from "@/app/lib/fetch-standings-client";
 import type { Fixture } from "@/app/lib/fixtures";
 import {
   COMPETITIONS,

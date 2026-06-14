@@ -71,18 +71,6 @@ export function SportView({ sport }: { sport: SportSlug }) {
     return <F1View />;
   }
 
-  if (sport === "cricket") {
-    return (
-      <section className="wf-section">
-        <div className="wf-center wf-gap8" style={{ marginBottom: 16 }}>
-          <span className={`wf-dot ${meta.dot}`} />
-          <span className="wf-h3">{meta.label}</span>
-        </div>
-        <div className="wf-empty">Cricket is coming soon — fixtures pending data.</div>
-      </section>
-    );
-  }
-
   return (
     <>
       <section className="wf-section">
@@ -99,7 +87,7 @@ export function SportView({ sport }: { sport: SportSlug }) {
             {comps.map((c) => (
               <Link
                 key={c.slug}
-                href={`/v2/${sport}/${c.slug}`}
+                href={`/${sport}/${c.slug}`}
                 className="wf-box wf-pad"
                 style={{ width: 190, textDecoration: "none", color: "inherit" }}
               >

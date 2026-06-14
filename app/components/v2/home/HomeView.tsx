@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getCompetition, getScheduleByCompetition, getTopMatches } from "@/app/lib/v2/queries";
-import { istTodayStr } from "@/app/lib/timezone";
+import { addDaysToDateStr, istTodayStr } from "@/app/lib/timezone";
 import { sportDot } from "@/app/lib/v2/types";
 import type { CompetitionMeta, MatchV2 } from "@/app/lib/v2/types";
 import { Crest } from "../common";
@@ -42,7 +42,7 @@ function CompetitionGroup({ comp, matches }: { comp: CompetitionMeta; matches: M
     <div>
       <div className="wf-comphead">
         <span className={`wf-dot ${sportDot(comp.sport)}`} />
-        <Link href={`/v2/${comp.sport}/${comp.slug}`} className="wf-h3" style={{ textDecoration: "none", color: "inherit" }}>
+        <Link href={`/${comp.sport}/${comp.slug}`} className="wf-h3" style={{ textDecoration: "none", color: "inherit" }}>
           {comp.name}
         </Link>
         <span className="wf-compmeta">
@@ -61,13 +61,20 @@ function CompetitionGroup({ comp, matches }: { comp: CompetitionMeta; matches: M
 
 export function HomeView() {
   const [groups, setGroups] = useState<{ competition: CompetitionMeta; matches: MatchV2[] }[]>([]);
+  const [tomorrowGroups, setTomorrowGroups] = useState<
+    { competition: CompetitionMeta; matches: MatchV2[] }[]
+  >([]);
   const [topMatches, setTopMatches] = useState<MatchV2[]>([]);
 
   useEffect(() => {
     let alive = true;
     const date = istTodayStr();
+    const tomorrow = addDaysToDateStr(date, 1);
     getScheduleByCompetition(date).then((g) => {
       if (alive) setGroups(g);
+    });
+    getScheduleByCompetition(tomorrow).then((g) => {
+      if (alive) setTomorrowGroups(g);
     });
     getTopMatches(date).then((m) => {
       if (alive) setTopMatches(m);
@@ -77,11 +84,13 @@ export function HomeView() {
     };
   }, []);
 
-  const heading = new Date().toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
+  const fmtDay = (d: Date) =>
+    d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  const todayDate = new Date();
+  const tomorrowDate = new Date(todayDate);
+  tomorrowDate.setDate(todayDate.getDate() + 1);
+  const heading = fmtDay(todayDate);
+  const tomorrowHeading = fmtDay(tomorrowDate);
 
   return (
     <>
@@ -93,8 +102,8 @@ export function HomeView() {
           ) : (
             topMatches.map((m) => {
               const compHref = getCompetition(m.competitionSlug)
-                ? `/v2/${m.sport}/${m.competitionSlug}`
-                : `/v2/${m.sport}`;
+                ? `/${m.sport}/${m.competitionSlug}`
+                : `/${m.sport}`;
               const subtitle =
                 m.status === "live"
                   ? `${m.homeScore ?? 0}–${m.awayScore ?? 0}`
@@ -134,6 +143,21 @@ export function HomeView() {
         ) : (
           <div className="wf-col" style={{ gap: 8 }}>
             {groups.map((g) => (
+              <CompetitionGroup key={g.competition.slug} comp={g.competition} matches={g.matches} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="wf-section">
+        <div className="wf-shead">
+          <span className="wf-h3">Tomorrow · {tomorrowHeading}</span>
+        </div>
+        {tomorrowGroups.length === 0 ? (
+          <div className="wf-empty">No fixtures for tomorrow.</div>
+        ) : (
+          <div className="wf-col" style={{ gap: 8 }}>
+            {tomorrowGroups.map((g) => (
               <CompetitionGroup key={g.competition.slug} comp={g.competition} matches={g.matches} />
             ))}
           </div>

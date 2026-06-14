@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   getWcFixtures,
   getWcGroupStandings,
@@ -8,7 +9,7 @@ import {
   type FootballFixtureRow,
   type WcGroupStandingRow,
 } from "@/app/lib/v2/queries";
-import { formatFixtureDate } from "@/app/lib/v1/team-meta";
+import { formatFixtureDate } from "@/app/lib/team-meta";
 import { istTodayStr } from "@/app/lib/timezone";
 import { Crest } from "../common";
 import { TeamsPanel } from "../competition/TeamsPanel";
@@ -207,6 +208,9 @@ export function WorldCupView() {
             {t}
           </button>
         ))}
+        <Link href="/predictions" className="wf-chip" style={{ textDecoration: "none" }}>
+          Predict →
+        </Link>
       </div>
 
       {tab === "Fixtures" && (

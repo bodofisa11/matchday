@@ -8,15 +8,22 @@ import { StandingsPanel } from "./StandingsPanel";
 import { StatsPanel } from "./StatsPanel";
 import { TeamsPanel } from "./TeamsPanel";
 
-type Tab = "Overview" | "Standings" | "Fixtures" | "Results" | "Stats" | "Teams";
-const TABS: Tab[] = ["Overview", "Standings", "Fixtures", "Results", "Stats", "Teams"];
+type Tab = "Overview" | "Standings" | "News" | "Fixtures" | "Results" | "Stats" | "Teams";
+
+const FOOTBALL_TABS: Tab[] = ["Overview", "Standings", "Fixtures", "Results", "Stats", "Teams"];
+const CRICKET_TABS: Tab[] = ["Overview", "News", "Fixtures", "Results", "Stats", "Teams"];
 
 function OverviewPanel() {
   // Intentionally blank for now — a competition summary lands here later.
   return <div className="wf-empty">Overview coming soon.</div>;
 }
 
+function NewsPanel() {
+  return <div className="wf-empty">No news yet.</div>;
+}
+
 export function CompetitionView({ competition }: { competition: CompetitionMeta }) {
+  const TABS = competition.sport === "cricket" ? CRICKET_TABS : FOOTBALL_TABS;
   const [tab, setTab] = useState<Tab>("Overview");
 
   return (
@@ -48,6 +55,7 @@ export function CompetitionView({ competition }: { competition: CompetitionMeta 
       </div>
 
       {tab === "Overview" && <OverviewPanel />}
+      {tab === "News" && <NewsPanel />}
       {tab === "Standings" && <StandingsPanel competitionSlug={competition.slug} />}
       {tab === "Fixtures" && <FixturesPanel competitionSlug={competition.slug} mode="upcoming" />}
       {tab === "Results" && <FixturesPanel competitionSlug={competition.slug} mode="results" />}

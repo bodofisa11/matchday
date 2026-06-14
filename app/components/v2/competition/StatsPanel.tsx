@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getCompetitionScorers, type FootballScorerRow } from "@/app/lib/v2/queries";
-import { countryDisplay } from "@/app/lib/v1/football-terms";
+import { countryDisplay } from "@/app/lib/football-terms";
 
 const COLS = "20px 1fr 1fr 34px 34px 40px";
 

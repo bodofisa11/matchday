@@ -13,8 +13,9 @@ import {
   type F1RaceRow,
   type F1SprintResultRow,
 } from "@/app/lib/v2/queries";
-import { F1_TEAM_COLORS, todayStr } from "@/app/lib/v1/team-meta";
-import { constructorCode } from "@/app/lib/v1/f1-codes";
+import { F1_TEAM_COLORS, todayStr } from "@/app/lib/team-meta";
+import { constructorCode, driverCode } from "@/app/lib/f1-codes";
+import { useCompactTables } from "@/app/lib/use-compact-tables";
 
 type Tab = "Overview" | "Schedule" | "Drivers" | "Constructors";
 const TABS: Tab[] = ["Overview", "Schedule", "Drivers", "Constructors"];
@@ -87,6 +88,7 @@ function ResultsTable({
   rows: (F1RaceResultRow | F1SprintResultRow)[];
   showFastest: boolean;
 }) {
+  const compact = useCompactTables();
   return (
     <div style={{ overflowX: "auto" }}>
       <div className="wf-box" style={{ minWidth: 560 }}>
@@ -109,7 +111,7 @@ function ResultsTable({
             >
               <span className="wf-rank">{r.position ?? "—"}</span>
               <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {r.driver}
+                {compact ? driverCode(r.driver) : r.driver}
                 {fastest && <span className="wf-f1fl"> ⚡FL</span>}
               </span>
               <span className="wf-muted" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -279,6 +281,7 @@ function SchedulePanel({
 }
 
 function DriversPanel({ drivers, loading }: { drivers: F1DriverRow[]; loading: boolean }) {
+  const compact = useCompactTables();
   if (loading) return <div className="wf-empty">Loading…</div>;
   if (drivers.length === 0) return <div className="wf-empty">No standings data yet.</div>;
   return (
@@ -301,7 +304,7 @@ function DriversPanel({ drivers, loading }: { drivers: F1DriverRow[]; loading: b
             >
               <span className="wf-rank">{d.position}</span>
               <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 600 }}>
-                {d.driver}
+                {compact ? driverCode(d.driver) : d.driver}
               </span>
               <span className="wf-muted" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {d.team}
