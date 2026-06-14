@@ -1,12 +1,11 @@
 /**
  * v2 query layer. Single entry point the v2 UI uses for data.
  *
- * Fixtures: live from the v1 database (existing `football_fixtures` /
- * `f1_fixtures` Supabase tables, via [v1/fetch-fixtures-client]) until the v2
- * schema is provisioned. Falls back to dummy fixtures when no data source is
- * configured (local dev / build) so the pages still render.
- * Standings, squads, top events, competitions: dummy ([dummy.ts]) — no v2
- * tables yet. Marked TODO; swap for live queries once the schema lands.
+ * Everything live-data is sourced from the normalized Matchday schema via the
+ * v1 fetch modules ([v1/fetch-fixtures-client], [v1/fetch-standings-client]);
+ * returns empty when Supabase is unconfigured so pages render empty states.
+ * The static `[team]` route still reads dummy profiles ([dummy.ts]) — the new
+ * schema has no club-honours source for it.
  */
 import { fetchFixturesByISTDateRange, type SportId } from "@/app/lib/v1/fetch-fixtures-client";
 import {
@@ -18,7 +17,7 @@ import {
   fetchFootballFixturesPaged,
   fetchFootballScorers,
   fetchFootballStandings,
-  fetchSquadByTeamApiId,
+  fetchSquadByClubId,
   fetchTeamsForCompetition,
   fetchWcFixturesByStage,
   fetchWcGroupStandings,
@@ -39,7 +38,6 @@ import {
   COMPETITIONS,
   TOP_EVENTS,
   competitionsForSport,
-  dummyMatches,
   standingsFor,
   teamProfileFor,
   teamsForCompetition,
@@ -98,17 +96,11 @@ function mapFixture(f: Fixture): MatchV2 {
 async function liveMatches(sport: SportSlug | "all", date: string): Promise<MatchV2[]> {
   if (sport === "cricket") return [];
   const sportId: SportId = sport === "all" ? "all" : sport === "f1" ? "f1" : "football";
-  try {
-    // `date` is an IST day string; the v1 client handles IST↔UTC and returns
-    // fixtures already mapped to the shared `Fixture` shape.
-    const { fixtures } = await fetchFixturesByISTDateRange(sportId, date, date);
-    if (fixtures.length > 0) return fixtures.map(mapFixture);
-  } catch {
-    /* fall through to dummy */
-  }
-  // dummy fallback (local dev / no data source configured)
-  const dummy = dummyMatches(date);
-  return sport === "all" ? dummy : dummy.filter((m) => m.sport === sport);
+  // `date` is an IST day string; the v1 client handles IST↔UTC and returns
+  // fixtures already mapped to the shared `Fixture` shape. Empty when Supabase
+  // is unconfigured — the UI renders its empty states.
+  const { fixtures } = await fetchFixturesByISTDateRange(sportId, date, date);
+  return fixtures.map(mapFixture);
 }
 
 // ---- public API ----------------------------------------------------------
@@ -193,27 +185,26 @@ export function getTeamsForCompetition(competitionSlug: string): TeamRef[] {
 }
 
 // ---- live competition queries (fixtures / results / stats / teams) --------
-// Maps a v2 competition slug to the DB `competition_short` value used by the
-// existing v1 Supabase tables. The v2 dummy `shortName` (e.g. "PL") differs
-// from the stored short code (e.g. "EPL"), so this mapping is the bridge.
+// Maps a v2 competition slug to the canonical `events.short_code` understood by
+// the fetch-standings layer. Unmapped slugs return empty.
 
 interface CompDbInfo {
-  /** value stored in `competition_short` columns */
+  /** canonical events.short_code */
   short: string;
-  /** competition name used by the league standings tables (FOOTBALL_TABLE_MAP).
-   *  Omitted for cup/group-stage competitions that have no league table. */
+  /** competition display name for the league standings query.
+   *  Omitted for competitions with no league table. */
   standings?: string;
 }
 
 const COMP_DB: Record<string, CompDbInfo> = {
-  "premier-league": { short: "EPL", standings: "Premier League" },
-  "champions-league": { short: "UCL" },
-  "la-liga": { short: "LAL", standings: "La Liga" },
-  "serie-a": { short: "SRA", standings: "Serie A" },
-  bundesliga: { short: "BUN", standings: "Bundesliga" },
-  "europa-league": { short: "UEL", standings: "UEFA Europa League" },
-  "fa-cup": { short: "FAC" },
-  "world-cup": { short: "WC2026" },
+  "premier-league": { short: "PL", standings: "Premier League" },
+  "champions-league": { short: "CL" },
+  "la-liga": { short: "PD", standings: "La Liga" },
+  "serie-a": { short: "SA", standings: "Serie A" },
+  bundesliga: { short: "BL1", standings: "Bundesliga" },
+  "ligue-1": { short: "FL1", standings: "Ligue 1" },
+  "europa-league": { short: "EL", standings: "UEFA Europa League" },
+  "world-cup": { short: "WC" },
 };
 
 /** DB `competition_short` for a v2 slug, or null if not wired to live data. */
@@ -322,7 +313,7 @@ export async function getCompetitionTeamDetails(
   return fetchTeamsForCompetition(short);
 }
 
-/** Squad for a team (by football-data API id). */
-export async function getTeamSquad(teamApiId: number): Promise<FootballSquadPlayerRow[]> {
-  return fetchSquadByTeamApiId(teamApiId);
+/** Squad for a club (by club UUID). */
+export async function getTeamSquad(clubId: string): Promise<FootballSquadPlayerRow[]> {
+  return fetchSquadByClubId(clubId);
 }

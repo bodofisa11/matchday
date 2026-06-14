@@ -31,16 +31,16 @@ function TeamDetail({ team, onBack }: { team: FootballTeamDetailRow; onBack: () 
   const [players, setPlayers] = useState<FootballSquadPlayerRow[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [prevId, setPrevId] = useState(team.team_api_id);
-  if (prevId !== team.team_api_id) {
-    setPrevId(team.team_api_id);
+  const [prevId, setPrevId] = useState(team.id);
+  if (prevId !== team.id) {
+    setPrevId(team.id);
     setPlayers([]);
     setLoading(true);
   }
 
   useEffect(() => {
     let cancelled = false;
-    getTeamSquad(team.team_api_id).then((data) => {
+    getTeamSquad(team.id).then((data) => {
       if (cancelled) return;
       setPlayers(data);
       setLoading(false);
@@ -48,7 +48,7 @@ function TeamDetail({ team, onBack }: { team: FootballTeamDetailRow; onBack: () 
     return () => {
       cancelled = true;
     };
-  }, [team.team_api_id]);
+  }, [team.id]);
 
   const grouped: Record<string, FootballSquadPlayerRow[]> = {};
   for (const p of players) {
@@ -100,7 +100,7 @@ function TeamDetail({ team, onBack }: { team: FootballTeamDetailRow; onBack: () 
               <span>DOB</span>
             </div>
             {grouped[g].map((p) => (
-              <div key={p.player_api_id} className="wf-trow" style={{ gridTemplateColumns: SQUAD_COLS }}>
+              <div key={p.id} className="wf-trow" style={{ gridTemplateColumns: SQUAD_COLS }}>
                 <span className="wf-rank">{p.shirt_number ?? "—"}</span>
                 <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {p.name}
@@ -161,7 +161,7 @@ export function TeamsPanel({ competitionSlug }: { competitionSlug: string }) {
       ) : (
         <div className="wf-teamgrid">
           {teams.map((t) => (
-            <button key={t.team_api_id} className="wf-teamcard" onClick={() => setSelected(t)}>
+            <button key={t.id} className="wf-teamcard" onClick={() => setSelected(t)}>
               <TeamCrest team={t} />
               <span className="wf-teamcard-nm">{t.short_name ?? t.name}</span>
               {t.tla && <span className="wf-mono-sm wf-muted">{t.tla}</span>}

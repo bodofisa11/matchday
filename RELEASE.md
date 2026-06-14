@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- Both the v1 and `/v2` frontends now read from the new normalized database schema across the board — daily fixtures, league/group standings, fixtures & results, top scorers, club squads, and the full Formula 1 calendar/standings/results. Club crests load from the database when available, falling back to colored-initials placeholders. Local Docker-Postgres support was removed; the app now talks only to Supabase (renders empty states when no data is configured). News and IPL views remain present but empty (no data source in the new schema).
+
 - The `/v2` **Formula 1** page is now a full section (was a placeholder): opens on an **Overview** tab (blank for now), plus **Schedule** (2026 race calendar — tap a completed round for full race/sprint classification), **Drivers** (championship standings), and **Constructors** (team standings). All live data, team colors on each row, matching the v1 F1 layout.
 
 - `/v2` football competition pages now open on a new **Overview** tab (a summary section, blank for now) and the **Standings** tab shows the full live league table — every team with played/won/drawn/lost, goal difference, points, and recent form — instead of placeholder rows.

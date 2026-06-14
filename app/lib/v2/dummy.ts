@@ -1,12 +1,12 @@
 /**
- * Dummy v2 data sources. Shaped like the future v2 Supabase schema so the
- * query layer ([queries.ts]) can swap these for live calls later. Standings,
- * squads, events and the live ticker have no v2 tables yet — these stand in.
+ * Static config + placeholder data for the v2 UI. Competitions list and top-
+ * events rail are static config; team profiles back the standalone `[team]`
+ * route, which the normalized schema has no club-honours source for. Live data
+ * (fixtures, standings, squads, scorers) comes from [queries.ts], not here.
  */
 import type {
   CompetitionMeta,
   EventCardItem,
-  MatchV2,
   SportSlug,
   StandingRow,
   SquadPlayer,
@@ -45,8 +45,8 @@ export const COMPETITIONS: CompetitionMeta[] = [
   { slug: "la-liga", name: "La Liga", shortName: "LAL", sport: "football", country: "Spain", season: "2025/26" },
   { slug: "serie-a", name: "Serie A", shortName: "SEA", sport: "football", country: "Italy", season: "2025/26" },
   { slug: "bundesliga", name: "Bundesliga", shortName: "BUN", sport: "football", country: "Germany", season: "2025/26" },
+  { slug: "ligue-1", name: "Ligue 1", shortName: "FL1", sport: "football", country: "France", season: "2025/26" },
   { slug: "europa-league", name: "Europa League", shortName: "UEL", sport: "football", country: "Europe", season: "2025/26" },
-  { slug: "fa-cup", name: "FA Cup", shortName: "FAC", sport: "football", country: "England", season: "2025/26" },
 ];
 // FIFA World Cup is not a league competition — it has its own top-level route
 // (`/v2/world-cup`, see [WorldCupView]) and is intentionally excluded here.
@@ -133,51 +133,6 @@ export function teamProfileFor(teamSlug: string): TeamProfile | null {
 export function teamsForCompetition(competitionSlug: string): TeamRef[] {
   const slugs = STANDINGS_TEAMS[competitionSlug] ?? [];
   return slugs.map((s) => TEAMS[s]);
-}
-
-// ---- matches (dummy) -----------------------------------------------------
-interface MatchSeed {
-  comp: string;
-  short: string;
-  home: string;
-  away: string;
-  time: string;
-  status: "scheduled" | "live" | "finished";
-  hs?: number;
-  as?: number;
-  clock?: string;
-}
-
-const MATCH_SEEDS: MatchSeed[] = [
-  { comp: "premier-league", short: "PL", home: "arsenal", away: "liverpool", time: "20:30", status: "live", hs: 2, as: 1, clock: "67'" },
-  { comp: "premier-league", short: "PL", home: "chelsea", away: "newcastle", time: "20:30", status: "scheduled" },
-  { comp: "premier-league", short: "PL", home: "mancity", away: "brighton", time: "23:00", status: "scheduled" },
-  { comp: "la-liga", short: "LAL", home: "barcelona", away: "realmadrid", time: "21:00", status: "live", hs: 1, as: 1, clock: "HT" },
-  { comp: "la-liga", short: "LAL", home: "atletico", away: "sevilla", time: "23:30", status: "scheduled" },
-  { comp: "champions-league", short: "UCL", home: "bayern", away: "inter", time: "00:30", status: "scheduled" },
-  { comp: "champions-league", short: "UCL", home: "dortmund", away: "milan", time: "00:30", status: "finished", hs: 2, as: 1 },
-  { comp: "serie-a", short: "SEA", home: "inter", away: "milan", time: "20:45", status: "scheduled" },
-];
-
-function matchFromSeed(s: MatchSeed, i: number, date: string): MatchV2 {
-  return {
-    id: `dummy-${i}`,
-    sport: "football",
-    competitionSlug: s.comp,
-    competitionShort: s.short,
-    home: TEAMS[s.home],
-    away: TEAMS[s.away],
-    date,
-    kickoff: s.time,
-    status: s.status,
-    homeScore: s.hs,
-    awayScore: s.as,
-    clock: s.clock,
-  };
-}
-
-export function dummyMatches(date: string): MatchV2[] {
-  return MATCH_SEEDS.map((s, i) => matchFromSeed(s, i, date));
 }
 
 // ---- top events (dummy) --------------------------------------------------
