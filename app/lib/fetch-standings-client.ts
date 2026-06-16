@@ -652,10 +652,10 @@ interface F1CalendarQueryRow {
   circuit: { name: string | null; country: string | null } | { name: string | null; country: string | null }[] | null;
 }
 
-export async function fetchF1Calendar(): Promise<F1RaceRow[]> {
+export async function fetchF1Calendar(season: string = DEFAULT_F1_SEASON): Promise<F1RaceRow[]> {
   const supabase = createSupabaseClient();
   if (!supabase) return [];
-  const event = await getF1Event(DEFAULT_F1_SEASON);
+  const event = await getF1Event(season);
   if (!event) return [];
   const { data } = await supabase
     .from("f1_fixtures")
@@ -684,10 +684,10 @@ interface DriverStandingQueryRow {
   team: { name: string | null } | { name: string | null }[] | null;
 }
 
-export async function fetchF1DriverStandings(): Promise<F1DriverRow[]> {
+export async function fetchF1DriverStandings(season: string = DEFAULT_F1_SEASON): Promise<F1DriverRow[]> {
   const supabase = createSupabaseClient();
   if (!supabase) return [];
-  const event = await getF1Event(DEFAULT_F1_SEASON);
+  const event = await getF1Event(season);
   if (!event) return [];
   const { data } = await supabase
     .from("f1_driver_standings")
@@ -711,10 +711,10 @@ interface ConstructorStandingQueryRow {
   team: { name: string | null } | { name: string | null }[] | null;
 }
 
-export async function fetchF1ConstructorStandings(): Promise<F1ConstructorRow[]> {
+export async function fetchF1ConstructorStandings(season: string = DEFAULT_F1_SEASON): Promise<F1ConstructorRow[]> {
   const supabase = createSupabaseClient();
   if (!supabase) return [];
-  const event = await getF1Event(DEFAULT_F1_SEASON);
+  const event = await getF1Event(season);
   if (!event) return [];
   const { data } = await supabase
     .from("f1_constructor_standings")

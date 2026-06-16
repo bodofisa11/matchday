@@ -30,3 +30,36 @@ export function TeamCell({ team }: { team: TeamRef }) {
     </span>
   );
 }
+
+/**
+ * Season picker — a row of chips. Renders nothing unless more than one season
+ * is available, so callers can mount it unconditionally and it stays invisible
+ * for single-season competitions (football, World Cup) until more are seeded.
+ */
+export function SeasonSelector({
+  seasons,
+  value,
+  onChange,
+}: {
+  seasons: string[];
+  value: string;
+  onChange: (season: string) => void;
+}) {
+  if (seasons.length < 2) return null;
+  return (
+    <div className="wf-center wf-gap6" role="tablist" aria-label="Season">
+      {seasons.map((s) => (
+        <button
+          key={s}
+          role="tab"
+          aria-selected={s === value}
+          className={`wf-chip${s === value ? " on" : ""}`}
+          style={{ cursor: "pointer" }}
+          onClick={() => onChange(s)}
+        >
+          {s}
+        </button>
+      ))}
+    </div>
+  );
+}

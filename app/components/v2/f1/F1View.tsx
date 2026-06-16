@@ -6,6 +6,7 @@ import {
   getF1ConstructorStandings,
   getF1DriverStandings,
   getF1RaceResults,
+  getF1Seasons,
   getF1SprintResults,
   type F1ConstructorRow,
   type F1DriverRow,
@@ -13,9 +14,11 @@ import {
   type F1RaceRow,
   type F1SprintResultRow,
 } from "@/app/lib/v2/queries";
+import { DEFAULT_F1_SEASON } from "@/app/lib/events";
 import { F1_TEAM_COLORS, todayStr } from "@/app/lib/team-meta";
 import { constructorCode, driverCode } from "@/app/lib/f1-codes";
 import { useCompactTables } from "@/app/lib/use-compact-tables";
+import { SeasonSelector } from "@/app/components/v2/common";
 
 type Tab = "Overview" | "Schedule" | "Drivers" | "Constructors";
 const TABS: Tab[] = ["Overview", "Schedule", "Drivers", "Constructors"];
@@ -216,10 +219,12 @@ function SchedulePanel({
   calendar,
   loading,
   nextRound,
+  season,
 }: {
   calendar: F1RaceRow[];
   loading: boolean;
   nextRound: number | null;
+  season: string;
 }) {
   const [selected, setSelected] = useState<F1RaceRow | null>(null);
 
@@ -232,7 +237,7 @@ function SchedulePanel({
 
   return (
     <div className="wf-col wf-gap12">
-      <span className="wf-h3">2026 race calendar</span>
+      <span className="wf-h3">{season} race calendar</span>
       <div className="wf-box">
         {calendar.map((r) => {
           const completed = r.status === "completed" || r.status === "cancelled";
@@ -371,22 +376,41 @@ export function F1View() {
   const [calendar, setCalendar] = useState<F1RaceRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("Overview");
+  const [seasons, setSeasons] = useState<string[]>([]);
+  const [season, setSeason] = useState<string>(DEFAULT_F1_SEASON);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getF1DriverStandings(), getF1ConstructorStandings(), getF1Calendar()]).then(
-      ([d, c, cal]) => {
-        if (cancelled) return;
-        setDrivers(d);
-        setConstructors(c);
-        setCalendar(cal);
-        setLoading(false);
-      },
-    );
+    getF1Seasons().then((s) => {
+      if (cancelled || s.length === 0) return;
+      setSeasons(s);
+      // Default to the live/most-recent season if the hardcoded default isn't seeded.
+      if (!s.includes(season)) setSeason(s[0]);
+    });
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    Promise.all([
+      getF1DriverStandings(season),
+      getF1ConstructorStandings(season),
+      getF1Calendar(season),
+    ]).then(([d, c, cal]) => {
+      if (cancelled) return;
+      setDrivers(d);
+      setConstructors(c);
+      setCalendar(cal);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [season]);
 
   const today = todayStr();
   const nextRound = calendar.find((r) => r.status === "scheduled" && r.date >= today)?.round ?? null;
@@ -400,7 +424,7 @@ export function F1View() {
         <div className="wf-col wf-gap12">
           <div className="wf-center wf-gap8">
             <span className="wf-dot f1" />
-            <span className="wf-eyebrow">2026 World Championship</span>
+            <span className="wf-eyebrow">{season} World Championship</span>
           </div>
           <h1 className="wf-h1">Formula 1</h1>
           {calendar.length > 0 && (
@@ -412,22 +436,25 @@ export function F1View() {
         <div className="wf-ph">grand prix / hero</div>
       </section>
 
-      <div className="wf-center wf-gap6" style={{ marginBottom: 20 }}>
-        {TABS.map((t) => (
-          <button
-            key={t}
-            className={`wf-chip${t === tab ? " on" : ""}`}
-            style={{ cursor: "pointer" }}
-            onClick={() => setTab(t)}
-          >
-            {t}
-          </button>
-        ))}
+      <div className="wf-col wf-gap6" style={{ marginBottom: 20, alignItems: "center" }}>
+        <SeasonSelector seasons={seasons} value={season} onChange={setSeason} />
+        <div className="wf-center wf-gap6">
+          {TABS.map((t) => (
+            <button
+              key={t}
+              className={`wf-chip${t === tab ? " on" : ""}`}
+              style={{ cursor: "pointer" }}
+              onClick={() => setTab(t)}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
       </div>
 
       {tab === "Overview" && <div className="wf-empty">Overview coming soon.</div>}
       {tab === "Schedule" && (
-        <SchedulePanel calendar={calendar} loading={loading} nextRound={nextRound} />
+        <SchedulePanel key={season} calendar={calendar} loading={loading} nextRound={nextRound} season={season} />
       )}
       {tab === "Drivers" && <DriversPanel drivers={drivers} loading={loading} />}
       {tab === "Constructors" && (
