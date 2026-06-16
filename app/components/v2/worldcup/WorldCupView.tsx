@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import {
   getCompetitionSeasons,
   getWcFixtures,
@@ -14,9 +13,10 @@ import { formatFixtureDate } from "@/app/lib/team-meta";
 import { istTodayStr } from "@/app/lib/timezone";
 import { Crest, SeasonSelector } from "../common";
 import { TeamsPanel } from "../competition/TeamsPanel";
+import { StatsPanel } from "../competition/StatsPanel";
 
-type Tab = "Fixtures" | "Groups" | "Bracket" | "Teams";
-const TABS: Tab[] = ["Fixtures", "Groups", "Bracket", "Teams"];
+type Tab = "Fixtures" | "Groups" | "Bracket" | "Teams" | "Stats";
+const TABS: Tab[] = ["Fixtures", "Groups", "Bracket", "Teams", "Stats"];
 
 const STAGE_LABEL: Record<string, string> = {
   group: "Group",
@@ -222,9 +222,6 @@ export function WorldCupView() {
             {t}
           </button>
         ))}
-        <Link href="/predictions" className="wf-chip" style={{ textDecoration: "none" }}>
-          Predict →
-        </Link>
       </div>
 
       {tab === "Fixtures" && (
@@ -298,6 +295,8 @@ export function WorldCupView() {
       )}
 
       {tab === "Teams" && <TeamsPanel competitionSlug="world-cup" />}
+
+      {tab === "Stats" && <StatsPanel competitionSlug="world-cup" />}
     </>
   );
 }
