@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- Crests and competition badges across the app now show **real logos** (sourced from football-logos.cc) instead of colored placeholders. This covers **club crests** (fixtures, standings, home schedule, live bar, team pages), **national-team crests** (World Cup groups, bracket, fixtures), and **competition logos** (the sport-page competition cards and each competition's hero) — including the Champions League, Europa League, the FIFA World Cup, and the top-five domestic leagues. Logos load at a crisp 256px and are cached by the browser for a year, so they appear instantly on repeat views with no extra network requests. Anything without a matching logo falls back to its existing placeholder (initials badge or colored band).
+
 - Each **sport page** (e.g. `/football`) now lists its competitions as a responsive grid of **cards** — a colored header band, the competition name, a short-code tag, country and season, and an "Open →" action — replacing the old horizontal chip rail. The "Top fixtures" and "Recent results" panels have been removed from these pages.
 
 - The season selector is now a **dropdown** placed next to the page title in the hero (previously a row of chips above the tabs), and appears on **every event** — football competition pages, the World Cup, and Formula 1. It shows even when only one season exists (seeded from the competition's own season), and switching re-fetches the data where the fetch layer is season-aware (F1 today).

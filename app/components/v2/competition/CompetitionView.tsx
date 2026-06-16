@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { sportDot } from "@/app/lib/v2/types";
 import type { CompetitionMeta } from "@/app/lib/v2/types";
 import { getCompetitionSeasons } from "@/app/lib/v2/queries";
-import { SeasonSelector } from "../common";
+import { CompetitionLogo, SeasonSelector } from "../common";
 import { FixturesPanel } from "./FixturesPanel";
 import { StandingsPanel } from "./StandingsPanel";
 import { StatsPanel } from "./StatsPanel";
@@ -60,7 +60,7 @@ export function CompetitionView({ competition }: { competition: CompetitionMeta 
             <SeasonSelector seasons={seasons} value={season} onChange={setSeason} />
           </div>
         </div>
-        <div className="wf-ph">competition crest / hero</div>
+        <CompetitionLogo idOrCode={competition.slug} name={competition.name} variant="hero" />
       </section>
 
       <div className="wf-center wf-gap6" style={{ marginBottom: 20 }}>
