@@ -19,6 +19,10 @@ interface FbClubRef {
   full_name?: string | null;
 }
 
+interface FbNationRef {
+  name: string | null;
+}
+
 interface FbFixtureRow {
   id: string;
   event_id: string;
@@ -32,6 +36,9 @@ interface FbFixtureRow {
   away_score: number | null;
   home_team: FbClubRef | FbClubRef[] | null;
   away_team: FbClubRef | FbClubRef[] | null;
+  // National-team competitions (WC) fill these instead of home_team/away_team.
+  home_nation: FbNationRef | FbNationRef[] | null;
+  away_nation: FbNationRef | FbNationRef[] | null;
 }
 
 type F1Status =
@@ -106,12 +113,14 @@ function mapFootballRow(row: FbFixtureRow, events: Map<string, EventRow>): Fixtu
   const ist = utcToIST(utcDate, utcKickoff);
   const home = unwrapRef(row.home_team);
   const away = unwrapRef(row.away_team);
+  const homeNation = unwrapRef(row.home_nation);
+  const awayNation = unwrapRef(row.away_nation);
   const labels = competitionLabels(events, row.event_id);
   return {
     id: String(row.id),
     sport: "football",
-    homeTeam: home?.common_name ?? home?.full_name ?? "TBD",
-    awayTeam: away?.common_name ?? away?.full_name ?? "TBD",
+    homeTeam: home?.common_name ?? home?.full_name ?? homeNation?.name ?? "TBD",
+    awayTeam: away?.common_name ?? away?.full_name ?? awayNation?.name ?? "TBD",
     competition: labels.competition,
     competitionShort: labels.competitionShort,
     kickoff: ist.kickoff,
@@ -172,7 +181,7 @@ async function fetchFromSupabase(
     let q = supabase
       .from("fb_fixtures")
       .select(
-        "id, event_id, home_team_id, away_team_id, kickoff_time_utc, match_date, stadium_name, status, home_score, away_score, home_team:fb_clubs!home_team_id(common_name, full_name), away_team:fb_clubs!away_team_id(common_name, full_name)",
+        "id, event_id, home_team_id, away_team_id, kickoff_time_utc, match_date, stadium_name, status, home_score, away_score, home_team:fb_clubs!home_team_id(common_name, full_name), away_team:fb_clubs!away_team_id(common_name, full_name), home_nation:fb_nations!home_nation_id(name), away_nation:fb_nations!away_nation_id(name)",
       )
       .order("match_date", { ascending: true })
       .order("kickoff_time_utc", { ascending: true });

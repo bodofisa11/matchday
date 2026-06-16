@@ -297,18 +297,21 @@ interface FixtureQueryRow {
   away_score: number | null;
   home: { common_name: string | null } | { common_name: string | null }[] | null;
   away: { common_name: string | null } | { common_name: string | null }[] | null;
+  // National-team competitions (WC) fill these instead of home/away.
+  home_nation: { name: string | null } | { name: string | null }[] | null;
+  away_nation: { name: string | null } | { name: string | null }[] | null;
 }
 
 const FIXTURE_COLS =
-  "id,match_date,kickoff_time_utc,stadium_name,match_type,status,home_score,away_score,home:fb_clubs!home_team_id(common_name),away:fb_clubs!away_team_id(common_name)";
+  "id,match_date,kickoff_time_utc,stadium_name,match_type,status,home_score,away_score,home:fb_clubs!home_team_id(common_name),away:fb_clubs!away_team_id(common_name),home_nation:fb_nations!home_nation_id(name),away_nation:fb_nations!away_nation_id(name)";
 
 function toFixtureRow(r: FixtureQueryRow, event: EventRow): FootballFixtureRow {
   const { date: utcDate, time: utcKickoff } = splitIso(r.kickoff_time_utc);
   const ist = utcToIST(utcDate, utcKickoff);
   return {
     id: String(r.id),
-    home_team: unwrapOne(r.home)?.common_name ?? "TBD",
-    away_team: unwrapOne(r.away)?.common_name ?? "TBD",
+    home_team: unwrapOne(r.home)?.common_name ?? unwrapOne(r.home_nation)?.name ?? "TBD",
+    away_team: unwrapOne(r.away)?.common_name ?? unwrapOne(r.away_nation)?.name ?? "TBD",
     competition: event.name ?? event.short_code,
     competition_short: event.short_code,
     kickoff: ist.kickoff,
@@ -435,14 +438,32 @@ export async function fetchTeamsForCompetition(
   if (clubIds.length === 0) {
     const { data: fx } = await supabase
       .from("fb_fixtures")
-      .select("home_team_id,away_team_id")
+      .select("home_team_id,away_team_id,home_nation_id,away_nation_id")
       .eq("event_id", event.id);
-    const set = new Set<string>();
-    for (const r of (fx as { home_team_id: string | null; away_team_id: string | null }[]) ?? []) {
-      if (r.home_team_id) set.add(r.home_team_id);
-      if (r.away_team_id) set.add(r.away_team_id);
+    const clubSet = new Set<string>();
+    const nationSet = new Set<string>();
+    for (const r of (fx as {
+      home_team_id: string | null;
+      away_team_id: string | null;
+      home_nation_id: string | null;
+      away_nation_id: string | null;
+    }[]) ?? []) {
+      if (r.home_team_id) clubSet.add(r.home_team_id);
+      if (r.away_team_id) clubSet.add(r.away_team_id);
+      if (r.home_nation_id) nationSet.add(r.home_nation_id);
+      if (r.away_nation_id) nationSet.add(r.away_nation_id);
     }
-    clubIds = [...set];
+    clubIds = [...clubSet];
+
+    // National-team competition (WC): teams are nations, not clubs.
+    if (clubIds.length === 0 && nationSet.size > 0) {
+      const { data: nat } = await supabase
+        .from("fb_nations")
+        .select("id,name,short_code,manager_name")
+        .in("id", [...nationSet])
+        .order("name");
+      return ((nat as NationQueryRow[]) ?? []).map(mapNation);
+    }
   }
   if (clubIds.length === 0) return [];
 
@@ -454,6 +475,33 @@ export async function fetchTeamsForCompetition(
     .in("id", clubIds)
     .order("common_name");
   return ((data as ClubQueryRow[]) ?? []).map(mapClub);
+}
+
+interface NationQueryRow {
+  id: string;
+  name: string;
+  short_code: string | null;
+  manager_name: string | null;
+}
+
+function mapNation(n: NationQueryRow): FootballTeamDetailRow {
+  return {
+    id: n.id,
+    name: n.name,
+    short_name: n.name,
+    tla: n.short_code ?? null,
+    crest: null,
+    founded: null,
+    venue: null,
+    club_colors: null,
+    website: null,
+    address: null,
+    coach_name: n.manager_name ?? null,
+    coach_nationality: null,
+    coach_dob: null,
+    coach_contract_start: null,
+    coach_contract_until: null,
+  };
 }
 
 interface SquadQueryRow {
@@ -479,15 +527,17 @@ interface SquadQueryRow {
     | null;
 }
 
-export async function fetchSquadByClubId(clubId: string): Promise<FootballSquadPlayerRow[]> {
+export async function fetchSquadByClubId(teamId: string): Promise<FootballSquadPlayerRow[]> {
   const supabase = createSupabaseClient();
   if (!supabase) return [];
+  // `teamId` is a club id for domestic comps, or a nation id for national-team
+  // comps (WC) — TeamsPanel passes whichever `team.id` it has. Match either.
   const { data } = await supabase
     .from("fb_squads")
     .select(
       "jersey_number,position,player:fb_players!player_id(id,full_name,common_name,date_of_birth,position,nation:fb_nations!nation_id(name))",
     )
-    .eq("team_id", clubId)
+    .or(`team_id.eq.${teamId},nation_id.eq.${teamId}`)
     .order("jersey_number", { ascending: true, nullsFirst: false });
 
   const rows = ((data as SquadQueryRow[]) ?? []).map((r) => {
@@ -534,6 +584,7 @@ interface ScorerQueryRow {
       }[]
     | null;
   club: { common_name: string | null } | { common_name: string | null }[] | null;
+  nation: { name: string | null } | { name: string | null }[] | null;
 }
 
 export async function fetchFootballScorers(
@@ -547,7 +598,7 @@ export async function fetchFootballScorers(
   const { data } = await supabase
     .from("fb_top_scorers")
     .select(
-      "position,matches_played,goals,player:fb_players!player_id(common_name,full_name,position,nation:fb_nations!nation_id(name)),club:fb_clubs!team_id(common_name)",
+      "position,matches_played,goals,player:fb_players!player_id(common_name,full_name,position,nation:fb_nations!nation_id(name)),club:fb_clubs!team_id(common_name),nation:fb_nations!nation_id(name)",
     )
     .eq("event_id", event.id)
     .order("position")
@@ -559,7 +610,7 @@ export async function fetchFootballScorers(
       player_name: p?.common_name ?? p?.full_name ?? "—",
       player_nationality: unwrapOne(p?.nation)?.name ?? null,
       player_position: p?.position ?? null,
-      team_name: unwrapOne(r.club)?.common_name ?? "—",
+      team_name: unwrapOne(r.club)?.common_name ?? unwrapOne(r.nation)?.name ?? "—",
       played_matches: r.matches_played,
       goals: r.goals,
       assists: null,
@@ -584,6 +635,7 @@ interface GroupQueryRow {
   goal_difference: number;
   points: number;
   team: { common_name: string | null } | { common_name: string | null }[] | null;
+  nation: { name: string | null } | { name: string | null }[] | null;
 }
 
 export async function fetchWcGroupStandings(): Promise<Record<string, WcGroupStandingRow[]>> {
@@ -594,7 +646,7 @@ export async function fetchWcGroupStandings(): Promise<Record<string, WcGroupSta
   const { data } = await supabase
     .from("fb_group_standings")
     .select(
-      "group_label,position,played,wins,draws,losses,goals_for,goals_against,goal_difference,points,team:fb_clubs!team_id(common_name)",
+      "group_label,position,played,wins,draws,losses,goals_for,goals_against,goal_difference,points,team:fb_clubs!team_id(common_name),nation:fb_nations!nation_id(name)",
     )
     .eq("event_id", event.id)
     .order("group_label")
@@ -603,7 +655,7 @@ export async function fetchWcGroupStandings(): Promise<Record<string, WcGroupSta
   for (const r of (data as GroupQueryRow[]) ?? []) {
     const row: WcGroupStandingRow = {
       position: r.position,
-      team: unwrapOne(r.team)?.common_name ?? "—",
+      team: unwrapOne(r.team)?.common_name ?? unwrapOne(r.nation)?.name ?? "—",
       played: r.played,
       won: r.wins,
       drawn: r.draws,
