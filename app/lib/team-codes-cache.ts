@@ -48,6 +48,19 @@ export async function loadTeamCodes(): Promise<void> {
         global.set(norm(k), r);
       }
     }
+    // National teams live in fb_nations (WC etc.), not fb_clubs — fold them in
+    // so their codes resolve too. `name` maps onto both club name keys.
+    const { data: nat } = await supabase
+      .from("fb_nations")
+      .select("name,short_code");
+    for (const n of (nat as { name: string; short_code: string | null }[]) ?? []) {
+      if (!n.name) continue;
+      global.set(norm(n.name), {
+        common_name: n.name,
+        full_name: n.name,
+        short_code: n.short_code,
+      });
+    }
     loaded = true;
   })();
   return inflight;
