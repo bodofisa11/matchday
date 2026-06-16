@@ -441,19 +441,17 @@ export function F1View() {
         <div className="wf-ph">grand prix / hero</div>
       </section>
 
-      <div className="wf-col wf-gap6" style={{ marginBottom: 20, alignItems: "center" }}>
-        <div className="wf-center wf-gap6">
-          {TABS.map((t) => (
-            <button
-              key={t}
-              className={`wf-chip${t === tab ? " on" : ""}`}
-              style={{ cursor: "pointer" }}
-              onClick={() => setTab(t)}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
+      <div className="wf-center wf-gap6" style={{ marginBottom: 20 }}>
+        {TABS.map((t) => (
+          <button
+            key={t}
+            className={`wf-chip${t === tab ? " on" : ""}`}
+            style={{ cursor: "pointer" }}
+            onClick={() => setTab(t)}
+          >
+            {t}
+          </button>
+        ))}
       </div>
 
       {tab === "Overview" && <div className="wf-empty">Overview coming soon.</div>}
