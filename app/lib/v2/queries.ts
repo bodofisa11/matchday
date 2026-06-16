@@ -8,6 +8,7 @@
  * schema has no club-honours source for it.
  */
 import { fetchFixturesByISTDateRange, type SportId } from "@/app/lib/fetch-fixtures-client";
+import { getSeasonsForCompetition } from "@/app/lib/events";
 import {
   fetchF1Calendar,
   fetchF1ConstructorStandings,
@@ -251,21 +252,26 @@ export type {
   F1SprintResultRow,
 };
 
-/** Full F1 race calendar, ordered by round. */
-export async function getF1Calendar(): Promise<F1RaceRow[]> {
-  return fetchF1Calendar();
+/** Full F1 race calendar for a season, ordered by round. */
+export async function getF1Calendar(season?: string): Promise<F1RaceRow[]> {
+  return fetchF1Calendar(season);
 }
 
-/** Driver championship standings, highest points first. */
-export async function getF1DriverStandings(): Promise<F1DriverRow[]> {
-  const rows = await fetchF1DriverStandings();
+/** Driver championship standings for a season, highest points first. */
+export async function getF1DriverStandings(season?: string): Promise<F1DriverRow[]> {
+  const rows = await fetchF1DriverStandings(season);
   return [...rows].sort((a, b) => Number(b.points) - Number(a.points));
 }
 
-/** Constructor championship standings, highest points first. */
-export async function getF1ConstructorStandings(): Promise<F1ConstructorRow[]> {
-  const rows = await fetchF1ConstructorStandings();
+/** Constructor championship standings for a season, highest points first. */
+export async function getF1ConstructorStandings(season?: string): Promise<F1ConstructorRow[]> {
+  const rows = await fetchF1ConstructorStandings(season);
   return [...rows].sort((a, b) => Number(b.points) - Number(a.points));
+}
+
+/** F1 seasons seeded in `events`, newest first. Drives the season selector. */
+export async function getF1Seasons(): Promise<string[]> {
+  return getSeasonsForCompetition("f1", "F1");
 }
 
 /** Race classification for a given season/round, sorted by finish position. */

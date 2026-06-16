@@ -85,6 +85,24 @@ export async function getF1Event(season: string = DEFAULT_F1_SEASON): Promise<Ev
 }
 
 /**
+ * All seasons seeded for a competition, newest first (string-desc, which is
+ * correct for both `YYYY` and `YYYY-YY` forms). Drives the season selector —
+ * callers render it only when more than one season is returned. Empty when
+ * Supabase is unconfigured or nothing is seeded.
+ */
+export async function getSeasonsForCompetition(
+  sport: EventSport,
+  shortCode: string,
+): Promise<string[]> {
+  const rows = await loadEvents();
+  return rows
+    .filter((r) => r.sport === sport && r.short_code === shortCode)
+    .map((r) => r.season)
+    .filter((s, i, a) => a.indexOf(s) === i)
+    .sort((a, b) => b.localeCompare(a));
+}
+
+/**
  * Resolve every event UUID for a sport in a season. Used when the daily
  * view aggregates fixtures across multiple competitions.
  */
