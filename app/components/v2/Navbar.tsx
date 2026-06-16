@@ -12,7 +12,6 @@ const TABS: { href: string; label: string; dot: Dot }[] = [
   { href: "/", label: "Home", dot: null },
   ...SPORTS.map((s) => ({ href: `/${s.slug}`, label: s.label, dot: s.dot as Dot })),
   { href: "/world-cup", label: "FIFA World Cup", dot: "foot" },
-  { href: "/predictions", label: "Predict", dot: null },
   { href: "/ufc", label: "UFC", dot: null },
 ];
 

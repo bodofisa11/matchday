@@ -157,6 +157,7 @@ export interface F1RaceResultRow {
   laps: number;
   status_text: string;
   points: number;
+  time: string | null;
   is_fastest_lap: boolean;
 }
 
@@ -168,6 +169,7 @@ export interface F1SprintResultRow {
   laps: number;
   status_text: string;
   points: number;
+  time: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -544,7 +546,7 @@ export async function fetchSquadByClubId(teamId: string): Promise<FootballSquadP
     const p = unwrapOne(r.player);
     return {
       id: p?.id ?? "",
-      name: p?.common_name ?? p?.full_name ?? "—",
+      name: p?.full_name ?? p?.common_name ?? "—",
       position: r.position ?? p?.position ?? null,
       dob: p?.date_of_birth ?? null,
       nationality: unwrapOne(p?.nation)?.name ?? null,
@@ -607,7 +609,7 @@ export async function fetchFootballScorers(
     const p = unwrapOne(r.player);
     return {
       position: r.position,
-      player_name: p?.common_name ?? p?.full_name ?? "—",
+      player_name: p?.full_name ?? p?.common_name ?? "—",
       player_nationality: unwrapOne(p?.nation)?.name ?? null,
       player_position: p?.position ?? null,
       team_name: unwrapOne(r.club)?.common_name ?? unwrapOne(r.nation)?.name ?? "—",
@@ -750,7 +752,7 @@ export async function fetchF1DriverStandings(season: string = DEFAULT_F1_SEASON)
     const d = unwrapOne(r.driver);
     return {
       position: i + 1,
-      driver: d?.common_name ?? d?.full_name ?? "—",
+      driver: d?.full_name ?? d?.common_name ?? "—",
       team: unwrapOne(r.team)?.name ?? "—",
       points: Number(r.points),
       wins: r.wins,
@@ -827,12 +829,13 @@ export async function fetchF1RaceResults(season: string, round: number): Promise
     const d = unwrapOne(r.driver);
     return {
       position: r.position,
-      driver: d?.common_name ?? d?.full_name ?? "—",
+      driver: d?.full_name ?? d?.common_name ?? "—",
       constructor: unwrapOne(r.team)?.name ?? "—",
       grid: r.grid,
       laps: r.laps_completed ?? 0,
       status_text: r.status ?? "",
       points: Number(r.points),
+      time: r.total_time,
       is_fastest_lap: false,
     };
   });
@@ -844,12 +847,13 @@ export async function fetchF1SprintResults(season: string, round: number): Promi
     const d = unwrapOne(r.driver);
     return {
       position: r.position,
-      driver: d?.common_name ?? d?.full_name ?? "—",
+      driver: d?.full_name ?? d?.common_name ?? "—",
       constructor: unwrapOne(r.team)?.name ?? "—",
       grid: r.grid,
       laps: r.laps_completed ?? 0,
       status_text: r.status ?? "",
       points: Number(r.points),
+      time: r.total_time,
     };
   });
 }

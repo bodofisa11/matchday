@@ -16,8 +16,7 @@ import {
 } from "@/app/lib/v2/queries";
 import { DEFAULT_F1_SEASON } from "@/app/lib/events";
 import { F1_TEAM_COLORS, todayStr } from "@/app/lib/team-meta";
-import { constructorCode, driverCode } from "@/app/lib/f1-codes";
-import { useCompactTables } from "@/app/lib/use-compact-tables";
+import { constructorCode } from "@/app/lib/f1-codes";
 import { SeasonSelector } from "@/app/components/v2/common";
 
 type Tab = "Overview" | "Schedule" | "Drivers" | "Constructors";
@@ -51,16 +50,6 @@ const CIRCUIT_TO_GP_NAME: Record<string, string> = {
   "Yas Marina Circuit": "Abu Dhabi Grand Prix",
 };
 
-const COUNTRY_FLAGS: Record<string, string> = {
-  Australia: "🇦🇺", China: "🇨🇳", Japan: "🇯🇵", Bahrain: "🇧🇭",
-  "Saudi Arabia": "🇸🇦", USA: "🇺🇸", "United States": "🇺🇸",
-  Canada: "🇨🇦", Monaco: "🇲🇨", Spain: "🇪🇸", Austria: "🇦🇹",
-  "Great Britain": "🇬🇧", "United Kingdom": "🇬🇧", Hungary: "🇭🇺",
-  Belgium: "🇧🇪", Netherlands: "🇳🇱", Italy: "🇮🇹", Azerbaijan: "🇦🇿",
-  Singapore: "🇸🇬", Mexico: "🇲🇽", Brazil: "🇧🇷", "Las Vegas": "🇺🇸",
-  Qatar: "🇶🇦", UAE: "🇦🇪", "Abu Dhabi": "🇦🇪", "United Arab Emirates": "🇦🇪",
-};
-
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
 function raceName(r: { name?: string | null; circuit: string; country: string }): string {
@@ -78,7 +67,7 @@ function teamColor(team: string): string {
 
 const DRIVER_COLS = "28px 1fr 1fr 40px 48px";
 const CONSTR_COLS = "28px 1fr 56px 40px 48px";
-const RESULT_COLS = "28px 1.2fr 1fr 44px 44px 1fr 44px";
+const RESULT_COLS = "28px 1.1fr 1fr 40px 40px 0.9fr 84px 44px";
 
 function SprintChip() {
   return <span className="wf-f1sprint">Sprint</span>;
@@ -91,10 +80,9 @@ function ResultsTable({
   rows: (F1RaceResultRow | F1SprintResultRow)[];
   showFastest: boolean;
 }) {
-  const compact = useCompactTables();
   return (
     <div style={{ overflowX: "auto" }}>
-      <div className="wf-box" style={{ minWidth: 560 }}>
+      <div className="wf-box" style={{ minWidth: 620 }}>
         <div className="wf-trow head" style={{ gridTemplateColumns: RESULT_COLS }}>
           <span>#</span>
           <span>Driver</span>
@@ -102,6 +90,7 @@ function ResultsTable({
           <span>Grid</span>
           <span>Laps</span>
           <span>Status</span>
+          <span>Time</span>
           <span>Pts</span>
         </div>
         {rows.map((r, i) => {
@@ -114,7 +103,7 @@ function ResultsTable({
             >
               <span className="wf-rank">{r.position ?? "—"}</span>
               <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {compact ? driverCode(r.driver) : r.driver}
+                {r.driver}
                 {fastest && <span className="wf-f1fl"> ⚡FL</span>}
               </span>
               <span className="wf-muted" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -127,6 +116,9 @@ function ResultsTable({
                 style={{ color: r.status_text === "Finished" ? "var(--wf-ink-2)" : "var(--wf-f1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
               >
                 {r.status_text}
+              </span>
+              <span className="wf-mono-sm" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {r.time ?? "—"}
               </span>
               <span className="wf-num" style={{ fontWeight: 700 }}>{Number(r.points)}</span>
             </div>
@@ -175,7 +167,7 @@ function RaceDetail({ race, onBack }: { race: F1RaceRow; onBack: () => void }) {
       </button>
       <div className="wf-col wf-gap6">
         <span className="wf-h3" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {COUNTRY_FLAGS[race.country] ?? "🏁"} {raceName(race)}
+          {raceName(race)}
           {race.has_sprint && <SprintChip />}
         </span>
         <span className="wf-mono-sm wf-muted">
@@ -255,11 +247,10 @@ function SchedulePanel({
             <div
               key={r.round}
               className="wf-trow"
-              style={{ gridTemplateColumns: "40px 28px 1fr auto", cursor: completed ? "pointer" : "default" }}
+              style={{ gridTemplateColumns: "40px 1fr auto", cursor: completed ? "pointer" : "default" }}
               onClick={() => completed && setSelected(r)}
             >
               <span className="wf-rank">R{r.round}</span>
-              <span style={{ fontSize: 18 }}>{COUNTRY_FLAGS[r.country] ?? "🏁"}</span>
               <span className="wf-col wf-gap6" style={{ minWidth: 0 }}>
                 <span style={{ display: "flex", alignItems: "center", gap: 8, overflow: "hidden" }}>
                   <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 600 }}>
@@ -286,7 +277,6 @@ function SchedulePanel({
 }
 
 function DriversPanel({ drivers, loading }: { drivers: F1DriverRow[]; loading: boolean }) {
-  const compact = useCompactTables();
   if (loading) return <div className="wf-empty">Loading…</div>;
   if (drivers.length === 0) return <div className="wf-empty">No standings data yet.</div>;
   return (
@@ -309,7 +299,7 @@ function DriversPanel({ drivers, loading }: { drivers: F1DriverRow[]; loading: b
             >
               <span className="wf-rank">{d.position}</span>
               <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 600 }}>
-                {compact ? driverCode(d.driver) : d.driver}
+                {d.driver}
               </span>
               <span className="wf-muted" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {d.team}

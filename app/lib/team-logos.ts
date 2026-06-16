@@ -57,6 +57,34 @@ const OVERRIDE: Record<string, string> = {
   "real-betis-balompie": "real-betis",
   "olympique-de-marseille": "marseille",
   psg: "paris-saint-germain",
+  // Short common_names the resolver can't denoise to a manifest slug.
+  // Keyed by slugify(common_name); target verified present in the manifest.
+  "1-fc-koln": "koln",
+  atleti: "atletico-madrid",
+  barca: "barcelona",
+  bayern: "bayern-munchen",
+  bremen: "werder-bremen",
+  dortmund: "borussia-dortmund",
+  frankfurt: "eintracht-frankfurt",
+  hsv: "hamburger-sv",
+  heidenheim: "fc-heidenheim",
+  "k-benhavn": "copenhagen",
+  "le-havre": "le-havre-ac",
+  leverkusen: "bayer-leverkusen",
+  "m-gladbach": "borussia-monchengladbach",
+  mainz: "mainz-05",
+  "man-city": "manchester-city",
+  "man-united": "manchester-united",
+  monaco: "as-monaco",
+  nottingham: "nottingham-forest",
+  olympiakos: "olympiacos",
+  "olympique-lyon": "lyon",
+  "real-oviedo": "oviedo",
+  "stade-rennais": "rennes",
+  strasbourg: "rc-strasbourg-alsace",
+  stuttgart: "vfb-stuttgart",
+  "bod-glimt": "bodo-glimt",
+  "sl-benfica": "benfica",
 };
 
 // National-team country-name variants -> the site's category segment. Lets a
@@ -75,6 +103,8 @@ const COUNTRY_ALIAS: Record<string, string> = {
   "dr-congo": "congo-dr",
   "democratic-republic-of-congo": "congo-dr",
   "cape-verde": "cabo-verde",
+  "cape-verde-islands": "cabo-verde",
+  "bosnia-herzegovina": "bosnia-and-herzegovina",
   turkiye: "turkey",
 };
 
