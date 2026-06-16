@@ -17,6 +17,22 @@ import { logoUrl } from "@/app/lib/team-logos";
 
 const SQUAD_COLS = "32px 1fr 56px 1fr 96px";
 
+/** Age from a date-of-birth string as "Ny Md" (years and remaining days). */
+function ageYearsDays(dob: string | null): string {
+  if (!dob) return "—";
+  const b = new Date(dob);
+  if (Number.isNaN(b.getTime())) return "—";
+  const now = new Date();
+  let years = now.getFullYear() - b.getFullYear();
+  let lastBirthday = new Date(b.getFullYear() + years, b.getMonth(), b.getDate());
+  if (lastBirthday > now) {
+    years -= 1;
+    lastBirthday = new Date(b.getFullYear() + years, b.getMonth(), b.getDate());
+  }
+  const days = Math.floor((now.getTime() - lastBirthday.getTime()) / 86_400_000);
+  return `${years}y ${days}d`;
+}
+
 function TeamCrest({ team, size = 56 }: { team: FootballTeamDetailRow; size?: number }) {
   // Prefer a real football-logos.cc logo; fall back to the DB crest, then initials.
   const src = logoUrl(team.name) ?? team.crest;
@@ -98,9 +114,9 @@ function TeamDetail({ team, onBack }: { team: FootballTeamDetailRow; onBack: () 
               <span>
                 {g} ({grouped[g].length})
               </span>
-              <span>Pos</span>
+              <span style={{ textAlign: "center" }}>Pos</span>
               <span>Nationality</span>
-              <span>DOB</span>
+              <span style={{ textAlign: "center" }}>Age</span>
             </div>
             {grouped[g].map((p) => (
               <div key={p.id} className="wf-trow" style={{ gridTemplateColumns: SQUAD_COLS }}>
@@ -108,9 +124,13 @@ function TeamDetail({ team, onBack }: { team: FootballTeamDetailRow; onBack: () 
                 <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {p.name}
                 </span>
-                <span className="wf-mono-sm">{shortPosition(p.position) ?? p.position ?? "—"}</span>
+                <span className="wf-mono-sm" style={{ textAlign: "center" }}>
+                  {shortPosition(p.position) ?? p.position ?? "—"}
+                </span>
                 <span className="wf-mono-sm">{countryDisplay(p.nationality)}</span>
-                <span className="wf-mono-sm wf-muted">{p.dob ?? "—"}</span>
+                <span className="wf-mono-sm wf-muted" style={{ textAlign: "center" }}>
+                  {ageYearsDays(p.dob)}
+                </span>
               </div>
             ))}
           </div>

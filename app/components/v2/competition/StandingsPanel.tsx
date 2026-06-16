@@ -53,13 +53,13 @@ export function StandingsPanel({ competitionSlug }: { competitionSlug: string })
             <div className="wf-trow head" style={{ gridTemplateColumns: COLS }}>
               <span>#</span>
               <span>Club</span>
-              <span>P</span>
-              <span>W</span>
-              <span>D</span>
-              <span>L</span>
-              <span>GD</span>
-              <span>Pts</span>
-              <span>Form</span>
+              <span style={{ textAlign: "center" }}>P</span>
+              <span style={{ textAlign: "center" }}>W</span>
+              <span style={{ textAlign: "center" }}>D</span>
+              <span style={{ textAlign: "center" }}>L</span>
+              <span style={{ textAlign: "center" }}>GD</span>
+              <span style={{ textAlign: "center" }}>Pts</span>
+              <span style={{ textAlign: "center" }}>Form</span>
             </div>
             {rows.map((r) => {
               const team = teamRefFromName(r.team);
@@ -76,17 +76,17 @@ export function StandingsPanel({ competitionSlug }: { competitionSlug: string })
                       {r.team}
                     </span>
                   </span>
-                  <span className="wf-num">{r.played}</span>
-                  <span className="wf-num">{r.won}</span>
-                  <span className="wf-num">{r.drawn}</span>
-                  <span className="wf-num">{r.lost}</span>
-                  <span className="wf-num">
+                  <span className="wf-num" style={{ textAlign: "center" }}>{r.played}</span>
+                  <span className="wf-num" style={{ textAlign: "center" }}>{r.won}</span>
+                  <span className="wf-num" style={{ textAlign: "center" }}>{r.drawn}</span>
+                  <span className="wf-num" style={{ textAlign: "center" }}>{r.lost}</span>
+                  <span className="wf-num" style={{ textAlign: "center" }}>
                     {r.goal_difference > 0 ? `+${r.goal_difference}` : r.goal_difference}
                   </span>
-                  <span className="wf-num" style={{ fontWeight: 700 }}>
+                  <span className="wf-num" style={{ textAlign: "center", fontWeight: 700 }}>
                     {r.points}
                   </span>
-                  <span className="wf-form">
+                  <span className="wf-form" style={{ justifyContent: "center" }}>
                     {parseForm(r.form).map((f, i) => (
                       <FormBadge key={i} r={f} />
                     ))}
