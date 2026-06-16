@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { sportDot } from "@/app/lib/v2/types";
 import type { CompetitionMeta } from "@/app/lib/v2/types";
+import { getCompetitionSeasons } from "@/app/lib/v2/queries";
+import { SeasonSelector } from "../common";
 import { FixturesPanel } from "./FixturesPanel";
 import { StandingsPanel } from "./StandingsPanel";
 import { StatsPanel } from "./StatsPanel";
@@ -25,6 +27,23 @@ function NewsPanel() {
 export function CompetitionView({ competition }: { competition: CompetitionMeta }) {
   const TABS = competition.sport === "cricket" ? CRICKET_TABS : FOOTBALL_TABS;
   const [tab, setTab] = useState<Tab>("Overview");
+  // Seed with the competition's own season so the dropdown always shows at
+  // least one entry; replace with live seasons from `events` when available.
+  const [seasons, setSeasons] = useState<string[]>([competition.season]);
+  const [season, setSeason] = useState<string>(competition.season);
+
+  useEffect(() => {
+    let cancelled = false;
+    getCompetitionSeasons(competition.slug).then((s) => {
+      if (cancelled || s.length === 0) return;
+      setSeasons(s);
+      if (!s.includes(season)) setSeason(s[0]);
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [competition.slug]);
 
   return (
     <>
@@ -33,10 +52,13 @@ export function CompetitionView({ competition }: { competition: CompetitionMeta 
           <div className="wf-center wf-gap8">
             <span className={`wf-dot ${sportDot(competition.sport)}`} />
             <span className="wf-eyebrow">
-              {competition.country} · {competition.season}
+              {competition.country} · {season}
             </span>
           </div>
-          <h1 className="wf-h1">{competition.name}</h1>
+          <div className="wf-center wf-gap12" style={{ flexWrap: "wrap" }}>
+            <h1 className="wf-h1">{competition.name}</h1>
+            <SeasonSelector seasons={seasons} value={season} onChange={setSeason} />
+          </div>
         </div>
         <div className="wf-ph">competition crest / hero</div>
       </section>

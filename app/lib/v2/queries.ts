@@ -213,6 +213,18 @@ export function competitionDbShort(competitionSlug: string): string | null {
   return COMP_DB[competitionSlug]?.short ?? null;
 }
 
+/**
+ * Seasons seeded in `events` for a football competition slug, newest first.
+ * Drives the season selector. Empty when the slug isn't wired to live data;
+ * callers fall back to the competition's own season so the dropdown always
+ * shows at least one entry.
+ */
+export async function getCompetitionSeasons(competitionSlug: string): Promise<string[]> {
+  const short = competitionDbShort(competitionSlug);
+  if (!short) return [];
+  return getSeasonsForCompetition("fb", short);
+}
+
 export type {
   FootballFixtureRow,
   FootballScorerRow,

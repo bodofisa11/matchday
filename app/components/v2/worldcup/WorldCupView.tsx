@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
+  getCompetitionSeasons,
   getWcFixtures,
   getWcGroupStandings,
   teamRefFromName,
@@ -11,7 +12,7 @@ import {
 } from "@/app/lib/v2/queries";
 import { formatFixtureDate } from "@/app/lib/team-meta";
 import { istTodayStr } from "@/app/lib/timezone";
-import { Crest } from "../common";
+import { Crest, SeasonSelector } from "../common";
 import { TeamsPanel } from "../competition/TeamsPanel";
 
 type Tab = "Fixtures" | "Groups" | "Bracket" | "Teams";
@@ -157,6 +158,10 @@ export function WorldCupView() {
   const [groups, setGroups] = useState<Record<string, WcGroupStandingRow[]>>({});
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("Fixtures");
+  // World Cup is a single-edition event; seed with 2026 and replace with any
+  // seasons seeded in `events` so the dropdown always shows at least one.
+  const [seasons, setSeasons] = useState<string[]>(["2026"]);
+  const [season, setSeason] = useState<string>("2026");
 
   useEffect(() => {
     let cancelled = false;
@@ -166,9 +171,15 @@ export function WorldCupView() {
       setGroups(gr);
       setLoading(false);
     });
+    getCompetitionSeasons("world-cup").then((s) => {
+      if (cancelled || s.length === 0) return;
+      setSeasons(s);
+      if (!s.includes(season)) setSeason(s[0]);
+    });
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const today = istTodayStr();
@@ -191,7 +202,10 @@ export function WorldCupView() {
             <span className="wf-dot foot" />
             <span className="wf-eyebrow">USA · Canada · Mexico · 2026</span>
           </div>
-          <h1 className="wf-h1">FIFA World Cup 2026</h1>
+          <div className="wf-center wf-gap12" style={{ flexWrap: "wrap" }}>
+            <h1 className="wf-h1">FIFA World Cup 2026</h1>
+            <SeasonSelector seasons={seasons} value={season} onChange={setSeason} />
+          </div>
           <span className="wf-mono-sm wf-muted">48 teams · 104 matches · 11 Jun – 19 Jul</span>
         </div>
         <div className="wf-ph">world cup crest / hero</div>

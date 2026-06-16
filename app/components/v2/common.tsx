@@ -32,9 +32,9 @@ export function TeamCell({ team }: { team: TeamRef }) {
 }
 
 /**
- * Season picker — a row of chips. Renders nothing unless more than one season
- * is available, so callers can mount it unconditionally and it stays invisible
- * for single-season competitions (football, World Cup) until more are seeded.
+ * Season picker — a dropdown. Renders the available seasons (newest first) and
+ * stays invisible only when the list is empty, so callers can mount it
+ * unconditionally. Single-season competitions still show their one season.
  */
 export function SeasonSelector({
   seasons,
@@ -45,21 +45,24 @@ export function SeasonSelector({
   value: string;
   onChange: (season: string) => void;
 }) {
-  if (seasons.length < 2) return null;
+  if (seasons.length === 0) return null;
   return (
-    <div className="wf-center wf-gap6" role="tablist" aria-label="Season">
-      {seasons.map((s) => (
-        <button
-          key={s}
-          role="tab"
-          aria-selected={s === value}
-          className={`wf-chip${s === value ? " on" : ""}`}
-          style={{ cursor: "pointer" }}
-          onClick={() => onChange(s)}
-        >
-          {s}
-        </button>
-      ))}
+    <div className="wf-select-wrap">
+      <select
+        className="wf-select"
+        aria-label="Season"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        {seasons.map((s) => (
+          <option key={s} value={s}>
+            {s}
+          </option>
+        ))}
+      </select>
+      <span className="wf-select-caret" aria-hidden>
+        ▾
+      </span>
     </div>
   );
 }
