@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getCompetitions } from "@/app/lib/v2/queries";
 import { SPORTS } from "@/app/lib/v2/types";
 import type { SportSlug } from "@/app/lib/v2/types";
+import { CompetitionLogo } from "../common";
 import { F1View } from "../f1/F1View";
 
 export function SportView({ sport }: { sport: SportSlug }) {
@@ -33,7 +34,7 @@ export function SportView({ sport }: { sport: SportSlug }) {
           <div className="wf-cardgrid" style={{ marginTop: 14 }}>
             {comps.map((c) => (
               <Link key={c.slug} href={`/${sport}/${c.slug}`} className="wf-compcard">
-                <span className="wf-compcard-band" />
+                <CompetitionLogo idOrCode={c.slug} name={c.name} variant="band" />
                 <div className="wf-compcard-body">
                   <div className="wf-between wf-gap8">
                     <span className="wf-evtitle">{c.name}</span>

@@ -13,12 +13,15 @@ import {
   positionGroup,
   shortPosition,
 } from "@/app/lib/football-terms";
+import { logoUrl } from "@/app/lib/team-logos";
 
 const SQUAD_COLS = "32px 1fr 56px 1fr 96px";
 
 function TeamCrest({ team, size = 56 }: { team: FootballTeamDetailRow; size?: number }) {
-  if (team.crest) {
-    return <img src={team.crest} alt={team.name} style={{ width: size, height: size, objectFit: "contain" }} />;
+  // Prefer a real football-logos.cc logo; fall back to the DB crest, then initials.
+  const src = logoUrl(team.name) ?? team.crest;
+  if (src) {
+    return <img src={src} alt={team.name} style={{ width: size, height: size, objectFit: "contain" }} />;
   }
   return (
     <span className="wf-crest lg" style={{ width: size, height: size }}>

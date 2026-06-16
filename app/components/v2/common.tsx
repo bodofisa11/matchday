@@ -1,11 +1,32 @@
 /** Shared presentational primitives for the v2 UI. */
+"use client";
+
+import { useState } from "react";
 import type { TeamRef } from "@/app/lib/v2/types";
+import { competitionLogoUrl, logoUrl } from "@/app/lib/team-logos";
 
 export function SportDot({ sport }: { sport: "foot" | "f1" | "crk" }) {
   return <span className={`wf-dot ${sport}`} />;
 }
 
 export function Crest({ team, lg }: { team: TeamRef; lg?: boolean }) {
+  const url = logoUrl(team);
+  const [failed, setFailed] = useState(false);
+
+  if (url && !failed) {
+    return (
+      <img
+        className={`wf-crest img${lg ? " lg" : ""}`}
+        src={url}
+        alt={team.name}
+        title={team.name}
+        loading="lazy"
+        decoding="async"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+
   return (
     <span
       className={`wf-crest${lg ? " lg" : ""}`}
@@ -14,6 +35,58 @@ export function Crest({ team, lg }: { team: TeamRef; lg?: boolean }) {
       aria-hidden
     >
       {team.code}
+    </span>
+  );
+}
+
+/**
+ * Real competition logo (league/cup/tournament) from football-logos.cc.
+ * `hero` fills the hero placeholder box; `band` sits in the sport-page card
+ * band. Falls back to the existing placeholder/empty band on miss or error.
+ */
+export function CompetitionLogo({
+  idOrCode,
+  name,
+  variant,
+}: {
+  idOrCode: string;
+  name: string;
+  variant: "hero" | "band";
+}) {
+  const url = competitionLogoUrl(idOrCode);
+  const [failed, setFailed] = useState(false);
+  const showImg = url && !failed;
+
+  if (variant === "hero") {
+    return (
+      <div className="wf-ph">
+        {showImg ? (
+          <img
+            className="wf-hero-logo"
+            src={url}
+            alt={name}
+            decoding="async"
+            onError={() => setFailed(true)}
+          />
+        ) : (
+          <span>{name}</span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <span className="wf-compcard-band">
+      {showImg && (
+        <img
+          className="wf-compcard-logo"
+          src={url}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          onError={() => setFailed(true)}
+        />
+      )}
     </span>
   );
 }
