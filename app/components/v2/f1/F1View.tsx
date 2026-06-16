@@ -376,7 +376,9 @@ export function F1View() {
   const [calendar, setCalendar] = useState<F1RaceRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("Overview");
-  const [seasons, setSeasons] = useState<string[]>([]);
+  // Seed with the default season so the dropdown always shows at least one
+  // entry; replace with the live seasons from `events` when available.
+  const [seasons, setSeasons] = useState<string[]>([DEFAULT_F1_SEASON]);
   const [season, setSeason] = useState<string>(DEFAULT_F1_SEASON);
 
   useEffect(() => {
@@ -426,7 +428,10 @@ export function F1View() {
             <span className="wf-dot f1" />
             <span className="wf-eyebrow">{season} World Championship</span>
           </div>
-          <h1 className="wf-h1">Formula 1</h1>
+          <div className="wf-center wf-gap12" style={{ flexWrap: "wrap" }}>
+            <h1 className="wf-h1">Formula 1</h1>
+            <SeasonSelector seasons={seasons} value={season} onChange={setSeason} />
+          </div>
           {calendar.length > 0 && (
             <span className="wf-mono-sm wf-muted">
               Round {completedCount} of {calendar.length}
@@ -437,7 +442,6 @@ export function F1View() {
       </section>
 
       <div className="wf-col wf-gap6" style={{ marginBottom: 20, alignItems: "center" }}>
-        <SeasonSelector seasons={seasons} value={season} onChange={setSeason} />
         <div className="wf-center wf-gap6">
           {TABS.map((t) => (
             <button

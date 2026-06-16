@@ -348,6 +348,23 @@ body {
   box-shadow: var(--wf-shadow-sm);
 }
 
+/* season dropdown */
+.v2 .wf-select-wrap { position: relative; display: inline-flex; align-items: center; }
+.v2 .wf-select {
+  appearance: none; -webkit-appearance: none; -moz-appearance: none;
+  padding: 8px 34px 8px 16px; border: 1px solid var(--wf-line); border-radius: 999px;
+  font-family: var(--font-jetbrains-mono), monospace; font-size: 14px; font-weight: 500;
+  color: var(--wf-ink); background: var(--wf-surface); cursor: pointer;
+  box-shadow: var(--wf-shadow-sm);
+  transition: border-color 0.18s, background 0.18s;
+}
+.v2 .wf-select:hover { background: var(--wf-fill); border-color: var(--wf-line-2); }
+.v2 .wf-select:focus-visible { outline: 2px solid var(--wf-accent); outline-offset: 2px; }
+.v2 .wf-select-caret {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  pointer-events: none; font-size: 11px; color: var(--wf-muted);
+}
+
 /* event cards (home top events) */
 .v2 .wf-eventcard {
   width: 250px; padding: 20px; border: 1px solid var(--wf-line); border-radius: var(--wf-r);
