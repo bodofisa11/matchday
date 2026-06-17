@@ -38,6 +38,7 @@ const KNOCKOUT_STAGES: { id: string; title: string }[] = [
 ];
 
 const GROUP_COLS = "20px 1fr 26px 26px 26px 26px 34px 34px";
+const RESULTS_PAGE = 10;
 
 function StageChip({ stage, group }: { stage?: string | null; group?: string | null }) {
   if (!stage) return null;
@@ -162,6 +163,7 @@ export function WorldCupView() {
   // seasons seeded in `events` so the dropdown always shows at least one.
   const [seasons, setSeasons] = useState<string[]>(["2026"]);
   const [season, setSeason] = useState<string>("2026");
+  const [resultsShown, setResultsShown] = useState(RESULTS_PAGE);
 
   useEffect(() => {
     let cancelled = false;
@@ -267,7 +269,19 @@ export function WorldCupView() {
           ) : results.length === 0 ? (
             <div className="wf-empty">No results yet this tournament.</div>
           ) : (
-            <div>{results.map((f) => <FixtureLine key={f.id} f={f} />)}</div>
+            <>
+              <div>
+                {results.slice(0, resultsShown).map((f) => <FixtureLine key={f.id} f={f} />)}
+              </div>
+              {resultsShown < results.length && (
+                <button
+                  className="wf-loadmore"
+                  onClick={() => setResultsShown((n) => n + RESULTS_PAGE)}
+                >
+                  Load more
+                </button>
+              )}
+            </>
           )}
         </div>
       )}
