@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- **World Cup Overview tab + consistent Fixtures.** The FIFA World Cup page gains an **Overview** tab (placeholder for now) and its **Fixtures** tab now uses the same upcoming-fixtures list (today first, paged with Load more) as other football competitions, replacing the old two-column upcoming/recent grid.
+
 - **World Cup Results tab.** The FIFA World Cup page now has a dedicated **Results** tab listing every finished match (newest first, with scores and stage labels), matching the Results view on other football competitions.
 
 - **Tidier stat tables.** Numeric columns (P/W/D/L/GD/Pts/Form) in league and World Cup group standings now sit centered under their headers, so columns and labels line up regardless of digit width. Squad tables replace the raw **date of birth** with each player's **age** in a `Ny Md` (years/days) format.

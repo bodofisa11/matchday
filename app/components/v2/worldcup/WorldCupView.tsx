@@ -10,13 +10,18 @@ import {
   type WcGroupStandingRow,
 } from "@/app/lib/v2/queries";
 import { formatFixtureDate } from "@/app/lib/team-meta";
-import { istTodayStr } from "@/app/lib/timezone";
 import { Crest, SeasonSelector } from "../common";
 import { TeamsPanel } from "../competition/TeamsPanel";
 import { StatsPanel } from "../competition/StatsPanel";
+import { FixturesPanel } from "../competition/FixturesPanel";
 
-type Tab = "Fixtures" | "Results" | "Groups" | "Bracket" | "Teams" | "Stats";
-const TABS: Tab[] = ["Fixtures", "Results", "Groups", "Bracket", "Teams", "Stats"];
+type Tab = "Overview" | "Fixtures" | "Results" | "Groups" | "Bracket" | "Teams" | "Stats";
+const TABS: Tab[] = ["Overview", "Fixtures", "Results", "Groups", "Bracket", "Teams", "Stats"];
+
+function OverviewPanel() {
+  // Intentionally blank for now — a tournament summary lands here later.
+  return <div className="wf-empty">Overview coming soon.</div>;
+}
 
 const STAGE_LABEL: Record<string, string> = {
   group: "Group",
@@ -158,7 +163,7 @@ export function WorldCupView() {
   const [fixtures, setFixtures] = useState<FootballFixtureRow[]>([]);
   const [groups, setGroups] = useState<Record<string, WcGroupStandingRow[]>>({});
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<Tab>("Fixtures");
+  const [tab, setTab] = useState<Tab>("Overview");
   // World Cup is a single-edition event; seed with 2026 and replace with any
   // seasons seeded in `events` so the dropdown always shows at least one.
   const [seasons, setSeasons] = useState<string[]>(["2026"]);
@@ -184,11 +189,6 @@ export function WorldCupView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const today = istTodayStr();
-  const upcoming = fixtures
-    .filter((f) => f.status !== "finished" && f.date >= today)
-    .slice(0, 8);
-  const recent = fixtures.filter((f) => f.status === "finished").slice(-8).reverse();
   const results = fixtures.filter((f) => f.status === "finished").reverse();
   const groupEntries = Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
   const knockout = KNOCKOUT_STAGES.map((s) => ({
@@ -227,36 +227,9 @@ export function WorldCupView() {
         ))}
       </div>
 
-      {tab === "Fixtures" && (
-        <div className="wf-grid">
-          <div className="wf-box wf-pad">
-            <div className="wf-shead">
-              <span className="wf-h3">Upcoming</span>
-              <span className="wf-mono-sm wf-muted">Next 8</span>
-            </div>
-            {loading ? (
-              <div className="wf-empty">Loading…</div>
-            ) : upcoming.length === 0 ? (
-              <div className="wf-empty">No upcoming fixtures.</div>
-            ) : (
-              <div>{upcoming.map((f) => <FixtureLine key={f.id} f={f} />)}</div>
-            )}
-          </div>
-          <div className="wf-box wf-pad">
-            <div className="wf-shead">
-              <span className="wf-h3">Recent results</span>
-              <span className="wf-mono-sm wf-muted">Newest first</span>
-            </div>
-            {loading ? (
-              <div className="wf-empty">Loading…</div>
-            ) : recent.length === 0 ? (
-              <div className="wf-empty">No results yet.</div>
-            ) : (
-              <div>{recent.map((f) => <FixtureLine key={f.id} f={f} />)}</div>
-            )}
-          </div>
-        </div>
-      )}
+      {tab === "Overview" && <OverviewPanel />}
+
+      {tab === "Fixtures" && <FixturesPanel competitionSlug="world-cup" mode="upcoming" />}
 
       {tab === "Results" && (
         <div className="wf-box wf-pad">
