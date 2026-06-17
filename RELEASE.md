@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- **World Cup Results tab.** The FIFA World Cup page now has a dedicated **Results** tab listing every finished match (newest first, with scores and stage labels), matching the Results view on other football competitions.
+
 - **Tidier stat tables.** Numeric columns (P/W/D/L/GD/Pts/Form) in league and World Cup group standings now sit centered under their headers, so columns and labels line up regardless of digit width. Squad tables replace the raw **date of birth** with each player's **age** in a `Ny Md` (years/days) format.
 
 - Cleanup + display fixes. The abandoned **Predictions** game has been removed entirely (route, components, the legacy `/public/logos` assets it used, and its navbar/World Cup links) — the editorial design is the only one left. **More football logos now render**: previously-missing clubs (Bayern, Dortmund, Leverkusen, Mönchengladbach, Stuttgart, Köln, Mainz, Heidenheim, Werder Bremen, Frankfurt, Hamburger SV, Man City, Man United, Nottingham Forest, Atlético Madrid, Barcelona, Benfica, Copenhagen, Le Havre, Strasbourg, Lyon, Rennes, Monaco, Oviedo, Olympiacos, Bodø/Glimt) and national teams (Bosnia-Herzegovina, Cape Verde) now resolve to real crests. **People show their full names** everywhere — F1 drivers and football players/scorers/squads no longer abbreviate to a common or 3-letter code. **F1 race/sprint result tables gained a Time column** (winner's finish time and gaps). **Country-flag emoji were removed** from the F1 schedule and race-detail headings. The **FIFA World Cup page has a new Stats tab** listing tournament top scorers.
