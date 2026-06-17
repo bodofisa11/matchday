@@ -15,8 +15,8 @@ import { Crest, SeasonSelector } from "../common";
 import { TeamsPanel } from "../competition/TeamsPanel";
 import { StatsPanel } from "../competition/StatsPanel";
 
-type Tab = "Fixtures" | "Groups" | "Bracket" | "Teams" | "Stats";
-const TABS: Tab[] = ["Fixtures", "Groups", "Bracket", "Teams", "Stats"];
+type Tab = "Fixtures" | "Results" | "Groups" | "Bracket" | "Teams" | "Stats";
+const TABS: Tab[] = ["Fixtures", "Results", "Groups", "Bracket", "Teams", "Stats"];
 
 const STAGE_LABEL: Record<string, string> = {
   group: "Group",
@@ -187,6 +187,7 @@ export function WorldCupView() {
     .filter((f) => f.status !== "finished" && f.date >= today)
     .slice(0, 8);
   const recent = fixtures.filter((f) => f.status === "finished").slice(-8).reverse();
+  const results = fixtures.filter((f) => f.status === "finished").reverse();
   const groupEntries = Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
   const knockout = KNOCKOUT_STAGES.map((s) => ({
     ...s,
@@ -252,6 +253,22 @@ export function WorldCupView() {
               <div>{recent.map((f) => <FixtureLine key={f.id} f={f} />)}</div>
             )}
           </div>
+        </div>
+      )}
+
+      {tab === "Results" && (
+        <div className="wf-box wf-pad">
+          <div className="wf-shead">
+            <span className="wf-h3">Results</span>
+            <span className="wf-mono-sm wf-muted">Newest first</span>
+          </div>
+          {loading ? (
+            <div className="wf-empty">Loading…</div>
+          ) : results.length === 0 ? (
+            <div className="wf-empty">No results yet this tournament.</div>
+          ) : (
+            <div>{results.map((f) => <FixtureLine key={f.id} f={f} />)}</div>
+          )}
         </div>
       )}
 
