@@ -37,6 +37,7 @@ import {
   type WcGroupStandingRow,
 } from "@/app/lib/fetch-standings-client";
 import type { Fixture } from "@/app/lib/fixtures";
+import { cachedQuery, TTL } from "@/app/lib/cache";
 import {
   COMPETITIONS,
   TOP_EVENTS,
@@ -102,8 +103,12 @@ async function liveMatches(sport: SportSlug | "all", date: string): Promise<Matc
   // `date` is an IST day string; the v1 client handles IST↔UTC and returns
   // fixtures already mapped to the shared `Fixture` shape. Empty when Supabase
   // is unconfigured — the UI renders its empty states.
-  const { fixtures } = await fetchFixturesByISTDateRange(sportId, date, date);
-  return fixtures.map(mapFixture);
+  // Cached at LIVE TTL: these rails carry live scores, and all daily views
+  // (schedule, ticker, top, sport) share this one cache by (sport, date).
+  return cachedQuery(`liveMatches:${sportId}:${date}`, TTL.LIVE, async () => {
+    const { fixtures } = await fetchFixturesByISTDateRange(sportId, date, date);
+    return fixtures.map(mapFixture);
+  });
 }
 
 // ---- public API ----------------------------------------------------------
@@ -224,7 +229,9 @@ export function competitionDbShort(competitionSlug: string): string | null {
 export async function getCompetitionSeasons(competitionSlug: string): Promise<string[]> {
   const short = competitionDbShort(competitionSlug);
   if (!short) return [];
-  return getSeasonsForCompetition("fb", short);
+  return cachedQuery(`compSeasons:${short}`, TTL.REFERENCE, () =>
+    getSeasonsForCompetition("fb", short),
+  );
 }
 
 export type {
@@ -243,7 +250,8 @@ export type {
  * see {@link matchHref}.
  */
 export async function getMatchById(id: string): Promise<FootballMatchDetail | null> {
-  return fetchFootballMatchById(id);
+  // SCHEDULE TTL: a match may be live; keep it short so scores don't stick.
+  return cachedQuery(`match:${id}`, TTL.SCHEDULE, () => fetchFootballMatchById(id));
 }
 
 /** Route to a fixture's dedicated detail page (uuid = unique code). */
@@ -258,17 +266,17 @@ export async function getCompetitionStandings(
 ): Promise<FootballStandingRow[]> {
   const name = COMP_DB[competitionSlug]?.standings;
   if (!name) return [];
-  return fetchFootballStandings(name);
+  return cachedQuery(`standings:${name}`, TTL.STANDINGS, () => fetchFootballStandings(name));
 }
 
 /** All World Cup fixtures (every stage), oldest first. */
 export async function getWcFixtures(): Promise<FootballFixtureRow[]> {
-  return fetchWcFixturesByStage(null, 250);
+  return cachedQuery("wcFixtures", TTL.STANDINGS, () => fetchWcFixturesByStage(null, 250));
 }
 
 /** World Cup group standings keyed by group name (A, B, …). */
 export async function getWcGroupStandings(): Promise<Record<string, WcGroupStandingRow[]>> {
-  return fetchWcGroupStandings();
+  return cachedQuery("wcGroupStandings", TTL.STANDINGS, () => fetchWcGroupStandings());
 }
 
 // ---- live Formula 1 queries ----------------------------------------------
@@ -283,36 +291,47 @@ export type {
 
 /** Full F1 race calendar for a season, ordered by round. */
 export async function getF1Calendar(season?: string): Promise<F1RaceRow[]> {
-  return fetchF1Calendar(season);
+  return cachedQuery(`f1Calendar:${season ?? "default"}`, TTL.REFERENCE, () =>
+    fetchF1Calendar(season),
+  );
 }
 
 /** Driver championship standings for a season, highest points first. */
 export async function getF1DriverStandings(season?: string): Promise<F1DriverRow[]> {
-  const rows = await fetchF1DriverStandings(season);
-  return [...rows].sort((a, b) => Number(b.points) - Number(a.points));
+  return cachedQuery(`f1Drivers:${season ?? "default"}`, TTL.STANDINGS, async () => {
+    const rows = await fetchF1DriverStandings(season);
+    return [...rows].sort((a, b) => Number(b.points) - Number(a.points));
+  });
 }
 
 /** Constructor championship standings for a season, highest points first. */
 export async function getF1ConstructorStandings(season?: string): Promise<F1ConstructorRow[]> {
-  const rows = await fetchF1ConstructorStandings(season);
-  return [...rows].sort((a, b) => Number(b.points) - Number(a.points));
+  return cachedQuery(`f1Constructors:${season ?? "default"}`, TTL.STANDINGS, async () => {
+    const rows = await fetchF1ConstructorStandings(season);
+    return [...rows].sort((a, b) => Number(b.points) - Number(a.points));
+  });
 }
 
 /** F1 seasons seeded in `events`, newest first. Drives the season selector. */
 export async function getF1Seasons(): Promise<string[]> {
-  return getSeasonsForCompetition("f1", "F1");
+  return cachedQuery("f1Seasons", TTL.REFERENCE, () => getSeasonsForCompetition("f1", "F1"));
 }
 
 /** Race classification for a given season/round, sorted by finish position. */
 export async function getF1RaceResults(season: string, round: number): Promise<F1RaceResultRow[]> {
-  const rows = await fetchF1RaceResults(season, round);
-  return [...rows].sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
+  // STANDINGS TTL: results finalize after a race; avoid 7d-caching a mid-race snapshot.
+  return cachedQuery(`f1RaceResults:${season}:${round}`, TTL.STANDINGS, async () => {
+    const rows = await fetchF1RaceResults(season, round);
+    return [...rows].sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
+  });
 }
 
 /** Sprint classification for a given season/round, sorted by finish position. */
 export async function getF1SprintResults(season: string, round: number): Promise<F1SprintResultRow[]> {
-  const rows = await fetchF1SprintResults(season, round);
-  return [...rows].sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
+  return cachedQuery(`f1SprintResults:${season}:${round}`, TTL.STANDINGS, async () => {
+    const rows = await fetchF1SprintResults(season, round);
+    return [...rows].sort((a, b) => (a.position ?? 99) - (b.position ?? 99));
+  });
 }
 
 /** Paged fixtures/results for a competition. Empty when the slug is unmapped. */
@@ -326,7 +345,10 @@ export async function getCompetitionFixtures(
 ): Promise<{ rows: FootballFixtureRow[]; hasMore: boolean }> {
   const short = competitionDbShort(competitionSlug);
   if (!short) return { rows: [], hasMore: false };
-  return fetchFootballFixturesPaged(short, status, page, pageSize, fromDate, toDate);
+  const key = `compFixtures:${short}:${status}:${page}:${pageSize}:${fromDate ?? ""}:${toDate ?? ""}`;
+  return cachedQuery(key, TTL.STANDINGS, () =>
+    fetchFootballFixturesPaged(short, status, page, pageSize, fromDate, toDate),
+  );
 }
 
 /** Top scorers for a competition. Empty when the slug is unmapped. */
@@ -336,7 +358,9 @@ export async function getCompetitionScorers(
 ): Promise<FootballScorerRow[]> {
   const short = competitionDbShort(competitionSlug);
   if (!short) return [];
-  return fetchFootballScorers(short, limit);
+  return cachedQuery(`compScorers:${short}:${limit}`, TTL.STANDINGS, () =>
+    fetchFootballScorers(short, limit),
+  );
 }
 
 /** Team list (with crests) for a competition. Empty when unmapped. */
@@ -345,10 +369,10 @@ export async function getCompetitionTeamDetails(
 ): Promise<FootballTeamDetailRow[]> {
   const short = competitionDbShort(competitionSlug);
   if (!short) return [];
-  return fetchTeamsForCompetition(short);
+  return cachedQuery(`compTeams:${short}`, TTL.REFERENCE, () => fetchTeamsForCompetition(short));
 }
 
 /** Squad for a club (by club UUID). */
 export async function getTeamSquad(clubId: string): Promise<FootballSquadPlayerRow[]> {
-  return fetchSquadByClubId(clubId);
+  return cachedQuery(`squad:${clubId}`, TTL.REFERENCE, () => fetchSquadByClubId(clubId));
 }
