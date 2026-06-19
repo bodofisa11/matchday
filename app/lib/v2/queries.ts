@@ -15,6 +15,7 @@ import {
   fetchF1DriverStandings,
   fetchF1RaceResults,
   fetchF1SprintResults,
+  fetchFootballMatchById,
   fetchFootballFixturesPaged,
   fetchFootballScorers,
   fetchFootballStandings,
@@ -28,6 +29,7 @@ import {
   type F1RaceRow,
   type F1SprintResultRow,
   type FootballFixtureRow,
+  type FootballMatchDetail,
   type FootballScorerRow,
   type FootballStandingRow,
   type FootballSquadPlayerRow,
@@ -227,12 +229,27 @@ export async function getCompetitionSeasons(competitionSlug: string): Promise<st
 
 export type {
   FootballFixtureRow,
+  FootballMatchDetail,
   FootballScorerRow,
   FootballStandingRow,
   FootballSquadPlayerRow,
   FootballTeamDetailRow,
   WcGroupStandingRow,
 };
+
+/**
+ * Single football match by UUID, for the dedicated match page. Null when not
+ * found / unconfigured. The URL carries the fixture's UUID as its unique code:
+ * see {@link matchHref}.
+ */
+export async function getMatchById(id: string): Promise<FootballMatchDetail | null> {
+  return fetchFootballMatchById(id);
+}
+
+/** Route to a fixture's dedicated detail page (uuid = unique code). */
+export function matchHref(id: string): string {
+  return `/match/?id=${encodeURIComponent(id)}`;
+}
 
 /** League standings (all teams) for a competition. Empty for cup/group-stage
  *  competitions with no league table, or when no data source is configured. */

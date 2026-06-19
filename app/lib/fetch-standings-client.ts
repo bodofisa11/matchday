@@ -11,6 +11,7 @@ import { createSupabaseClient } from "@/app/lib/supabase-client";
 import { utcToIST } from "@/app/lib/timezone";
 import {
   DEFAULT_F1_SEASON,
+  getEventIndex,
   getF1Event,
   getFbEvent,
   type EventRow,
@@ -325,6 +326,32 @@ function toFixtureRow(r: FixtureQueryRow, event: EventRow): FootballFixtureRow {
     stage: r.match_type,
     group_name: null,
   };
+}
+
+/** A single fixture with its event season attached, for the match detail page. */
+export interface FootballMatchDetail extends FootballFixtureRow {
+  season: string;
+}
+
+/**
+ * Resolve a single football fixture by its UUID, with competition + season.
+ * Returns null when Supabase is unconfigured or no row matches (caller renders
+ * a "match not found" empty state). Works for any competition incl. World Cup.
+ */
+export async function fetchFootballMatchById(id: string): Promise<FootballMatchDetail | null> {
+  const supabase = createSupabaseClient();
+  if (!supabase || !id) return null;
+  const { data } = await supabase
+    .from("fb_fixtures")
+    .select(`event_id,${FIXTURE_COLS}`)
+    .eq("id", id)
+    .maybeSingle();
+  if (!data) return null;
+  const row = data as FixtureQueryRow & { event_id: string };
+  const events = await getEventIndex();
+  const event = events.get(row.event_id);
+  if (!event) return null;
+  return { ...toFixtureRow(row, event), season: event.season };
 }
 
 export async function fetchFootballFixtures(
