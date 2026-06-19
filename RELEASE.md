@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- **Match detail page.** Clicking any football fixture or result (on the home schedule or a competition's Fixtures/Results tab) now opens a dedicated match page showing the scoreboard, status (upcoming/live/finished), competition, season, date, kick-off and venue. Lineups, match events and statistics are placeholders until that data lands in the database.
+
 - **World Cup Overview tab + consistent Fixtures.** The FIFA World Cup page gains an **Overview** tab (placeholder for now) and its **Fixtures** tab now uses the same upcoming-fixtures list (today first, paged with Load more) as other football competitions, replacing the old two-column upcoming/recent grid.
 
 - **World Cup Results tab.** The FIFA World Cup page now has a dedicated **Results** tab listing every finished match (newest first, with scores and stage labels), matching the Results view on other football competitions.

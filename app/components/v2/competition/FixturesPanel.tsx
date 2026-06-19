@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import {
   getCompetitionFixtures,
+  matchHref,
   teamRefFromName,
   type FootballFixtureRow,
 } from "@/app/lib/v2/queries";
@@ -37,7 +39,11 @@ function Teams({ r }: { r: FootballFixtureRow }) {
 
 function FixtureRow({ r }: { r: FootballFixtureRow }) {
   return (
-    <div className="wf-trow" style={{ gridTemplateColumns: "64px 1fr auto" }}>
+    <Link
+      href={matchHref(r.id)}
+      className="wf-trow"
+      style={{ gridTemplateColumns: "64px 1fr auto", textDecoration: "none", color: "inherit" }}
+    >
       <span className="wf-mono-sm wf-muted">{formatFixtureDate(r.date)}</span>
       <Teams r={r} />
       <span className="wf-col" style={{ alignItems: "flex-end", gap: 2 }}>
@@ -48,13 +54,17 @@ function FixtureRow({ r }: { r: FootballFixtureRow }) {
           </span>
         )}
       </span>
-    </div>
+    </Link>
   );
 }
 
 function ResultRow({ r }: { r: FootballFixtureRow }) {
   return (
-    <div className="wf-trow" style={{ gridTemplateColumns: "64px 1fr auto" }}>
+    <Link
+      href={matchHref(r.id)}
+      className="wf-trow"
+      style={{ gridTemplateColumns: "64px 1fr auto", textDecoration: "none", color: "inherit" }}
+    >
       <span className="wf-mono-sm wf-muted">{formatFixtureDate(r.date)}</span>
       <Teams r={r} />
       <span className="wf-center wf-gap8">
@@ -62,7 +72,7 @@ function ResultRow({ r }: { r: FootballFixtureRow }) {
         <span className="wf-muted">:</span>
         <span className="wf-score">{r.away_score ?? "–"}</span>
       </span>
-    </div>
+    </Link>
   );
 }
 

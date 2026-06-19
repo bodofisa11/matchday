@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getCompetition, getScheduleByCompetition, getTopMatches } from "@/app/lib/v2/queries";
+import { getCompetition, getScheduleByCompetition, getTopMatches, matchHref } from "@/app/lib/v2/queries";
 import { addDaysToDateStr, istTodayStr } from "@/app/lib/timezone";
 import { sportDot } from "@/app/lib/v2/types";
 import type { CompetitionMeta, MatchV2 } from "@/app/lib/v2/types";
@@ -19,9 +19,8 @@ function VsRow({ m }: { m: MatchV2 }) {
     ) : (
       <span className="wf-vs-center">{m.kickoff}</span>
     );
-  return (
-    <div className="wf-vsrow">
-      <Star id={m.id} />
+  const body = (
+    <>
       <span className="wf-vsteam wf-vsteam-home">
         <span className="nm">{m.home.name}</span>
         <Crest team={m.home} />
@@ -33,6 +32,22 @@ function VsRow({ m }: { m: MatchV2 }) {
         <Crest team={m.away} />
         <span className="nm">{m.away.name}</span>
       </span>
+    </>
+  );
+  return (
+    <div className="wf-vsrow">
+      <Star id={m.id} />
+      {/* Only football fixtures have a detail page (uuid matches fb_fixtures). */}
+      {m.sport === "football" ? (
+        <Link
+          href={matchHref(m.id)}
+          style={{ display: "contents", textDecoration: "none", color: "inherit" }}
+        >
+          {body}
+        </Link>
+      ) : (
+        body
+      )}
     </div>
   );
 }
