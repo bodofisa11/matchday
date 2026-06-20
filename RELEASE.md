@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- **Cleaner live match stats.** The match-statistics panel no longer shows placeholder values for stats a provider hasn't computed yet during a live match (some return `-1` mid-game). Those now read as missing instead of "-1%"/"-1".
+
 - **Match detail: lineups, events & statistics.** The match page's former placeholders now show real data for enriched matches (FIFA World Cup to start): a **match-events timeline** (goals, cards and substitutions in chronological order, home vs away, with assists and pen/own-goal notes), a **team-statistics** panel with comparison bars (possession, shots, shots on target, corners, offsides, expected goals), and **lineups** for both sides (formation, starting XI with shirt numbers and positions, bench, coach). The scoreboard also shows the half-time score and extra-time/penalties indicators. Matches without this data still show the "Soon" placeholders.
 
 - **Faster repeat visits.** Pages now cache their data in your browser and reuse it on repeat visits and navigation, so standings, fixtures, results and schedules paint instantly instead of reloading every time. Fresh data is fetched in the background — live scores refresh within 30 seconds, standings hourly, and completed details are kept longer.
