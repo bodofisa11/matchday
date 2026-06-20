@@ -19,6 +19,8 @@ import {
   fetchFootballFixturesPaged,
   fetchFootballScorers,
   fetchFootballStandings,
+  fetchMatchLineups,
+  fetchMatchResult,
   fetchSquadByClubId,
   fetchTeamsForCompetition,
   fetchWcFixturesByStage,
@@ -34,6 +36,8 @@ import {
   type FootballStandingRow,
   type FootballSquadPlayerRow,
   type FootballTeamDetailRow,
+  type MatchLineup,
+  type MatchResultDetail,
   type WcGroupStandingRow,
 } from "@/app/lib/fetch-standings-client";
 import type { Fixture } from "@/app/lib/fixtures";
@@ -241,8 +245,17 @@ export type {
   FootballStandingRow,
   FootballSquadPlayerRow,
   FootballTeamDetailRow,
+  MatchLineup,
+  MatchResultDetail,
   WcGroupStandingRow,
 };
+export type {
+  LineupPlayer,
+  MatchBooking,
+  MatchGoal,
+  MatchSub,
+  MatchTeamStats,
+} from "@/app/lib/fetch-standings-client";
 
 /**
  * Single football match by UUID, for the dedicated match page. Null when not
@@ -252,6 +265,16 @@ export type {
 export async function getMatchById(id: string): Promise<FootballMatchDetail | null> {
   // SCHEDULE TTL: a match may be live; keep it short so scores don't stick.
   return cachedQuery(`match:${id}`, TTL.SCHEDULE, () => fetchFootballMatchById(id));
+}
+
+/** Match events + team stats by fixture UUID. Null when never enriched. */
+export async function getMatchResult(id: string): Promise<MatchResultDetail | null> {
+  return fetchMatchResult(id);
+}
+
+/** Both lineups (home first) for a fixture. Empty when none stored. */
+export async function getMatchLineups(id: string): Promise<MatchLineup[]> {
+  return fetchMatchLineups(id);
 }
 
 /** Route to a fixture's dedicated detail page (uuid = unique code). */

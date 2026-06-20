@@ -354,6 +354,197 @@ export async function fetchFootballMatchById(id: string): Promise<FootballMatchD
   return { ...toFixtureRow(row, event), season: event.season };
 }
 
+// ---------------------------------------------------------------------------
+// Football: match detail (events + team stats + lineups)
+// Sourced from fb_results (one row/fixture: goals/bookings/substitutions jsonb +
+// scalar team-stat columns) and fb_lineups (one row/side). Both are populated by
+// live-fb / backfill-fb. Empty when a fixture was never enriched.
+// ---------------------------------------------------------------------------
+
+/** A goal in fb_results.goals[]. team is the scoring side. */
+export interface MatchGoal {
+  minute: number | null;
+  injury_time?: number | null;
+  /** detail: regular | own | penalty | … (provider-specific, may be null) */
+  type?: string | null;
+  team: "home" | "away";
+  scorer: string | null;
+  assist?: string | null;
+}
+
+/** A card in fb_results.bookings[]. */
+export interface MatchBooking {
+  minute: number | null;
+  injury_time?: number | null;
+  team: "home" | "away";
+  player: string | null;
+  /** yellow | red */
+  card: string | null;
+}
+
+/** A substitution in fb_results.substitutions[]. */
+export interface MatchSub {
+  minute: number | null;
+  injury_time?: number | null;
+  team: "home" | "away";
+  player_in: string | null;
+  player_out: string | null;
+}
+
+/** Team match statistics (1:1 with a fixture), home vs away. */
+export interface MatchTeamStats {
+  possession_home: number | null;
+  possession_away: number | null;
+  shots_home: number | null;
+  shots_away: number | null;
+  shots_on_target_home: number | null;
+  shots_on_target_away: number | null;
+  corners_home: number | null;
+  corners_away: number | null;
+  offsides_home: number | null;
+  offsides_away: number | null;
+  xg_home: number | null;
+  xg_away: number | null;
+}
+
+export interface MatchResultDetail {
+  winner: string | null;
+  duration: string | null;
+  home_score_ht: number | null;
+  away_score_ht: number | null;
+  goals: MatchGoal[];
+  bookings: MatchBooking[];
+  substitutions: MatchSub[];
+  /** null when no team-stat column is populated. */
+  stats: MatchTeamStats | null;
+  events_source: string | null;
+  stats_source: string | null;
+}
+
+/** A player in a lineup's starting_xi[] / bench[]. */
+export interface LineupPlayer {
+  player: string | null;
+  number: number | null;
+  position: string | null;
+}
+
+export interface MatchLineup {
+  side: "home" | "away";
+  formation: string | null;
+  starting_xi: LineupPlayer[];
+  bench: LineupPlayer[];
+  coach: string | null;
+  confirmed: boolean;
+}
+
+interface ResultQueryRow {
+  winner: string | null;
+  duration: string | null;
+  home_score_ht: number | null;
+  away_score_ht: number | null;
+  goals: MatchGoal[] | null;
+  bookings: MatchBooking[] | null;
+  substitutions: MatchSub[] | null;
+  possession_home: number | null;
+  possession_away: number | null;
+  shots_home: number | null;
+  shots_away: number | null;
+  shots_on_target_home: number | null;
+  shots_on_target_away: number | null;
+  corners_home: number | null;
+  corners_away: number | null;
+  offsides_home: number | null;
+  offsides_away: number | null;
+  xg_home: number | string | null;
+  xg_away: number | string | null;
+  events_source: string | null;
+  stats_source: string | null;
+}
+
+function numOrNull(v: number | string | null): number | null {
+  if (v === null || v === undefined) return null;
+  const n = Number(v);
+  return Number.isNaN(n) ? null : n;
+}
+
+const RESULT_COLS =
+  "winner,duration,home_score_ht,away_score_ht,goals,bookings,substitutions," +
+  "possession_home,possession_away,shots_home,shots_away," +
+  "shots_on_target_home,shots_on_target_away,corners_home,corners_away," +
+  "offsides_home,offsides_away,xg_home,xg_away,events_source,stats_source";
+
+/**
+ * Match result detail (events + team stats) by fixture UUID. Null when the
+ * fixture has no fb_results row (never enriched). `stats` is null when no
+ * team-stat column is populated even if a result row exists.
+ */
+export async function fetchMatchResult(fixtureId: string): Promise<MatchResultDetail | null> {
+  const supabase = createSupabaseClient();
+  if (!supabase || !fixtureId) return null;
+  const { data } = await supabase
+    .from("fb_results")
+    .select(RESULT_COLS)
+    .eq("fixture_id", fixtureId)
+    .maybeSingle();
+  if (!data) return null;
+  const r = data as unknown as ResultQueryRow;
+  const stats: MatchTeamStats = {
+    possession_home: r.possession_home,
+    possession_away: r.possession_away,
+    shots_home: r.shots_home,
+    shots_away: r.shots_away,
+    shots_on_target_home: r.shots_on_target_home,
+    shots_on_target_away: r.shots_on_target_away,
+    corners_home: r.corners_home,
+    corners_away: r.corners_away,
+    offsides_home: r.offsides_home,
+    offsides_away: r.offsides_away,
+    xg_home: numOrNull(r.xg_home),
+    xg_away: numOrNull(r.xg_away),
+  };
+  const hasStats = Object.values(stats).some((v) => v !== null);
+  return {
+    winner: r.winner,
+    duration: r.duration,
+    home_score_ht: r.home_score_ht,
+    away_score_ht: r.away_score_ht,
+    goals: r.goals ?? [],
+    bookings: r.bookings ?? [],
+    substitutions: r.substitutions ?? [],
+    stats: hasStats ? stats : null,
+    events_source: r.events_source,
+    stats_source: r.stats_source,
+  };
+}
+
+interface LineupQueryRow {
+  side: string;
+  formation: string | null;
+  starting_xi: LineupPlayer[] | null;
+  bench: LineupPlayer[] | null;
+  coach: string | null;
+  confirmed: boolean;
+}
+
+/** Both lineups (home first) for a fixture. Empty when none stored. */
+export async function fetchMatchLineups(fixtureId: string): Promise<MatchLineup[]> {
+  const supabase = createSupabaseClient();
+  if (!supabase || !fixtureId) return [];
+  const { data } = await supabase
+    .from("fb_lineups")
+    .select("side,formation,starting_xi,bench,coach,confirmed")
+    .eq("fixture_id", fixtureId);
+  const rows = ((data as LineupQueryRow[]) ?? []).map((r) => ({
+    side: (r.side === "away" ? "away" : "home") as "home" | "away",
+    formation: r.formation,
+    starting_xi: r.starting_xi ?? [],
+    bench: r.bench ?? [],
+    coach: r.coach,
+    confirmed: r.confirmed,
+  }));
+  return rows.sort((a, b) => (a.side === "home" ? -1 : 1) - (b.side === "home" ? -1 : 1));
+}
+
 export async function fetchFootballFixtures(
   competitionShort: string,
   status: "scheduled" | "finished" | "live",
