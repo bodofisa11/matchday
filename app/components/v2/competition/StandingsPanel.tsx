@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   getCompetitionStandings,
+  teamHref,
   teamRefFromName,
   type FootballStandingRow,
 } from "@/app/lib/v2/queries";
@@ -70,12 +72,16 @@ export function StandingsPanel({ competitionSlug }: { competitionSlug: string })
                   style={{ gridTemplateColumns: COLS }}
                 >
                   <span className="wf-rank">{r.position}</span>
-                  <span className="wf-center wf-gap8" style={{ minWidth: 0 }}>
+                  <Link
+                    href={teamHref(competitionSlug, r.team)}
+                    className="wf-center wf-gap8"
+                    style={{ minWidth: 0, textDecoration: "none", color: "inherit" }}
+                  >
                     <Crest team={team} />
                     <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {r.team}
                     </span>
-                  </span>
+                  </Link>
                   <span className="wf-num" style={{ textAlign: "center" }}>{r.played}</span>
                   <span className="wf-num" style={{ textAlign: "center" }}>{r.won}</span>
                   <span className="wf-num" style={{ textAlign: "center" }}>{r.drawn}</span>

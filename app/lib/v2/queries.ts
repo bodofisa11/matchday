@@ -282,6 +282,33 @@ export function matchHref(id: string): string {
   return `/match/?id=${encodeURIComponent(id)}`;
 }
 
+/** Stable URL slug for a team/nation name. Same function feeds links, route
+ *  params and the slug→team lookup, so they always agree. */
+export function teamSlug(name: string): string {
+  return slugify(name);
+}
+
+/**
+ * Route to a team's detail page. World Cup teams are nations and live under the
+ * top-level `/world-cup/<team>`; every other (football league) team lives under
+ * `/football/<competition>/<team>`.
+ */
+export function teamHref(competitionSlug: string, name: string): string {
+  const slug = teamSlug(name);
+  return competitionSlug === "world-cup"
+    ? `/world-cup/${slug}/`
+    : `/football/${competitionSlug}/${slug}/`;
+}
+
+/** Resolve one team in a competition by its URL slug. Null when not found. */
+export async function getCompetitionTeamBySlug(
+  competitionSlug: string,
+  slug: string,
+): Promise<FootballTeamDetailRow | null> {
+  const teams = await getCompetitionTeamDetails(competitionSlug);
+  return teams.find((t) => teamSlug(t.name) === slug) ?? null;
+}
+
 /** League standings (all teams) for a competition. Empty for cup/group-stage
  *  competitions with no league table, or when no data source is configured. */
 export async function getCompetitionStandings(

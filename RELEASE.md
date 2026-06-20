@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- **Dedicated team pages + breadcrumbs.** Every football team now has its own page at a clean URL — clubs at `/football/<competition>/<team>` (e.g. `/football/premier-league/manchester-city`) and World Cup nations at `/world-cup/<team>` (e.g. `/world-cup/brazil`). Clicking a team in a standings table, a group table, or the Teams tab opens its profile (crest, founding year, stadium, coach, colours and squad by position). Competition and team pages also gained a breadcrumb trail (Football / Premier League / Manchester City) for quick navigation back up.
+
 - **World Cup matches open the match page too.** Clicking a fixture, result or bracket match on the FIFA World Cup page — plus any live match in the top "Live now" bar — now opens its dedicated match detail page, matching the rest of the football pages.
 
 - **Collapsible match sections.** Each section on the match page (match info, events, statistics, lineups) can now be collapsed or expanded with its header's chevron. All sections start expanded, so you can read everything at once and just fold away the parts you don't need — no scrolling past a long panel to reach the one you want.

@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import { sportDot } from "@/app/lib/v2/types";
 import type { CompetitionMeta } from "@/app/lib/v2/types";
 import { getCompetitionSeasons } from "@/app/lib/v2/queries";
+import { Breadcrumbs } from "../Breadcrumbs";
 import { CompetitionLogo, SeasonSelector } from "../common";
+
+const SPORT_LABEL: Record<string, string> = {
+  football: "Football",
+  cricket: "Cricket",
+  f1: "Formula 1",
+};
 import { FixturesPanel } from "./FixturesPanel";
 import { StandingsPanel } from "./StandingsPanel";
 import { StatsPanel } from "./StatsPanel";
@@ -47,6 +54,13 @@ export function CompetitionView({ competition }: { competition: CompetitionMeta 
 
   return (
     <>
+      <Breadcrumbs
+        items={[
+          { label: SPORT_LABEL[competition.sport] ?? competition.sport, href: `/${competition.sport}/` },
+          { label: competition.name },
+        ]}
+      />
+
       <section className="wf-hero">
         <div className="wf-col wf-gap12">
           <div className="wf-center wf-gap8">

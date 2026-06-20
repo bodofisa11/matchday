@@ -7,6 +7,7 @@ import {
   getWcFixtures,
   getWcGroupStandings,
   matchHref,
+  teamHref,
   teamRefFromName,
   type FootballFixtureRow,
   type WcGroupStandingRow,
@@ -116,12 +117,16 @@ function GroupCard({ name, rows }: { name: string; rows: WcGroupStandingRow[] })
             style={{ gridTemplateColumns: GROUP_COLS }}
           >
             <span className="wf-rank">{r.position}</span>
-            <span className="wf-center wf-gap8" style={{ minWidth: 0 }}>
+            <Link
+              href={teamHref("world-cup", r.team)}
+              className="wf-center wf-gap8"
+              style={{ minWidth: 0, textDecoration: "none", color: "inherit" }}
+            >
               <Crest team={team} />
               <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {r.team}
               </span>
-            </span>
+            </Link>
             <span className="wf-num" style={{ textAlign: "center" }}>{r.played}</span>
             <span className="wf-num" style={{ textAlign: "center" }}>{r.won}</span>
             <span className="wf-num" style={{ textAlign: "center" }}>{r.drawn}</span>
