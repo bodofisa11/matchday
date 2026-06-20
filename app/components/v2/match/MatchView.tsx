@@ -32,15 +32,6 @@ function StatusBadge({ phase, raw }: { phase: Phase; raw: string }) {
   return <span className="wf-vs-center">{raw === "postponed" ? "POSTP." : "UPCOMING"}</span>;
 }
 
-function MetaRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="wf-trow" style={{ gridTemplateColumns: "120px 1fr" }}>
-      <span className="wf-mono-sm wf-muted">{label}</span>
-      <span style={{ fontWeight: 500 }}>{value}</span>
-    </div>
-  );
-}
-
 /** Chevron pointing down when open, right when collapsed. */
 function Chevron({ open }: { open: boolean }) {
   return (
@@ -120,6 +111,13 @@ function ComingSoon({ title }: { title: string }) {
   );
 }
 
+/** "group_stage" → "Group stage". Null/empty → null. */
+function prettyStage(s: string | null | undefined): string | null {
+  if (!s) return null;
+  const text = s.replace(/[_-]+/g, " ").trim();
+  return text ? text.charAt(0).toUpperCase() + text.slice(1) : null;
+}
+
 function Scoreboard({ m, result }: { m: FootballMatchDetail; result: MatchResultDetail | null }) {
   const phase = phaseOf(m.status);
   const showScore = phase === "live" || phase === "finished";
@@ -135,11 +133,29 @@ function Scoreboard({ m, result }: { m: FootballMatchDetail; result: MatchResult
         ? "Pens"
         : "AET"
       : null;
+  const stage = prettyStage(m.stage);
+  const meta = [formatFixtureDate(m.date), `${m.kickoff} IST`, m.venue].filter(
+    (v): v is string => Boolean(v),
+  );
   return (
     <div className="wf-box wf-pad">
+      <div className="wf-col" style={{ alignItems: "center", gap: 8, marginBottom: 4 }}>
+        <span className="wf-mono-sm wf-muted" style={{ letterSpacing: ".06em", textTransform: "uppercase" }}>
+          {m.competition} · {m.season}
+        </span>
+        {stage && (
+          <span
+            className="wf-mono-sm"
+            style={{ padding: "2px 12px", border: "1px solid var(--wf-line)", borderRadius: 999 }}
+          >
+            {stage}
+          </span>
+        )}
+      </div>
+
       <div
         className="wf-center"
-        style={{ justifyContent: "center", gap: 24, padding: "12px 0" }}
+        style={{ justifyContent: "center", gap: 24, padding: "16px 0" }}
       >
         <span className="wf-col" style={{ alignItems: "center", gap: 8, flex: 1, minWidth: 0 }}>
           <Crest team={home} lg />
@@ -148,12 +164,12 @@ function Scoreboard({ m, result }: { m: FootballMatchDetail; result: MatchResult
         <span className="wf-col" style={{ alignItems: "center", gap: 4 }}>
           {showScore ? (
             <span className="wf-center wf-gap8">
-              <span className="wf-score" style={{ fontSize: 32 }}>{m.home_score ?? 0}</span>
+              <span className="wf-score" style={{ fontSize: 36 }}>{m.home_score ?? 0}</span>
               <span className="wf-muted">:</span>
-              <span className="wf-score" style={{ fontSize: 32 }}>{m.away_score ?? 0}</span>
+              <span className="wf-score" style={{ fontSize: 36 }}>{m.away_score ?? 0}</span>
             </span>
           ) : (
-            <span className="wf-score" style={{ fontSize: 28 }}>{m.kickoff}</span>
+            <span className="wf-score" style={{ fontSize: 30 }}>{m.kickoff}</span>
           )}
           <StatusBadge phase={phase} raw={m.status} />
           {extra && <span className="wf-mono-sm wf-muted">{extra}</span>}
@@ -163,6 +179,29 @@ function Scoreboard({ m, result }: { m: FootballMatchDetail; result: MatchResult
           <Crest team={away} lg />
           <span style={{ fontWeight: 600, textAlign: "center" }}>{m.away_team}</span>
         </span>
+      </div>
+
+      <div
+        className="wf-center"
+        style={{
+          justifyContent: "center",
+          gap: 10,
+          flexWrap: "wrap",
+          borderTop: "1px solid var(--wf-line)",
+          paddingTop: 14,
+          marginTop: 6,
+        }}
+      >
+        {meta.map((x, i) => (
+          <span key={i} className="wf-center" style={{ gap: 10 }}>
+            {i > 0 && (
+              <span className="wf-muted" aria-hidden>
+                ·
+              </span>
+            )}
+            <span className="wf-mono-sm wf-muted">{x}</span>
+          </span>
+        ))}
       </div>
     </div>
   );
@@ -454,23 +493,8 @@ export function MatchView({ matchId }: { matchId: string | null }) {
         ← Back
       </Link>
 
-      <span className="wf-eyebrow">
-        {match.competition} · {match.season}
-      </span>
-
       <div style={{ marginTop: 12 }}>
         <Scoreboard m={match} result={result} />
-      </div>
-
-      <div style={{ marginTop: 12 }}>
-        <Section title="Match info">
-          <MetaRow label="Competition" value={`${match.competition} (${match.competition_short})`} />
-          <MetaRow label="Season" value={match.season} />
-          <MetaRow label="Date" value={formatFixtureDate(match.date)} />
-          <MetaRow label="Kick-off (IST)" value={match.kickoff} />
-          {match.venue && <MetaRow label="Venue" value={match.venue} />}
-          {match.stage && <MetaRow label="Stage" value={match.stage} />}
-        </Section>
       </div>
 
       <div className="wf-col" style={{ gap: 12, marginTop: 12 }}>
