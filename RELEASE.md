@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- **World Cup matches open the match page too.** Clicking a fixture, result or bracket match on the FIFA World Cup page — plus any live match in the top "Live now" bar — now opens its dedicated match detail page, matching the rest of the football pages.
+
 - **Collapsible match sections.** Each section on the match page (match info, events, statistics, lineups) can now be collapsed or expanded with its header's chevron. All sections start expanded, so you can read everything at once and just fold away the parts you don't need — no scrolling past a long panel to reach the one you want.
 
 - **Cleaner live match stats.** The match-statistics panel no longer shows placeholder values for stats a provider hasn't computed yet during a live match (some return `-1` mid-game). Those now read as missing instead of "-1%"/"-1".

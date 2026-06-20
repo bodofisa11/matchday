@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   getCompetitionSeasons,
   getWcFixtures,
   getWcGroupStandings,
+  matchHref,
   teamRefFromName,
   type FootballFixtureRow,
   type WcGroupStandingRow,
@@ -56,7 +58,11 @@ function FixtureLine({ f }: { f: FootballFixtureRow }) {
   const away = teamRefFromName(f.away_team);
   const finished = f.status === "finished";
   return (
-    <div className="wf-trow" style={{ gridTemplateColumns: "1fr auto" }}>
+    <Link
+      href={matchHref(f.id)}
+      className="wf-trow"
+      style={{ gridTemplateColumns: "1fr auto", textDecoration: "none", color: "inherit" }}
+    >
       <div className="wf-col wf-gap6" style={{ minWidth: 0 }}>
         <span className="wf-center wf-gap8" style={{ minWidth: 0 }}>
           <Crest team={home} />
@@ -84,7 +90,7 @@ function FixtureLine({ f }: { f: FootballFixtureRow }) {
           <span className="wf-mono-sm" style={{ fontWeight: 600 }}>{f.kickoff}</span>
         )}
       </span>
-    </div>
+    </Link>
   );
 }
 
@@ -135,7 +141,7 @@ function BracketCard({ f }: { f: FootballFixtureRow }) {
   const home = teamRefFromName(f.home_team);
   const away = teamRefFromName(f.away_team);
   return (
-    <div className="wf-match">
+    <Link className="wf-match" href={matchHref(f.id)} style={{ textDecoration: "none", color: "inherit" }}>
       <span className="wf-between" style={{ gap: 8 }}>
         <span className="wf-center wf-gap8" style={{ minWidth: 0 }}>
           <Crest team={home} />
@@ -155,7 +161,7 @@ function BracketCard({ f }: { f: FootballFixtureRow }) {
         <span className="wf-num" style={{ fontWeight: 700 }}>{f.away_score ?? "–"}</span>
       </span>
       <span className="wf-mono-sm wf-muted">{formatFixtureDate(f.date)}</span>
-    </div>
+    </Link>
   );
 }
 
