@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- **Faster repeat visits.** Pages now cache their data in your browser and reuse it on repeat visits and navigation, so standings, fixtures, results and schedules paint instantly instead of reloading every time. Fresh data is fetched in the background — live scores refresh within 30 seconds, standings hourly, and completed details are kept longer.
+
 - **Match detail page.** Clicking any football fixture or result (on the home schedule or a competition's Fixtures/Results tab) now opens a dedicated match page showing the scoreboard, status (upcoming/live/finished), competition, season, date, kick-off and venue. Lineups, match events and statistics are placeholders until that data lands in the database.
 
 - **World Cup Overview tab + consistent Fixtures.** The FIFA World Cup page gains an **Overview** tab (placeholder for now) and its **Fixtures** tab now uses the same upcoming-fixtures list (today first, paged with Load more) as other football competitions, replacing the old two-column upcoming/recent grid.
