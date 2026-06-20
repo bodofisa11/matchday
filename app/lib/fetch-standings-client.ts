@@ -461,10 +461,15 @@ interface ResultQueryRow {
   stats_source: string | null;
 }
 
+/**
+ * Coerce a stat value to a number, treating null/NaN and negative "not
+ * available" sentinels (some providers return -1 for stats not yet computed
+ * mid-match) as missing. None of these stats can legitimately be negative.
+ */
 function numOrNull(v: number | string | null): number | null {
   if (v === null || v === undefined) return null;
   const n = Number(v);
-  return Number.isNaN(n) ? null : n;
+  return Number.isNaN(n) || n < 0 ? null : n;
 }
 
 const RESULT_COLS =
@@ -489,16 +494,16 @@ export async function fetchMatchResult(fixtureId: string): Promise<MatchResultDe
   if (!data) return null;
   const r = data as unknown as ResultQueryRow;
   const stats: MatchTeamStats = {
-    possession_home: r.possession_home,
-    possession_away: r.possession_away,
-    shots_home: r.shots_home,
-    shots_away: r.shots_away,
-    shots_on_target_home: r.shots_on_target_home,
-    shots_on_target_away: r.shots_on_target_away,
-    corners_home: r.corners_home,
-    corners_away: r.corners_away,
-    offsides_home: r.offsides_home,
-    offsides_away: r.offsides_away,
+    possession_home: numOrNull(r.possession_home),
+    possession_away: numOrNull(r.possession_away),
+    shots_home: numOrNull(r.shots_home),
+    shots_away: numOrNull(r.shots_away),
+    shots_on_target_home: numOrNull(r.shots_on_target_home),
+    shots_on_target_away: numOrNull(r.shots_on_target_away),
+    corners_home: numOrNull(r.corners_home),
+    corners_away: numOrNull(r.corners_away),
+    offsides_home: numOrNull(r.offsides_home),
+    offsides_away: numOrNull(r.offsides_away),
     xg_home: numOrNull(r.xg_home),
     xg_away: numOrNull(r.xg_away),
   };
