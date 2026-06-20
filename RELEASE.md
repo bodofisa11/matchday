@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- **Collapsible match sections.** Each section on the match page (match info, events, statistics, lineups) can now be collapsed or expanded with its header's chevron. All sections start expanded, so you can read everything at once and just fold away the parts you don't need — no scrolling past a long panel to reach the one you want.
+
 - **Cleaner live match stats.** The match-statistics panel no longer shows placeholder values for stats a provider hasn't computed yet during a live match (some return `-1` mid-game). Those now read as missing instead of "-1%"/"-1".
 
 - **Match detail: lineups, events & statistics.** The match page's former placeholders now show real data for enriched matches (FIFA World Cup to start): a **match-events timeline** (goals, cards and substitutions in chronological order, home vs away, with assists and pen/own-goal notes), a **team-statistics** panel with comparison bars (possession, shots, shots on target, corners, offsides, expected goals), and **lineups** for both sides (formation, starting XI with shirt numbers and positions, bench, coach). The scoreboard also shows the half-time score and extra-time/penalties indicators. Matches without this data still show the "Soon" placeholders.

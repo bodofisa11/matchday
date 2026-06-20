@@ -41,16 +41,82 @@ function MetaRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+/** Chevron pointing down when open, right when collapsed. */
+function Chevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      style={{
+        transition: "transform 0.15s ease",
+        transform: open ? "rotate(0deg)" : "rotate(-90deg)",
+        flexShrink: 0,
+      }}
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}
+
+/**
+ * Collapsible section box. Open by default so every stat is visible without
+ * scrolling; click the header (or chevron) to collapse the ones not wanted.
+ */
+function Section({
+  title,
+  note,
+  children,
+  defaultOpen = true,
+}: {
+  title: string;
+  note?: string | null;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="wf-box wf-pad">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="wf-shead"
+        style={{
+          width: "100%",
+          background: "none",
+          border: "none",
+          padding: 0,
+          margin: 0,
+          cursor: "pointer",
+          color: "inherit",
+          font: "inherit",
+          textAlign: "left",
+        }}
+      >
+        <span className="wf-center wf-gap8">
+          <Chevron open={open} />
+          <span className="wf-h3">{title}</span>
+        </span>
+        {note && <span className="wf-mono-sm wf-muted">{note}</span>}
+      </button>
+      {open && <div style={{ marginTop: 12 }}>{children}</div>}
+    </div>
+  );
+}
+
 /** Placeholder for detail sections with no data yet for this match. */
 function ComingSoon({ title }: { title: string }) {
   return (
-    <div className="wf-box wf-pad">
-      <div className="wf-shead">
-        <span className="wf-h3">{title}</span>
-        <span className="wf-mono-sm wf-muted">Soon</span>
-      </div>
+    <Section title={title} note="Soon">
       <div className="wf-empty">No {title.toLowerCase()} data yet for this match.</div>
-    </div>
+    </Section>
   );
 }
 
@@ -194,17 +260,13 @@ function MatchEvents({ result }: { result: MatchResultDetail }) {
   const timeline = buildTimeline(result);
   if (timeline.length === 0) return <ComingSoon title="Match events" />;
   return (
-    <div className="wf-box wf-pad">
-      <div className="wf-shead">
-        <span className="wf-h3">Match events</span>
-        {result.events_source && <span className="wf-mono-sm wf-muted">{result.events_source}</span>}
-      </div>
+    <Section title="Match events" note={result.events_source}>
       <div className="wf-col">
         {timeline.map((it, i) => (
           <EventRow key={i} it={it} />
         ))}
       </div>
-    </div>
+    </Section>
   );
 }
 
@@ -260,17 +322,13 @@ function Statistics({ result }: { result: MatchResultDetail }) {
   const lines = statLines(result.stats);
   if (lines.length === 0) return <ComingSoon title="Statistics" />;
   return (
-    <div className="wf-box wf-pad">
-      <div className="wf-shead">
-        <span className="wf-h3">Statistics</span>
-        {result.stats_source && <span className="wf-mono-sm wf-muted">{result.stats_source}</span>}
-      </div>
+    <Section title="Statistics" note={result.stats_source}>
       <div className="wf-col">
         {lines.map((l) => (
           <StatBar key={l.label} line={l} />
         ))}
       </div>
-    </div>
+    </Section>
   );
 }
 
@@ -323,15 +381,12 @@ function Lineups({ lineups, m }: { lineups: MatchLineup[]; m: FootballMatchDetai
   const hasXi = (home?.starting_xi.length ?? 0) > 0 || (away?.starting_xi.length ?? 0) > 0;
   if (!hasXi) return <ComingSoon title="Lineups" />;
   return (
-    <div className="wf-box wf-pad">
-      <div className="wf-shead">
-        <span className="wf-h3">Lineups</span>
-      </div>
+    <Section title="Lineups">
       <div className="wf-center" style={{ alignItems: "flex-start", gap: 20 }}>
         {home && <LineupColumn lu={home} teamName={m.home_team} />}
         {away && <LineupColumn lu={away} teamName={m.away_team} />}
       </div>
-    </div>
+    </Section>
   );
 }
 
@@ -407,16 +462,15 @@ export function MatchView({ matchId }: { matchId: string | null }) {
         <Scoreboard m={match} result={result} />
       </div>
 
-      <div className="wf-box wf-pad" style={{ marginTop: 12 }}>
-        <div className="wf-shead">
-          <span className="wf-h3">Match info</span>
-        </div>
-        <MetaRow label="Competition" value={`${match.competition} (${match.competition_short})`} />
-        <MetaRow label="Season" value={match.season} />
-        <MetaRow label="Date" value={formatFixtureDate(match.date)} />
-        <MetaRow label="Kick-off (IST)" value={match.kickoff} />
-        {match.venue && <MetaRow label="Venue" value={match.venue} />}
-        {match.stage && <MetaRow label="Stage" value={match.stage} />}
+      <div style={{ marginTop: 12 }}>
+        <Section title="Match info">
+          <MetaRow label="Competition" value={`${match.competition} (${match.competition_short})`} />
+          <MetaRow label="Season" value={match.season} />
+          <MetaRow label="Date" value={formatFixtureDate(match.date)} />
+          <MetaRow label="Kick-off (IST)" value={match.kickoff} />
+          {match.venue && <MetaRow label="Venue" value={match.venue} />}
+          {match.stage && <MetaRow label="Stage" value={match.stage} />}
+        </Section>
       </div>
 
       <div className="wf-col" style={{ gap: 12, marginTop: 12 }}>
