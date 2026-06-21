@@ -211,7 +211,7 @@ export function WorldCupView() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "FIFA World Cup" }]} />
+      <Breadcrumbs items={[{ label: "FIFA World Cup" }]} />
 
       <section className="wf-hero">
         <div className="wf-col wf-gap12">

@@ -413,7 +413,7 @@ export function F1View() {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Formula 1" }]} />
+      <Breadcrumbs items={[{ label: "Formula 1" }]} />
 
       <section className="wf-hero">
         <div className="wf-col wf-gap12">

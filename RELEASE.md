@@ -10,7 +10,7 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
-- **Breadcrumbs on every section page.** The Home-rooted breadcrumb trail now appears across all sport and event pages — sport landings (Home / Football), Formula 1 (Home / Formula 1), the World Cup (Home / FIFA World Cup), competitions and team pages — so you can always navigate back up. Match-detail section headers (Match events, Statistics, Lineups, etc.) now show their expand/collapse chevron on the right, and the match stage badge renders in uppercase (e.g. GROUP STAGE).
+- **Breadcrumbs on every section page.** A breadcrumb trail now appears across all sport and event pages — sport landings (Football), Formula 1, the World Cup, competitions (Football / Premier League) and team pages (Football / Premier League / Manchester City) — so you can always navigate back up. Match-detail section headers (Match events, Statistics, Lineups, etc.) now show their expand/collapse chevron on the right, and the match stage badge renders in uppercase (e.g. GROUP STAGE).
 
 - **Cleaner match scoreboard.** The match page now folds the competition, season, stage, date, kick-off and venue into a single tidy scoreboard card (competition · season and a stage pill above the score, date · kick-off · venue below it) instead of a separate key/value "Match info" table.
 

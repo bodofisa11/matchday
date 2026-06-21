@@ -18,7 +18,7 @@ export function SportView({ sport }: { sport: SportSlug }) {
 
   return (
     <>
-      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: meta.label }]} />
+      <Breadcrumbs items={[{ label: meta.label }]} />
 
       <section className="wf-section">
         <div className="wf-center wf-gap8">
