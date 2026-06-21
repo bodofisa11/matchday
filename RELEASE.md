@@ -10,6 +10,16 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- **Breadcrumbs on every section page.** A breadcrumb trail now appears across all sport and event pages — sport landings (Football), Formula 1, the World Cup, competitions (Football / Premier League) and team pages (Football / Premier League / Manchester City) — so you can always navigate back up. Match-detail section headers (Match events, Statistics, Lineups, etc.) now show their expand/collapse chevron on the right, and the match stage badge renders in uppercase (e.g. GROUP STAGE).
+
+- **Cleaner match scoreboard.** The match page now folds the competition, season, stage, date, kick-off and venue into a single tidy scoreboard card (competition · season and a stage pill above the score, date · kick-off · venue below it) instead of a separate key/value "Match info" table.
+
+- **Dedicated team pages + breadcrumbs.** Every football team now has its own page at a clean URL — clubs at `/football/<competition>/<team>` (e.g. `/football/premier-league/manchester-city`) and World Cup nations at `/world-cup/<team>` (e.g. `/world-cup/brazil`). Clicking a team in a standings table, a group table, or the Teams tab opens its profile (crest, founding year, stadium, coach, colours and squad by position). Competition and team pages also gained a breadcrumb trail (Football / Premier League / Manchester City) for quick navigation back up.
+
+- **World Cup matches open the match page too.** Clicking a fixture, result or bracket match on the FIFA World Cup page — plus any live match in the top "Live now" bar — now opens its dedicated match detail page, matching the rest of the football pages.
+
+- **Collapsible match sections.** Each section on the match page (match info, events, statistics, lineups) can now be collapsed or expanded with its header's chevron. All sections start expanded, so you can read everything at once and just fold away the parts you don't need — no scrolling past a long panel to reach the one you want.
+
 - **Cleaner live match stats.** The match-statistics panel no longer shows placeholder values for stats a provider hasn't computed yet during a live match (some return `-1` mid-game). Those now read as missing instead of "-1%"/"-1".
 
 - **Match detail: lineups, events & statistics.** The match page's former placeholders now show real data for enriched matches (FIFA World Cup to start): a **match-events timeline** (goals, cards and substitutions in chronological order, home vs away, with assists and pen/own-goal notes), a **team-statistics** panel with comparison bars (possession, shots, shots on target, corners, offsides, expected goals), and **lineups** for both sides (formation, starting XI with shirt numbers and positions, bench, coach). The scoreboard also shows the half-time score and extra-time/penalties indicators. Matches without this data still show the "Soon" placeholders.

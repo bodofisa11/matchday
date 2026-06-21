@@ -18,6 +18,7 @@ import { DEFAULT_F1_SEASON } from "@/app/lib/events";
 import { F1_TEAM_COLORS, todayStr } from "@/app/lib/team-meta";
 import { constructorCode } from "@/app/lib/f1-codes";
 import { SeasonSelector } from "@/app/components/v2/common";
+import { Breadcrumbs } from "@/app/components/v2/Breadcrumbs";
 
 type Tab = "Overview" | "Schedule" | "Drivers" | "Constructors";
 const TABS: Tab[] = ["Overview", "Schedule", "Drivers", "Constructors"];
@@ -412,6 +413,8 @@ export function F1View() {
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Formula 1" }]} />
+
       <section className="wf-hero">
         <div className="wf-col wf-gap12">
           <div className="wf-center wf-gap8">
