@@ -56,6 +56,7 @@ export function CompetitionView({ competition }: { competition: CompetitionMeta 
     <>
       <Breadcrumbs
         items={[
+          { label: "Home", href: "/" },
           { label: SPORT_LABEL[competition.sport] ?? competition.sport, href: `/${competition.sport}/` },
           { label: competition.name },
         ]}

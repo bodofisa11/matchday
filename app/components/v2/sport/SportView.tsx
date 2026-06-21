@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getCompetitions } from "@/app/lib/v2/queries";
 import { SPORTS } from "@/app/lib/v2/types";
 import type { SportSlug } from "@/app/lib/v2/types";
+import { Breadcrumbs } from "../Breadcrumbs";
 import { CompetitionLogo } from "../common";
 import { F1View } from "../f1/F1View";
 
@@ -17,6 +18,8 @@ export function SportView({ sport }: { sport: SportSlug }) {
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: meta.label }]} />
+
       <section className="wf-section">
         <div className="wf-center wf-gap8">
           <span className={`wf-dot ${meta.dot}`} />

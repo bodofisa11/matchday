@@ -91,11 +91,11 @@ function Section({
           textAlign: "left",
         }}
       >
+        <span className="wf-h3">{title}</span>
         <span className="wf-center wf-gap8">
+          {note && <span className="wf-mono-sm wf-muted">{note}</span>}
           <Chevron open={open} />
-          <span className="wf-h3">{title}</span>
         </span>
-        {note && <span className="wf-mono-sm wf-muted">{note}</span>}
       </button>
       {open && <div style={{ marginTop: 12 }}>{children}</div>}
     </div>
@@ -146,7 +146,13 @@ function Scoreboard({ m, result }: { m: FootballMatchDetail; result: MatchResult
         {stage && (
           <span
             className="wf-mono-sm"
-            style={{ padding: "2px 12px", border: "1px solid var(--wf-line)", borderRadius: 999 }}
+            style={{
+              padding: "2px 12px",
+              border: "1px solid var(--wf-line)",
+              borderRadius: 999,
+              textTransform: "uppercase",
+              letterSpacing: ".04em",
+            }}
           >
             {stage}
           </span>

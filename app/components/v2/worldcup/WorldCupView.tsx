@@ -13,6 +13,7 @@ import {
   type WcGroupStandingRow,
 } from "@/app/lib/v2/queries";
 import { formatFixtureDate } from "@/app/lib/team-meta";
+import { Breadcrumbs } from "../Breadcrumbs";
 import { Crest, SeasonSelector } from "../common";
 import { TeamsPanel } from "../competition/TeamsPanel";
 import { StatsPanel } from "../competition/StatsPanel";
@@ -210,6 +211,8 @@ export function WorldCupView() {
 
   return (
     <>
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "FIFA World Cup" }]} />
+
       <section className="wf-hero">
         <div className="wf-col wf-gap12">
           <div className="wf-center wf-gap8">

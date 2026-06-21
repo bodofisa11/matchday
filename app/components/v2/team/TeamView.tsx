@@ -51,8 +51,13 @@ export function TeamView({
   const isWc = competitionSlug === "world-cup";
   const comp = getCompetition(competitionSlug);
   const crumbs: Crumb[] = isWc
-    ? [{ label: "FIFA World Cup", href: "/world-cup/" }, { label: team?.name ?? "Team" }]
+    ? [
+        { label: "Home", href: "/" },
+        { label: "FIFA World Cup", href: "/world-cup/" },
+        { label: team?.name ?? "Team" },
+      ]
     : [
+        { label: "Home", href: "/" },
         { label: SPORT_LABEL[sport] ?? sport, href: `/${sport}/` },
         { label: comp?.name ?? competitionSlug, href: `/${sport}/${competitionSlug}/` },
         { label: team?.name ?? "Team" },
