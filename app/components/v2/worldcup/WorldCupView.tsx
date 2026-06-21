@@ -49,9 +49,16 @@ const KNOCKOUT_STAGES: { id: string; title: string }[] = [
 const GROUP_COLS = "20px 1fr 26px 26px 26px 26px 34px 34px";
 const RESULTS_PAGE = 10;
 
+// Group labels may arrive as "A", "Group_A", "GROUP A", etc. Strip any leading
+// "group" prefix and rebuild a clean "Group A" so it never doubles up.
+function groupLabel(raw: string): string {
+  const letter = raw.replace(/^group[\s_-]*/i, "").trim();
+  return `Group ${letter || raw}`;
+}
+
 function StageChip({ stage, group }: { stage?: string | null; group?: string | null }) {
   if (!stage) return null;
-  const label = stage === "group" && group ? `Group ${group}` : (STAGE_LABEL[stage] ?? stage);
+  const label = stage === "group" && group ? groupLabel(group) : (STAGE_LABEL[stage] ?? stage);
   return <span className="wf-wcstage">{label}</span>;
 }
 
@@ -101,7 +108,7 @@ function GroupCard({ name, rows }: { name: string; rows: WcGroupStandingRow[] })
     <div className="wf-box">
       <div className="wf-trow head" style={{ gridTemplateColumns: GROUP_COLS }}>
         <span>#</span>
-        <span>Group {name}</span>
+        <span>{groupLabel(name)}</span>
         <span style={{ textAlign: "center" }}>P</span>
         <span style={{ textAlign: "center" }}>W</span>
         <span style={{ textAlign: "center" }}>D</span>
