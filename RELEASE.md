@@ -10,6 +10,8 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- **No more horizontal page scroll on mobile.** The section tab row (Overview / Fixtures / Results / Groups / Bracket / Teams / Stats) on competition, World Cup and Formula 1 pages now slides horizontally on its own instead of stretching the page wider than the screen, so the page stays pinned to the display width on phones.
+
 - **Tidier World Cup group headings.** Group standings headers now read "GROUP A", "GROUP B" and so on, instead of the doubled-up "GROUP GROUP_A".
 
 - **Breadcrumbs on every section page.** A breadcrumb trail now appears across all sport and event pages — sport landings (Football), Formula 1, the World Cup, competitions (Football / Premier League) and team pages (Football / Premier League / Manchester City) — so you can always navigate back up. Match-detail section headers (Match events, Statistics, Lineups, etc.) now show their expand/collapse chevron on the right, and the match stage badge renders in uppercase (e.g. GROUP STAGE).

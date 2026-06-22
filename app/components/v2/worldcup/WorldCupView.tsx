@@ -235,7 +235,7 @@ export function WorldCupView() {
         <div className="wf-ph">world cup crest / hero</div>
       </section>
 
-      <div className="wf-center wf-gap6" style={{ marginBottom: 20 }}>
+      <div className="wf-tabstrip" style={{ marginBottom: 20 }}>
         {TABS.map((t) => (
           <button
             key={t}

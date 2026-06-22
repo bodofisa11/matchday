@@ -230,6 +230,19 @@ body {
 .v2 .wf-hscroll::-webkit-scrollbar { display: none; width: 0; height: 0; }
 .v2 .wf-hscroll > * { flex: 0 0 auto; }
 
+/* tab strip — horizontal slider so the chip row never overflows the screen */
+.v2 .wf-tabstrip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+.v2 .wf-tabstrip::-webkit-scrollbar { display: none; width: 0; height: 0; }
+.v2 .wf-tabstrip > * { flex: 0 0 auto; }
+
 /* chips — pill buttons */
 .v2 .wf-chip {
   padding: 9px 18px; border: 1px solid var(--wf-line); border-radius: 999px;

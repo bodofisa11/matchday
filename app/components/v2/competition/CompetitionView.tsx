@@ -77,7 +77,7 @@ export function CompetitionView({ competition }: { competition: CompetitionMeta 
         <CompetitionLogo idOrCode={competition.slug} name={competition.name} variant="hero" />
       </section>
 
-      <div className="wf-center wf-gap6" style={{ marginBottom: 20 }}>
+      <div className="wf-tabstrip" style={{ marginBottom: 20 }}>
         {TABS.map((t) => (
           <button
             key={t}
