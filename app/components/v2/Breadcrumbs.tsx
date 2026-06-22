@@ -12,7 +12,7 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
     <nav
       aria-label="Breadcrumb"
       className="wf-center"
-      style={{ gap: 8, flexWrap: "wrap", marginBottom: 16 }}
+      style={{ gap: 8, flexWrap: "wrap", marginTop: 36, marginBottom: 8 }}
     >
       {items.map((c, i) => (
         <span key={i} className="wf-center" style={{ gap: 8 }}>
