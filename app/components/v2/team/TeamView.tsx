@@ -50,6 +50,7 @@ export function TeamView({
 
   const isWc = competitionSlug === "world-cup";
   const comp = getCompetition(competitionSlug);
+  const eyebrow = isWc ? "FIFA World Cup" : comp?.name ?? competitionSlug;
   const crumbs: Crumb[] = isWc
     ? [{ label: "FIFA World Cup", href: "/world-cup/" }, { label: team?.name ?? "Team" }]
     : [
@@ -59,15 +60,19 @@ export function TeamView({
       ];
 
   return (
-    <section className="wf-section" style={{ paddingTop: 0 }}>
+    <>
       <Breadcrumbs items={crumbs} />
       {loading ? (
-        <div className="wf-empty">Loading team…</div>
+        <section className="wf-section" style={{ paddingTop: 0 }}>
+          <div className="wf-empty">Loading team…</div>
+        </section>
       ) : !team ? (
-        <div className="wf-empty">Team not found.</div>
+        <section className="wf-section" style={{ paddingTop: 0 }}>
+          <div className="wf-empty">Team not found.</div>
+        </section>
       ) : (
-        <TeamProfileCard team={team} />
+        <TeamProfileCard team={team} eyebrow={eyebrow} />
       )}
-    </section>
+    </>
   );
 }

@@ -48,7 +48,13 @@ export function TeamCrest({ team, size = 56 }: { team: FootballTeamDetailRow; si
 /** Team header (crest + meta) plus squad grouped by position. Loads its own
  *  squad by club/nation id, so it works for both the Teams tab and the
  *  dedicated team route. */
-export function TeamProfileCard({ team }: { team: FootballTeamDetailRow }) {
+export function TeamProfileCard({
+  team,
+  eyebrow,
+}: {
+  team: FootballTeamDetailRow;
+  eyebrow?: string;
+}) {
   const [players, setPlayers] = useState<FootballSquadPlayerRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -78,34 +84,41 @@ export function TeamProfileCard({ team }: { team: FootballTeamDetailRow }) {
   }
   const groupKeys = [...POSITION_GROUP_ORDER, "Other"].filter((k) => grouped[k]?.length);
 
-  return (
-    <div className="wf-col wf-gap20">
-      <div className="wf-center wf-gap20">
-        <TeamCrest team={team} size={64} />
-        <div className="wf-col wf-gap6" style={{ minWidth: 0 }}>
-          <span className="wf-h1">{team.name}</span>
-          <span className="wf-mono-sm wf-muted">
-            {[team.tla, team.founded && `Founded ${team.founded}`, team.venue]
-              .filter(Boolean)
-              .join(" · ")}
-          </span>
-          {(team.coach_name || team.club_colors) && (
-            <span className="wf-mono-sm wf-muted">
-              {team.coach_name &&
-                `Coach: ${team.coach_name}${team.coach_nationality ? ` (${countryDisplay(team.coach_nationality)})` : ""}`}
-              {team.coach_name && team.club_colors && " · "}
-              {team.club_colors && `Colors: ${team.club_colors}`}
-            </span>
-          )}
-        </div>
-      </div>
+  const metaLine = [team.tla, team.founded && `Founded ${team.founded}`, team.venue]
+    .filter(Boolean)
+    .join(" · ");
 
-      {loading ? (
-        <div className="wf-empty">Loading squad…</div>
-      ) : players.length === 0 ? (
-        <div className="wf-empty">Squad coming soon.</div>
-      ) : (
-        groupKeys.map((g) => (
+  return (
+    <>
+      <section className="wf-hero">
+        <div className="wf-col wf-gap12" style={{ minWidth: 0 }}>
+          <div className="wf-center wf-gap8">
+            <span className="wf-dot foot" />
+            <span className="wf-eyebrow">{eyebrow ?? "Team"}</span>
+          </div>
+          <h1 className="wf-h1">{team.name}</h1>
+          <div className="wf-col wf-gap6">
+            {metaLine && <span className="wf-mono-sm wf-muted">{metaLine}</span>}
+            {(team.coach_name || team.club_colors) && (
+              <span className="wf-mono-sm wf-muted">
+                {team.coach_name &&
+                  `Coach: ${team.coach_name}${team.coach_nationality ? ` (${countryDisplay(team.coach_nationality)})` : ""}`}
+                {team.coach_name && team.club_colors && " · "}
+                {team.club_colors && `Colors: ${team.club_colors}`}
+              </span>
+            )}
+          </div>
+        </div>
+        <TeamCrest team={team} size={120} />
+      </section>
+
+      <div className="wf-col wf-gap20">
+        {loading ? (
+          <div className="wf-empty">Loading squad…</div>
+        ) : players.length === 0 ? (
+          <div className="wf-empty">Squad coming soon.</div>
+        ) : (
+          groupKeys.map((g) => (
           <div key={g} className="wf-box">
             <div className="wf-trow head" style={{ gridTemplateColumns: SQUAD_COLS }}>
               <span>#</span>
@@ -132,8 +145,9 @@ export function TeamProfileCard({ team }: { team: FootballTeamDetailRow }) {
               </div>
             ))}
           </div>
-        ))
-      )}
-    </div>
+          ))
+        )}
+      </div>
+    </>
   );
 }

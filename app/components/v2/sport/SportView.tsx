@@ -20,11 +20,17 @@ export function SportView({ sport }: { sport: SportSlug }) {
     <>
       <Breadcrumbs items={[{ label: meta.label }]} />
 
-      <section className="wf-section">
-        <div className="wf-center wf-gap8">
-          <span className={`wf-dot ${meta.dot}`} />
-          <span className="wf-h3">{meta.label}</span>
+      <section className="wf-hero">
+        <div className="wf-col wf-gap12">
+          <div className="wf-center wf-gap8">
+            <span className={`wf-dot ${meta.dot}`} />
+            <span className="wf-eyebrow">
+              {comps.length} {comps.length === 1 ? "competition" : "competitions"}
+            </span>
+          </div>
+          <h1 className="wf-h1">{meta.label}</h1>
         </div>
+        <div className="wf-ph">{meta.label.toLowerCase()}</div>
       </section>
 
       <section className="wf-section" style={{ paddingTop: 0 }}>
