@@ -224,6 +224,12 @@ export function competitionDbShort(competitionSlug: string): string | null {
   return COMP_DB[competitionSlug]?.short ?? null;
 }
 
+/** Reverse of {@link competitionDbShort}: events short_code → v2 route slug. */
+export function competitionSlugForShort(short: string): string | null {
+  const entry = Object.entries(COMP_DB).find(([, v]) => v.short === short);
+  return entry ? entry[0] : null;
+}
+
 /**
  * Seasons seeded in `events` for a football competition slug, newest first.
  * Drives the season selector. Empty when the slug isn't wired to live data;

@@ -14,6 +14,12 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 - **Breadcrumbs sit lower with more breathing room.** The breadcrumb trail no longer hugs the bar above it — it now has more space above so it sits comfortably in the gap instead of looking cramped.
 
+- **Consistent page-top spacing.** Team pages no longer have an oversized gap above the breadcrumb — every page now spaces its breadcrumb the same way under the top bar.
+
+- **Match pages get a breadcrumb too.** The match detail page now shows a full breadcrumb trail (e.g. Football / Premier League / Germany v Ivory Coast) instead of a bare "← Back" link, so you can jump straight back to the competition or sport instead of landing on the home page.
+
+- **Consistent page headers everywhere.** Sport landing pages (Football, Cricket) and team pages now use the same hero header — eyebrow, large title and a side logo/crest — as the competition, Formula 1 and World Cup pages, so every page header looks and feels the same instead of three different styles.
+
 - **Tidier World Cup group headings.** Group standings headers now read "GROUP A", "GROUP B" and so on, instead of the doubled-up "GROUP GROUP_A".
 
 - **Breadcrumbs on every section page.** A breadcrumb trail now appears across all sport and event pages — sport landings (Football), Formula 1, the World Cup, competitions (Football / Premier League) and team pages (Football / Premier League / Manchester City) — so you can always navigate back up. Match-detail section headers (Match events, Statistics, Lineups, etc.) now show their expand/collapse chevron on the right, and the match stage badge renders in uppercase (e.g. GROUP STAGE).

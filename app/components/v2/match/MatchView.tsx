@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
+  competitionSlugForShort,
   getMatchById,
   getMatchLineups,
   getMatchResult,
@@ -14,6 +15,7 @@ import {
   type MatchTeamStats,
 } from "@/app/lib/v2/queries";
 import { formatFixtureDate } from "@/app/lib/team-meta";
+import { Breadcrumbs, type Crumb } from "../Breadcrumbs";
 import { Crest } from "../common";
 
 type Phase = "scheduled" | "live" | "finished";
@@ -489,19 +491,24 @@ export function MatchView({ matchId }: { matchId: string | null }) {
     );
   }
 
-  return (
-    <section className="wf-section">
-      <Link
-        href="/"
-        className="wf-mono-sm wf-muted"
-        style={{ textDecoration: "none", display: "inline-block", marginBottom: 12 }}
-      >
-        ← Back
-      </Link>
+  const isWc = match.competition_short === "WC";
+  const compSlug = competitionSlugForShort(match.competition_short);
+  const matchup = `${match.home_team} v ${match.away_team}`;
+  const crumbs: Crumb[] = isWc
+    ? [{ label: "FIFA World Cup", href: "/world-cup/" }, { label: matchup }]
+    : [
+        { label: "Football", href: "/football/" },
+        compSlug
+          ? { label: match.competition, href: `/football/${compSlug}/` }
+          : { label: match.competition },
+        { label: matchup },
+      ];
 
-      <div style={{ marginTop: 12 }}>
-        <Scoreboard m={match} result={result} />
-      </div>
+  return (
+    <section className="wf-section" style={{ paddingTop: 0 }}>
+      <Breadcrumbs items={crumbs} />
+
+      <Scoreboard m={match} result={result} />
 
       <div className="wf-col" style={{ gap: 12, marginTop: 12 }}>
         {result ? <MatchEvents result={result} /> : <ComingSoon title="Match events" />}
