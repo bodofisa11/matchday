@@ -59,7 +59,7 @@ export function TeamView({
       ];
 
   return (
-    <section className="wf-section">
+    <section className="wf-section" style={{ paddingTop: 0 }}>
       <Breadcrumbs items={crumbs} />
       {loading ? (
         <div className="wf-empty">Loading team…</div>
