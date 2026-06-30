@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getCompetition, getScheduleByCompetition, getTopMatches, matchHref } from "@/app/lib/v2/queries";
+import {
+  getCompetition,
+  getScheduleByCompetition,
+  getTopMatches,
+  getUpcomingF1Races,
+  matchHref,
+} from "@/app/lib/v2/queries";
 import { addDaysToDateStr, istTodayStr } from "@/app/lib/timezone";
 import { sportDot } from "@/app/lib/v2/types";
 import type { CompetitionMeta, MatchV2 } from "@/app/lib/v2/types";
@@ -80,6 +86,9 @@ export function HomeView() {
     { competition: CompetitionMeta; matches: MatchV2[] }[]
   >([]);
   const [topMatches, setTopMatches] = useState<MatchV2[]>([]);
+  const [f1Week, setF1Week] = useState<{ competition: CompetitionMeta; matches: MatchV2[] } | null>(
+    null,
+  );
 
   useEffect(() => {
     let alive = true;
@@ -93,6 +102,9 @@ export function HomeView() {
     });
     getTopMatches(date).then((m) => {
       if (alive) setTopMatches(m);
+    });
+    getUpcomingF1Races(date, 7).then((g) => {
+      if (alive) setF1Week(g);
     });
     return () => {
       alive = false;
@@ -145,6 +157,57 @@ export function HomeView() {
           )}
         </div>
       </section>
+
+      {f1Week && f1Week.matches.length > 0 && (
+        <section className="wf-section">
+          <div className="wf-shead">
+            <span className="wf-h3">Race week · next 7 days</span>
+          </div>
+          <div>
+            <div className="wf-comphead">
+              <span className={`wf-dot ${sportDot(f1Week.competition.sport)}`} />
+              <Link
+                href={`/${f1Week.competition.sport}`}
+                className="wf-h3"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                {f1Week.competition.name}
+              </Link>
+              <span className="wf-compmeta">
+                {f1Week.matches.length} {f1Week.matches.length === 1 ? "race" : "races"}
+              </span>
+            </div>
+            <div>
+              {f1Week.matches.map((m) => {
+                const d = new Date(`${m.date}T00:00:00`);
+                const label = d.toLocaleDateString("en-US", {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                });
+                return (
+                  <div key={m.id} className="wf-vsrow">
+                    <Star id={m.id} />
+                    <span className="wf-vsteam wf-vsteam-home">
+                      <span className="nm">{m.home.name}</span>
+                      <Crest team={m.home} />
+                    </span>
+                    <span className="wf-vsmid">
+                      <span className="wf-vs-center">
+                        {label} · {m.kickoff}
+                      </span>
+                    </span>
+                    <span className="wf-vsteam wf-vsteam-away">
+                      <Crest team={m.away} />
+                      <span className="nm">{m.away.name}</span>
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="wf-section">
         <div className="wf-shead">

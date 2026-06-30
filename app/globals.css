@@ -493,6 +493,75 @@ body {
 }
 .v2 .wf-trow.wf-qual { box-shadow: inset 3px 0 0 var(--wf-foot); }
 
+/* world cup — knockout bracket tree */
+.v2 .wf-bracket { display: flex; min-width: max-content; padding: 4px 0 10px; align-items: stretch; }
+.v2 .wf-bcol { display: flex; flex-direction: column; flex: 0 0 232px; }
+.v2 .wf-broundhd {
+  text-align: center; font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--wf-muted); padding: 4px 0 14px;
+}
+.v2 .wf-bround { display: flex; flex-direction: column; flex: 1 1 auto; }
+.v2 .wf-btie-slot { position: relative; flex: 1 1 0; display: flex; align-items: center; }
+/* the tie card leaves a 24px gutter on its right for connector lines */
+.v2 .wf-btie {
+  width: calc(100% - 24px);
+  border: 1px solid var(--wf-line); border-radius: var(--wf-r-sm);
+  background: var(--wf-surface); box-shadow: var(--wf-shadow-sm); overflow: hidden;
+  display: flex; flex-direction: column; text-decoration: none; color: inherit;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.v2 .wf-btie:hover { box-shadow: var(--wf-shadow-md); border-color: var(--wf-line-2); }
+.v2 .wf-btie-row {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px;
+  padding: 8px 10px; font-size: 13px;
+}
+.v2 .wf-btie-row + .wf-btie-row { border-top: 1px solid var(--wf-line); }
+.v2 .wf-btie-row.win { font-weight: 700; }
+.v2 .wf-btie-row.win .wf-btie-sc { color: var(--wf-foot); }
+.v2 .wf-btie-row.out { color: var(--wf-muted); }
+/* undecided slot: muted text + a hollow placeholder where the crest goes */
+.v2 .wf-btie.tbd { border-style: dashed; background: var(--wf-fill); box-shadow: none; }
+.v2 .wf-btie-row.tbd { color: var(--wf-muted); }
+.v2 .wf-btie-row.tbd .wf-btie-nm { letter-spacing: 0.06em; font-size: 11px; }
+.v2 .wf-btie-tbdcrest {
+  width: 20px; height: 20px; border-radius: 7px;
+  border: 1px dashed var(--wf-line-2); background: transparent; flex: 0 0 auto;
+}
+.v2 .wf-btie-nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .wf-btie-sc { font-family: var(--font-jetbrains-mono), monospace; font-variant-numeric: tabular-nums; }
+.v2 .wf-btie-pen { font-size: 9px; color: var(--wf-muted); margin-left: 1px; font-weight: 700; }
+.v2 .wf-btie-meta {
+  padding: 4px 10px; font-size: 10px; color: var(--wf-muted);
+  border-top: 1px solid var(--wf-line); background: var(--wf-fill);
+  font-family: var(--font-jetbrains-mono), monospace; letter-spacing: 0.03em;
+}
+/* connectors — horizontal stub out of every tie except the last column */
+.v2 .wf-bcol:not(:last-child) .wf-btie-slot::after {
+  content: ""; position: absolute; top: 50%; left: calc(100% - 24px); width: 24px; height: 2px;
+  background: var(--wf-line-2); transform: translateY(-50%);
+}
+/* vertical join at the column edge linking each pair of feeders */
+.v2 .wf-bcol:not(:last-child) .wf-btie-slot:nth-child(odd):not(:only-child)::before {
+  content: ""; position: absolute; left: calc(100% - 2px); top: 50%; height: 50%; width: 2px;
+  background: var(--wf-line-2);
+}
+.v2 .wf-bcol:not(:last-child) .wf-btie-slot:nth-child(even)::before {
+  content: ""; position: absolute; left: calc(100% - 2px); bottom: 50%; height: 50%; width: 2px;
+  background: var(--wf-line-2);
+}
+/* champion node */
+.v2 .wf-bchamp {
+  width: calc(100% - 24px); display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 18px 14px; text-align: center;
+  border: 1px solid var(--wf-foot); border-radius: var(--wf-r-sm);
+  background: var(--wf-blue-soft); box-shadow: var(--wf-shadow-sm);
+}
+.v2 .wf-bchamp-nm { font-weight: 700; font-size: 14px; line-height: 1.2; }
+.v2 .wf-bchamp-tag {
+  font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--wf-foot);
+}
+
 /* formula 1 */
 .v2 .wf-f1sprint {
   font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;

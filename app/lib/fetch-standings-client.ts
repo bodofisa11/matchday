@@ -43,8 +43,21 @@ export interface FootballFixtureRow {
   status: string;
   home_score: number | null;
   away_score: number | null;
+  /** penalty-shootout goals — null unless the tie was decided on penalties. */
+  home_score_pen?: number | null;
+  away_score_pen?: number | null;
   stage?: string | null;
   group_name?: string | null;
+}
+
+/** One side of a World Cup knockout tie (fb_knockout_standings). Two rows per
+ *  tie; the `qualified` row names the team that advanced (decides penalties). */
+export interface WcKnockoutRow {
+  round: string;
+  team: string;
+  opponent: string;
+  qualified: boolean | null;
+  aggregate_score: string | null;
 }
 
 export interface WcGroupStandingRow {
@@ -298,6 +311,8 @@ interface FixtureQueryRow {
   status: string;
   home_score: number | null;
   away_score: number | null;
+  home_score_pen: number | null;
+  away_score_pen: number | null;
   home: { common_name: string | null } | { common_name: string | null }[] | null;
   away: { common_name: string | null } | { common_name: string | null }[] | null;
   // National-team competitions (WC) fill these instead of home/away.
@@ -306,7 +321,7 @@ interface FixtureQueryRow {
 }
 
 const FIXTURE_COLS =
-  "id,match_date,kickoff_time_utc,stadium_name,match_type,status,home_score,away_score,home:fb_clubs!home_team_id(common_name),away:fb_clubs!away_team_id(common_name),home_nation:fb_nations!home_nation_id(name),away_nation:fb_nations!away_nation_id(name)";
+  "id,match_date,kickoff_time_utc,stadium_name,match_type,status,home_score,away_score,home_score_pen,away_score_pen,home:fb_clubs!home_team_id(common_name),away:fb_clubs!away_team_id(common_name),home_nation:fb_nations!home_nation_id(name),away_nation:fb_nations!away_nation_id(name)";
 
 function toFixtureRow(r: FixtureQueryRow, event: EventRow): FootballFixtureRow {
   const { date: utcDate, time: utcKickoff } = splitIso(r.kickoff_time_utc);
@@ -323,6 +338,8 @@ function toFixtureRow(r: FixtureQueryRow, event: EventRow): FootballFixtureRow {
     status: r.status,
     home_score: r.home_score,
     away_score: r.away_score,
+    home_score_pen: r.home_score_pen,
+    away_score_pen: r.away_score_pen,
     stage: r.match_type,
     group_name: null,
   };
@@ -914,6 +931,40 @@ export async function fetchWcFixturesByStage(
   if (stage) q = q.eq("match_type", stage);
   const { data } = await q;
   return ((data as FixtureQueryRow[]) ?? []).map((r) => toFixtureRow(r, event));
+}
+
+interface KnockoutQueryRow {
+  round: string;
+  qualified: boolean | null;
+  aggregate_score: string | null;
+  team: { common_name: string | null } | { common_name: string | null }[] | null;
+  opp: { common_name: string | null } | { common_name: string | null }[] | null;
+  nation: { name: string | null } | { name: string | null }[] | null;
+  opp_nation: { name: string | null } | { name: string | null }[] | null;
+}
+
+/** World Cup knockout ties (fb_knockout_standings). Used to resolve who
+ *  advanced — the only reliable signal for a single-leg tie won on penalties. */
+export async function fetchWcKnockout(): Promise<WcKnockoutRow[]> {
+  const supabase = createSupabaseClient();
+  if (!supabase) return [];
+  const event = await getFbEvent("WC");
+  if (!event) return [];
+  const { data } = await supabase
+    .from("fb_knockout_standings")
+    .select(
+      "round,qualified,aggregate_score,team:fb_clubs!team_id(common_name),opp:fb_clubs!opponent_team_id(common_name),nation:fb_nations!nation_id(name),opp_nation:fb_nations!opponent_nation_id(name)",
+    )
+    .eq("event_id", event.id);
+  return ((data as KnockoutQueryRow[]) ?? [])
+    .map((r) => ({
+      round: r.round,
+      team: unwrapOne(r.team)?.common_name ?? unwrapOne(r.nation)?.name ?? "",
+      opponent: unwrapOne(r.opp)?.common_name ?? unwrapOne(r.opp_nation)?.name ?? "",
+      qualified: r.qualified,
+      aggregate_score: r.aggregate_score,
+    }))
+    .filter((r) => r.team && r.opponent);
 }
 
 // ---------------------------------------------------------------------------

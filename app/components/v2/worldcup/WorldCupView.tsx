@@ -6,18 +6,21 @@ import {
   getCompetitionSeasons,
   getWcFixtures,
   getWcGroupStandings,
+  getWcKnockout,
   matchHref,
   teamHref,
   teamRefFromName,
   type FootballFixtureRow,
   type WcGroupStandingRow,
 } from "@/app/lib/v2/queries";
+import { buildWinnerLookup, stageChipLabel } from "@/app/lib/v2/wc-bracket";
 import { formatFixtureDate } from "@/app/lib/team-meta";
 import { Breadcrumbs } from "../Breadcrumbs";
 import { Crest, SeasonSelector } from "../common";
 import { TeamsPanel } from "../competition/TeamsPanel";
 import { StatsPanel } from "../competition/StatsPanel";
 import { FixturesPanel } from "../competition/FixturesPanel";
+import { BracketTree } from "./BracketTree";
 
 type Tab = "Overview" | "Fixtures" | "Results" | "Groups" | "Bracket" | "Teams" | "Stats";
 const TABS: Tab[] = ["Overview", "Fixtures", "Results", "Groups", "Bracket", "Teams", "Stats"];
@@ -26,25 +29,6 @@ function OverviewPanel() {
   // Intentionally blank for now — a tournament summary lands here later.
   return <div className="wf-empty">Overview coming soon.</div>;
 }
-
-const STAGE_LABEL: Record<string, string> = {
-  group: "Group",
-  r32: "Round of 32",
-  r16: "Round of 16",
-  qf: "Quarter-final",
-  sf: "Semi-final",
-  third: "Third place",
-  final: "Final",
-};
-
-const KNOCKOUT_STAGES: { id: string; title: string }[] = [
-  { id: "r32", title: "Round of 32" },
-  { id: "r16", title: "Round of 16" },
-  { id: "qf", title: "Quarter-finals" },
-  { id: "sf", title: "Semi-finals" },
-  { id: "third", title: "Third place" },
-  { id: "final", title: "Final" },
-];
 
 const GROUP_COLS = "20px 1fr 26px 26px 26px 26px 34px 34px";
 const RESULTS_PAGE = 10;
@@ -57,8 +41,8 @@ function groupLabel(raw: string): string {
 }
 
 function StageChip({ stage, group }: { stage?: string | null; group?: string | null }) {
-  if (!stage) return null;
-  const label = stage === "group" && group ? groupLabel(group) : (STAGE_LABEL[stage] ?? stage);
+  const label = stageChipLabel(stage, group);
+  if (!label) return null;
   return <span className="wf-wcstage">{label}</span>;
 }
 
@@ -94,6 +78,11 @@ function FixtureLine({ f }: { f: FootballFixtureRow }) {
             <span className="wf-score">{f.home_score ?? "–"}</span>
             <span className="wf-muted">:</span>
             <span className="wf-score">{f.away_score ?? "–"}</span>
+            {f.home_score_pen != null && f.away_score_pen != null && (
+              <span className="wf-mono-sm wf-muted">
+                ({f.home_score_pen}–{f.away_score_pen} pens)
+              </span>
+            )}
           </span>
         ) : (
           <span className="wf-mono-sm" style={{ fontWeight: 600 }}>{f.kickoff}</span>
@@ -150,37 +139,10 @@ function GroupCard({ name, rows }: { name: string; rows: WcGroupStandingRow[] })
   );
 }
 
-function BracketCard({ f }: { f: FootballFixtureRow }) {
-  const home = teamRefFromName(f.home_team);
-  const away = teamRefFromName(f.away_team);
-  return (
-    <Link className="wf-match" href={matchHref(f.id)} style={{ textDecoration: "none", color: "inherit" }}>
-      <span className="wf-between" style={{ gap: 8 }}>
-        <span className="wf-center wf-gap8" style={{ minWidth: 0 }}>
-          <Crest team={home} />
-          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {f.home_team}
-          </span>
-        </span>
-        <span className="wf-num" style={{ fontWeight: 700 }}>{f.home_score ?? "–"}</span>
-      </span>
-      <span className="wf-between" style={{ gap: 8 }}>
-        <span className="wf-center wf-gap8" style={{ minWidth: 0 }}>
-          <Crest team={away} />
-          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {f.away_team}
-          </span>
-        </span>
-        <span className="wf-num" style={{ fontWeight: 700 }}>{f.away_score ?? "–"}</span>
-      </span>
-      <span className="wf-mono-sm wf-muted">{formatFixtureDate(f.date)}</span>
-    </Link>
-  );
-}
-
 export function WorldCupView() {
   const [fixtures, setFixtures] = useState<FootballFixtureRow[]>([]);
   const [groups, setGroups] = useState<Record<string, WcGroupStandingRow[]>>({});
+  const [winners, setWinners] = useState<Map<string, string>>(new Map());
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("Overview");
   // World Cup is a single-edition event; seed with 2026 and replace with any
@@ -191,10 +153,11 @@ export function WorldCupView() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getWcFixtures(), getWcGroupStandings()]).then(([fx, gr]) => {
+    Promise.all([getWcFixtures(), getWcGroupStandings(), getWcKnockout()]).then(([fx, gr, ko]) => {
       if (cancelled) return;
       setFixtures(fx);
       setGroups(gr);
+      setWinners(buildWinnerLookup(ko));
       setLoading(false);
     });
     getCompetitionSeasons("world-cup").then((s) => {
@@ -210,11 +173,6 @@ export function WorldCupView() {
 
   const results = fixtures.filter((f) => f.status === "finished").reverse();
   const groupEntries = Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
-  const knockout = KNOCKOUT_STAGES.map((s) => ({
-    ...s,
-    fixtures: fixtures.filter((f) => f.stage === s.id),
-  }));
-  const hasKnockout = knockout.some((s) => s.fixtures.length > 0);
 
   return (
     <>
@@ -299,22 +257,16 @@ export function WorldCupView() {
 
       {tab === "Bracket" && (
         <div className="wf-col wf-gap12">
-          <span className="wf-h3">Knockout bracket</span>
+          <div className="wf-shead">
+            <span className="wf-h3">Knockout bracket</span>
+            <Link href="/world-cup/bracket/" className="wf-mono-sm" style={{ color: "var(--wf-foot)", textDecoration: "none" }}>
+              Open full bracket →
+            </Link>
+          </div>
           {loading ? (
             <div className="wf-empty">Loading…</div>
-          ) : !hasKnockout ? (
-            <div className="wf-empty">Bracket activates after the group stage.</div>
           ) : (
-            <div className="wf-hscroll" style={{ alignItems: "flex-start" }}>
-              {knockout
-                .filter((s) => s.fixtures.length > 0)
-                .map((s) => (
-                  <div key={s.id} className="wf-col wf-gap8" style={{ minWidth: 220 }}>
-                    <span className="wf-eyebrow">{s.title}</span>
-                    {s.fixtures.map((f) => <BracketCard key={f.id} f={f} />)}
-                  </div>
-                ))}
-            </div>
+            <BracketTree fixtures={fixtures} winners={winners} />
           )}
         </div>
       )}
