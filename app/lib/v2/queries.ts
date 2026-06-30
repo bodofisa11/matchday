@@ -9,6 +9,7 @@
  */
 import { fetchFixturesByISTDateRange, type SportId } from "@/app/lib/fetch-fixtures-client";
 import { getSeasonsForCompetition } from "@/app/lib/events";
+import { addDaysToDateStr } from "@/app/lib/timezone";
 import {
   fetchF1Calendar,
   fetchF1ConstructorStandings,
@@ -25,6 +26,7 @@ import {
   fetchTeamsForCompetition,
   fetchWcFixturesByStage,
   fetchWcGroupStandings,
+  fetchWcKnockout,
   type F1ConstructorRow,
   type F1DriverRow,
   type F1RaceResultRow,
@@ -39,6 +41,7 @@ import {
   type MatchLineup,
   type MatchResultDetail,
   type WcGroupStandingRow,
+  type WcKnockoutRow,
 } from "@/app/lib/fetch-standings-client";
 import type { Fixture } from "@/app/lib/fixtures";
 import { cachedQuery, TTL } from "@/app/lib/cache";
@@ -174,6 +177,34 @@ export async function getTopMatches(date: string, limit = 8): Promise<MatchV2[]>
   return sorted.slice(0, limit);
 }
 
+/**
+ * Upcoming F1 races within the next `daysAhead` IST days from `date` (inclusive).
+ * Returns a single group keyed under a synthetic "Formula 1" competition so the
+ * Home view can render race weekends a week ahead of the first session.
+ */
+export async function getUpcomingF1Races(
+  date: string,
+  daysAhead = 7,
+): Promise<{ competition: CompetitionMeta; matches: MatchV2[] } | null> {
+  const end = addDaysToDateStr(date, daysAhead);
+  return cachedQuery(`upcomingF1:${date}:${daysAhead}`, TTL.SCHEDULE, async () => {
+    const { fixtures } = await fetchFixturesByISTDateRange("f1", date, end);
+    if (fixtures.length === 0) return null;
+    const matches = fixtures
+      .map(mapFixture)
+      .map((m) => ({ ...m, competitionSlug: "formula-1" }));
+    const competition: CompetitionMeta = {
+      slug: "formula-1",
+      name: "Formula 1",
+      shortName: "F1",
+      sport: "f1",
+      country: "",
+      season: "",
+    };
+    return { competition, matches };
+  });
+}
+
 export function getCompetitions(sport: SportSlug): CompetitionMeta[] {
   return competitionsForSport(sport);
 }
@@ -254,6 +285,7 @@ export type {
   MatchLineup,
   MatchResultDetail,
   WcGroupStandingRow,
+  WcKnockoutRow,
 };
 export type {
   LineupPlayer,
@@ -333,6 +365,11 @@ export async function getWcFixtures(): Promise<FootballFixtureRow[]> {
 /** World Cup group standings keyed by group name (A, B, …). */
 export async function getWcGroupStandings(): Promise<Record<string, WcGroupStandingRow[]>> {
   return cachedQuery("wcGroupStandings", TTL.STANDINGS, () => fetchWcGroupStandings());
+}
+
+/** World Cup knockout ties — resolves who advanced (incl. on penalties). */
+export async function getWcKnockout(): Promise<WcKnockoutRow[]> {
+  return cachedQuery("wcKnockout", TTL.STANDINGS, () => fetchWcKnockout());
 }
 
 // ---- live Formula 1 queries ----------------------------------------------

@@ -10,6 +10,14 @@ Versioning rules + deploy commands: [`docs/RELEASE-PROCESS.md`](docs/RELEASE-PRO
 
 <!-- Add bullets per PR merged to main. Promote block to versioned heading on deploy. -->
 
+- **World Cup knockout bracket.** The FIFA World Cup **Bracket** tab now draws a proper connected knockout tree — Round of 32 through the Final, with lines linking each tie to the next round, the team that advanced highlighted, and a champion at the end. There's also a new full-width **`/world-cup/bracket`** page (linked as "Open full bracket") with room for the whole tree. Previously the bracket tab was wired to the wrong stage codes and showed nothing once the knockouts began.
+
+- **Full bracket visible from the start.** The knockout tree now shows the entire structure — every round and tie slot — even before the qualifiers are known. Undecided ties render as dashed **TBD** placeholders that fill in with the real teams as each round is played, so you can always see the path to the final instead of the tree appearing round by round.
+
+- **Penalty shootouts shown properly.** Match pages and World Cup fixtures now show the full-time score and the penalty shootout result **separately** (e.g. *1–1, Penalties 4–2*) instead of a single penalty-inclusive number. Bracket ties show the shootout score as a small superscript next to the score.
+
+- **Race week on the home page.** F1 races now appear on the home page from a week before the start, so you can see at a glance whether the coming weekend is a race weekend without leaving the home view.
+
 - **No more horizontal page scroll on mobile.** The section tab row (Overview / Fixtures / Results / Groups / Bracket / Teams / Stats) on competition, World Cup and Formula 1 pages now slides horizontally on its own instead of stretching the page wider than the screen, so the page stays pinned to the display width on phones.
 
 - **Breadcrumbs sit lower with more breathing room.** The breadcrumb trail no longer hugs the bar above it — it now has more space above so it sits comfortably in the gap instead of looking cramped.

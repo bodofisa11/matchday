@@ -129,12 +129,18 @@ function Scoreboard({ m, result }: { m: FootballMatchDetail; result: MatchResult
     result && result.home_score_ht !== null && result.away_score_ht !== null
       ? `HT ${result.home_score_ht}–${result.away_score_ht}`
       : null;
+  // Penalty shootout: home_score/away_score now hold the pre-shootout score, so
+  // surface the kicks on their own line. Drive off the fixture's pen columns so
+  // it shows even before the result detail loads.
+  const hasPens = m.home_score_pen != null && m.away_score_pen != null;
   const extra =
     result?.duration && result.duration !== "REGULAR"
-      ? result.duration === "PENALTY_SHOOTOUT"
-        ? "Pens"
+      ? result.duration === "PENALTY_SHOOTOUT" || hasPens
+        ? "AET · pens"
         : "AET"
-      : null;
+      : hasPens
+        ? "AET · pens"
+        : null;
   const stage = prettyStage(m.stage);
   const meta = [formatFixtureDate(m.date), `${m.kickoff} IST`, m.venue].filter(
     (v): v is string => Boolean(v),
@@ -180,6 +186,11 @@ function Scoreboard({ m, result }: { m: FootballMatchDetail; result: MatchResult
             <span className="wf-score" style={{ fontSize: 30 }}>{m.kickoff}</span>
           )}
           <StatusBadge phase={phase} raw={m.status} />
+          {hasPens && (
+            <span className="wf-mono-sm" style={{ fontWeight: 700 }}>
+              Penalties {m.home_score_pen}–{m.away_score_pen}
+            </span>
+          )}
           {extra && <span className="wf-mono-sm wf-muted">{extra}</span>}
           {ht && <span className="wf-mono-sm wf-muted">{ht}</span>}
         </span>
